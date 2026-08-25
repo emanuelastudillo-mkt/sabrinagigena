@@ -134,3 +134,23 @@ a{color:inherit;text-decoration:none}img{display:block;max-width:100%}button,inp
   .section-head h2{font-size:28px}
   .spec-grid{grid-template-columns:1fr 1fr}
 }
+
+
+/* V5 — hero sin buscador + imagen destacada a media altura */
+@media(min-width:721px){
+  .hero-grid{align-items:center}
+  .hero-copy{min-height:220px;padding-top:26px;padding-bottom:26px}
+  .hero-copy p{margin-bottom:0}
+  .hero-image{height:146px;min-height:146px;align-self:center}
+  .hero-image-label{left:16px;right:16px;bottom:14px}
+  .hero-image-label strong{font-size:21px}
+  .hero-image-label span{font-size:12px}
+}
+@media(min-width:721px) and (max-width:980px){
+  .hero-grid{grid-template-columns:1.08fr .92fr}
+  .hero-copy{min-height:205px}
+  .hero-image{height:123px;min-height:123px}
+}
+@media(max-width:720px){
+  .hero-copy p{margin-bottom:0}
+}
