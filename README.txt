@@ -1,16 +1,9 @@
-SABRINA GIGENA INMOBILIARIA · WEB V1
+Sabrina Gigena Inmobiliaria · Web V2
 
-Contenido:
-- index.html: página principal
-- propiedades.html: catálogo de propiedades
-- santa-brigida.html: ficha de propiedad
-- la-loma.html: ficha del loteo
-- assets/css/styles.css: estilos generales
-- assets/js/main.js: navegación y formulario de WhatsApp
-- assets/images/: imágenes optimizadas WebP
+- index.html: portal principal
+- propiedades.html: catálogo filtrable
+- propiedad-*.html: fichas públicas
+- /metricas/: dashboard interno sin acceso desde navegación pública y marcado noindex
+- favicon.png tomado del paquete de métricas
 
-Publicación:
-Subir todos los archivos conservando la estructura. Es compatible con GitHub Pages y hosting estático.
-
-Nota:
-Esta V1 replica la estructura y el contenido principal visibles en sabrinagigena.com, adaptados a una versión estática sin WordPress.
+Sitio estático listo para GitHub Pages o hosting tradicional.

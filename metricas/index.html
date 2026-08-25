@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+
+<html lang="es-AR">
+<head>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Dashboard de Marketing · Sabrina Gigena Inmobiliaria</title>
+<link href="../assets/images/favicon.png" rel="icon" type="image/png"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+    :root {
+      --azul:#083c67;
+      --azul-2:#0d4d7d;
+      --dorado:#d4a33a;
+      --dorado-2:#b88625;
+      --fondo:#d5dfdb;
+      --fondo-2:#edf2ef;
+      --card:#ffffff;
+      --texto:#143342;
+      --muted:#6a7a78;
+      --linea:rgba(8,60,103,.12);
+      --ok:#2e8b57;
+      --warn:#d4a33a;
+      --bad:#b85c4f;
+      --shadow:0 14px 34px rgba(8,60,103,.09);
+      --shadow-soft:0 8px 20px rgba(8,60,103,.06);
+      --radius:22px;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      min-height:100vh;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.55), transparent 34%),
+        linear-gradient(180deg, var(--fondo), #eef3f0 62%, #f8faf8);
+      color:var(--texto);
+      font-size:16px;
+    }
+    .wrap { width:min(1180px, calc(100% - 32px)); margin:0 auto; padding:24px 0 40px; }
+    .hero {
+      background:linear-gradient(135deg, rgba(255,255,255,.88), rgba(255,255,255,.58));
+      border:1px solid rgba(255,255,255,.82);
+      border-radius:30px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .hero::after {
+      content:"";
+      position:absolute;
+      inset:auto 28px 0 28px;
+      height:4px;
+      border-radius:999px;
+      background:linear-gradient(90deg, transparent, var(--dorado), transparent);
+      opacity:.85;
+    }
+    .brandCover {
+      width:100%;
+      max-width:100%;
+      height:auto;
+      display:block;
+      margin:0 auto;
+      background:#d5dfdb;
+      object-fit:contain;
+      max-height:none;
+    }
+    .heroText { padding:18px 28px 24px; display:flex; justify-content:space-between; gap:18px; align-items:flex-end; }
+    .heroText h1 { margin:0; color:var(--azul); font-size:clamp(27px, 3.6vw, 44px); line-height:1.04; letter-spacing:-.035em; }
+    .heroText p { margin:8px 0 0; color:#516764; font-size:16px; line-height:1.45; }
+    .toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+    select, button {
+      border:1px solid var(--linea);
+      background:#fff;
+      color:var(--azul);
+      border-radius:999px;
+      padding:12px 16px;
+      font-weight:800;
+      font-size:14px;
+      outline:none;
+      box-shadow:var(--shadow-soft);
+    }
+    button { cursor:pointer; }
+    button:hover { border-color:rgba(212,163,58,.8); }
+
+    .sectionHead {
+      margin:24px 2px 10px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .sectionHead.compact { margin-top:18px; }
+    .sectionHead h2 {
+      margin:0;
+      color:var(--azul);
+      font-size:clamp(20px, 2.3vw, 27px);
+      letter-spacing:-.03em;
+      line-height:1.1;
+    }
+    .sectionHead p {
+      margin:5px 0 0;
+      color:#5e706e;
+      line-height:1.45;
+      max-width:720px;
+      font-size:15px;
+    }
+
+    .systemInfo { margin-top:22px; }
+    .status {
+      margin:0;
+      padding:9px 12px;
+      border:1px solid rgba(8,60,103,.10);
+      border-radius:14px;
+      background:rgba(255,255,255,.42);
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.45;
+      text-align:center;
+    }
+    .status strong { color:var(--azul); }
+    .grid { display:grid; gap:14px; margin-top:0; }
+    .kpis { grid-template-columns:repeat(4, minmax(0, 1fr)); }
+    .kpi {
+      background:rgba(255,255,255,.9);
+      border:1px solid rgba(255,255,255,.9);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+      padding:19px;
+      min-height:142px;
+      position:relative;
+      overflow:hidden;
+    }
+    .kpi::before {
+      content:"";
+      position:absolute;
+      inset:0 auto 0 0;
+      width:5px;
+      background:linear-gradient(180deg, var(--dorado), rgba(212,163,58,.25));
+    }
+    .kpi.primary {
+      grid-column:span 2;
+      background:linear-gradient(135deg, var(--azul), var(--azul-2));
+      border-color:rgba(8,60,103,.08);
+      box-shadow:0 18px 42px rgba(8,60,103,.18);
+    }
+    .kpi.primary::before { background:linear-gradient(180deg, #f2cf78, var(--dorado)); width:7px; }
+    .kpi.featured { border-color:rgba(212,163,58,.45); background:linear-gradient(135deg,#fff,rgba(255,255,255,.76)); }
+    .kpi.soft { box-shadow:none; background:rgba(255,255,255,.72); }
+    .label { text-transform:uppercase; letter-spacing:.1em; font-size:11px; font-weight:900; color:var(--muted); }
+    .value { margin-top:10px; font-size:clamp(31px, 4.2vw, 55px); font-weight:900; letter-spacing:-.055em; color:var(--azul); line-height:.98; }
+    .kpi:not(.primary) .value { font-size:clamp(25px, 2.8vw, 36px); }
+    .kpi.primary .label, .kpi.primary .sub { color:rgba(255,255,255,.78); }
+    .kpi.primary .value { color:#fff; }
+    .sub { margin-top:10px; color:#617371; font-size:13px; line-height:1.35; }
+    .badge {
+      display:inline-flex; align-items:center; gap:7px;
+      margin-top:12px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(8,60,103,.06);
+      color:var(--azul);
+      font-size:12px;
+      font-weight:850;
+    }
+    .dot { width:9px; height:9px; border-radius:999px; background:var(--dorado); display:inline-block; }
+    .charts { grid-template-columns:1fr 1fr; margin-top:18px; }
+    .panel {
+      background:rgba(255,255,255,.88);
+      border:1px solid rgba(255,255,255,.9);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+      padding:20px;
+      min-height:348px;
+    }
+    .panel.wide { grid-column:1 / -1; }
+    .panel h2 { margin:0 0 13px; color:var(--azul); font-size:19px; letter-spacing:-.02em; line-height:1.18; }
+    .chartNote { margin:-4px 0 12px; color:#6a7d7a; font-size:12px; line-height:1.4; }
+    .chartNote strong { color:var(--azul); }
+    .chartBox { height:275px; }
+    .notes { grid-template-columns:.85fr 1.35fr; margin-top:18px; }
+    .note {
+      background:rgba(255,255,255,.9);
+      border:1px solid rgba(255,255,255,.9);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+      padding:20px;
+    }
+    .note:first-child { border-left:6px solid var(--dorado); }
+    .note h2 { margin:0 0 10px; color:var(--azul); font-size:19px; letter-spacing:-.02em; }
+    .note p { margin:0; color:#445d59; line-height:1.65; font-size:16px; }
+    .tableWrap { overflow:auto; border-radius:18px; border:1px solid var(--linea); background:#fff; }
+    table { width:100%; border-collapse:collapse; min-width:720px; background:#fff; }
+    th, td { padding:13px 14px; text-align:left; border-bottom:1px solid rgba(8,60,103,.08); font-size:13px; }
+    th { background:rgba(8,60,103,.055); color:var(--azul); text-transform:uppercase; letter-spacing:.07em; font-size:11px; }
+    td { color:#304c57; }
+    tr:last-child td { border-bottom:0; }
+    .debug { margin-top:8px; font-size:10px; color:var(--muted); opacity:.72; }
+    .debug summary { cursor:pointer; color:var(--azul); font-weight:800; text-align:center; }
+    .debug pre { white-space:pre-wrap; word-break:break-word; background:rgba(8,60,103,.04); border-radius:12px; padding:10px; }
+    .footer { text-align:center; color:var(--muted); font-size:12px; margin-top:22px; }
+
+
+    .exampleAccess {
+      display:flex;
+      justify-content:flex-end;
+      margin:0 2px 10px;
+    }
+    .exampleAccess a {
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:7px 11px;
+      border:1px solid rgba(8,60,103,.12);
+      border-radius:999px;
+      background:rgba(255,255,255,.42);
+      color:#54706f;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.01em;
+      text-decoration:none;
+      box-shadow:none;
+      transition:background .18s ease, color .18s ease, border-color .18s ease;
+    }
+    .exampleAccess a:hover {
+      color:var(--azul);
+      background:rgba(255,255,255,.72);
+      border-color:rgba(8,60,103,.22);
+    }
+    .exampleAccess svg { width:14px; height:14px; flex:none; }
+
+    @media (max-width:920px) {
+      .wrap { width:min(100% - 24px, 1180px); }
+      .heroText { align-items:flex-start; flex-direction:column; }
+      .toolbar { justify-content:flex-start; width:100%; }
+      .toolbar select, .toolbar button { max-width:100%; }
+      .sectionHead { display:block; margin-top:22px; }
+      .kpis { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; }
+      .kpi.primary { grid-column:span 2; }
+      .charts, .notes { grid-template-columns:1fr; }
+      .panel.wide { grid-column:auto; }
+      .brandCover { width:100%; height:auto; max-height:none; object-fit:contain; }
+    }
+    @media (max-width:560px) {
+      .wrap { width:min(100% - 18px, 1180px); padding-top:10px; }
+      .hero { border-radius:20px; }
+      .heroText { padding:14px 15px 17px; }
+      .heroText h1 { font-size:clamp(24px, 8vw, 33px); }
+      .heroText p { font-size:14px; }
+      select, button { width:100%; text-align:center; padding:11px 14px; }
+      .sectionHead h2 { font-size:21px; }
+      .sectionHead p { font-size:13px; }
+      .kpis { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
+      .kpi { min-height:116px; padding:14px 11px 14px 15px; border-radius:18px; }
+      .kpi.primary { grid-column:span 2; min-height:126px; }
+      .kpi::before { width:4px; }
+      .kpi.primary::before { width:6px; }
+      .label { font-size:9px; letter-spacing:.075em; }
+      .value { font-size:clamp(30px, 11vw, 42px); letter-spacing:-.05em; }
+      .kpi:not(.primary) .value { font-size:clamp(22px, 7.2vw, 30px); }
+      .sub { font-size:11px; line-height:1.25; margin-top:8px; }
+      .badge { font-size:10px; padding:6px 8px; margin-top:9px; }
+      .panel, .note { border-radius:19px; padding:15px; }
+      .panel { min-height:auto; }
+      .panel h2, .note h2 { font-size:17px; }
+      .chartBox { height:248px; }
+      table { min-width:640px; }
+      th, td { padding:11px 12px; }
+    }
+
+  </style>
+</head>
+<body>
+<main class="wrap">
+
+<div class="exampleAccess" aria-label="Accesos secundarios">
+  <a href="../propiedades.html">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
+    Páginas de propiedades
+  </a>
+</div>
+
+<section class="hero">
+<img alt="Sabrina Gigena Inmobiliaria" class="brandCover" src="../assets/images/portada-dashboard.png"/>
+<div class="heroText">
+<div>
+<h1>Informe de Marketing Digital</h1>
+<p>Resumen mensual simple de consultas, inversión y alcance.</p>
+</div>
+<div class="toolbar">
+<select aria-label="Filtrar por mes" id="monthFilter"><option value="all">Todos los meses</option></select>
+<button id="reloadBtn" type="button">Actualizar</button>
+</div>
+</div>
+</section>
+<section class="sectionHead"><div><h2>Resultados principales</h2><p>Los números que más sirven para evaluar si la publicidad está generando movimiento real.</p></div></section><section class="grid kpis kpisMain"><article class="kpi primary">
+<div class="label">Consultas</div>
+<div class="value" id="kConsultas">0</div>
+<div class="sub">Mensajes o consultas generadas por los anuncios.</div>
+</article><article class="kpi featured">
+<div class="label">Costo por consulta</div>
+<div class="value" id="kCpc">$0</div>
+<div class="sub">Promedio invertido por cada consulta recibida.</div>
+</article><article class="kpi">
+<div class="label">Interesados</div>
+<div class="value" id="kInteresados">0</div>
+<div class="sub" id="kInteresadosSub">Personas que mostraron interés tocando el anuncio.</div>
+<div class="badge" id="badgeInteresados"><span class="dot"></span>Sin comparación mensual</div>
+</article><article class="kpi featured">
+<div class="label">Costo por interesado</div>
+<div class="value" id="kCpi">$0</div>
+<div class="sub">Promedio invertido por cada interesado.</div>
+</article></section><section class="sectionHead compact"><div><h2>Alcance de los anuncios</h2><p>Sirve para ver cuánta gente vio la marca y con qué frecuencia.</p></div></section><section class="grid kpis kpisSecondary"><article class="kpi soft">
+<div class="label">Inversión</div>
+<div class="value" id="kInversion">$0</div>
+<div class="sub">Dinero invertido en el período.</div>
+</article><article class="kpi soft">
+<div class="label">Alcance</div>
+<div class="value" id="kAlcance">0</div>
+<div class="sub">Cuentas alcanzadas por los anuncios.</div>
+</article><article class="kpi soft">
+<div class="label">Veces visto</div>
+<div class="value" id="kImpresiones">0</div>
+<div class="sub">Cantidad total de veces que se mostraron los anuncios.</div>
+</article><article class="kpi soft">
+<div class="label">Respuesta</div>
+<div class="value" id="kCtr">0%</div>
+<div class="sub">Relación entre interesados y veces visto.</div>
+</article><article class="kpi soft">
+<div class="label">Repetición</div>
+<div class="value" id="kFrecuencia">0</div>
+<div class="sub">Veces promedio que una persona vio los anuncios.</div>
+</article><article class="kpi soft">
+<div class="label">Meses cargados</div>
+<div class="value" id="kMeses">0</div>
+<div class="sub">Períodos disponibles en la hoja.</div>
+</article></section>
+<section class="grid charts">
+<article class="panel">
+<h2>Consultas e interesados</h2>
+<p class="chartNote"><strong>Escala visual:</strong> 1 consulta = 100 interesados. Al pasar el cursor se muestran los valores reales.</p>
+<div class="chartBox"><canvas id="chartInteresados"></canvas></div>
+</article>
+<article class="panel">
+<h2>Costo por consulta</h2>
+<div class="chartBox"><canvas id="chartCpi"></canvas></div>
+</article>
+<article class="panel wide">
+<h2>Inversión y resultados</h2>
+<p class="chartNote"><strong>Escala visual de resultados:</strong> 1 consulta = 100 interesados. La inversión mantiene su eje propio en pesos.</p>
+<div class="chartBox"><canvas id="chartMix"></canvas></div>
+</article>
+</section>
+<section class="grid notes">
+<article class="note">
+<h2>Lo importante</h2>
+<p id="insight">Cuando carguen los datos, acá aparecerá una lectura simple del rendimiento.</p>
+</article>
+<article class="note">
+<h2>Resumen mensual</h2>
+<div class="tableWrap">
+<table>
+<thead>
+<tr>
+<th>Mes</th>
+<th>Inversión</th>
+<th>Consultas</th>
+<th>Costo consulta</th>
+<th>Interesados</th>
+<th>Costo interesado</th>
+<th>Alcance</th>
+<th>Veces visto</th>
+<th>Respuesta</th>
+<th>Repetición</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+</article>
+</section>
+<section aria-label="Información técnica del dashboard" class="systemInfo">
+<div class="status" id="status">Cargando datos desde Google Sheets…</div>
+<details class="debug" id="debugBox" style="display:none">
+<summary>Detalle técnico</summary>
+<pre id="debugText"></pre>
+</details>
+</section>
+<div class="footer">Sabrina Gigena Inmobiliaria · Informe conectado a Google Sheets</div>
+</main>
+<script>
+
+(function () {
+  "use strict";
+
+  const PUB_ID = "2PACX-1vT5djeux14WLjnJAKK2jubHdLeD1mLkrXoRXjJN8hK9tr4bAtKUb1IjXqHtbebr2HlH-jYXjlmT7NDx";
+  const DEFAULT_MONTH = "Mayo 2026";
+  const SPREADSHEET_ID = "";
+  const SHEET_GIDS = ["", "0"];
+  const SHEET_NAMES = [""];
+
+  const $ = (id) => document.getElementById(id);
+  let rawRows = [];
+  let charts = [];
+  let lastDebug = [];
+
+  function setStatus(message, ok = false) {
+    $("status").innerHTML = ok ? `<strong>${message}</strong>` : message;
+  }
+
+  function setDebug(lines) {
+    lastDebug = Array.isArray(lines) ? lines : [String(lines || "")];
+    $("debugText").textContent = lastDebug.join("\n");
+    $("debugBox").style.display = lastDebug.length ? "block" : "none";
+  }
+
+  function normalizeKey(v) {
+    return String(v || "")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function normalizeMonthLabel(v, index) {
+    const raw = String(v || "").trim();
+
+    // Si la hoja no trae una columna de mes/fecha, no inventamos etiquetas tipo
+    // "Registro 7". Por ahora toda la carga corresponde a Mayo 2026.
+    if (!raw) return DEFAULT_MONTH;
+
+    const dateMatch = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](20\d{2})/);
+    if (dateMatch) {
+      const d = new Date(Number(dateMatch[3]), Number(dateMatch[2]) - 1, Number(dateMatch[1]));
+      if (!Number.isNaN(d.getTime())) return d.toLocaleDateString("es-AR", { month:"short", year:"numeric" }).replace(".", "");
+    }
+
+    const isoMatch = raw.match(/(20\d{2})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+    if (isoMatch) {
+      const d = new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+      if (!Number.isNaN(d.getTime())) return d.toLocaleDateString("es-AR", { month:"short", year:"numeric" }).replace(".", "");
+    }
+
+    const gvizDate = raw.match(/Date\((\d{4}),(\d{1,2}),(\d{1,2})\)/);
+    if (gvizDate) {
+      const d = new Date(Number(gvizDate[1]), Number(gvizDate[2]), Number(gvizDate[3]));
+      if (!Number.isNaN(d.getTime())) return d.toLocaleDateString("es-AR", { month:"short", year:"numeric" }).replace(".", "");
+    }
+
+    return raw;
+  }
+
+  function monthSortValue(label, fallbackIndex) {
+    const raw = String(label || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const months = { ene:0, enero:0, feb:1, febrero:1, mar:2, marzo:2, abr:3, abril:3, may:4, mayo:4, jun:5, junio:5, jul:6, julio:6, ago:7, agosto:7, sep:8, sept:8, septiembre:8, oct:9, octubre:9, nov:10, noviembre:10, dic:11, diciembre:11 };
+    const yearMatch = raw.match(/20\d{2}/);
+    const year = yearMatch ? Number(yearMatch[0]) : 9999;
+    let month = null;
+    for (const [name, idx] of Object.entries(months)) {
+      if (raw.includes(name)) { month = idx; break; }
+    }
+    if (month !== null) return year * 100 + month;
+    const numericDate = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](20\d{2})/);
+    if (numericDate) return Number(numericDate[3]) * 100 + Number(numericDate[2]) - 1;
+    return 999900 + fallbackIndex;
+  }
+
+  function extractYear(text) {
+    const m = String(text || "").match(/20\d{2}/);
+    return m ? m[0] : "Sin año";
+  }
+
+  function toNumber(v) {
+    if (v === null || v === undefined) return 0;
+    let s = String(v).trim();
+    if (!s) return 0;
+    s = s.replace(/\u00a0/g, "").replace(/\s/g, "");
+    s = s.replace(/[^0-9,\.\-]/g, "");
+    if (!s || s === "-" || s === "," || s === ".") return 0;
+
+    const comma = s.lastIndexOf(",");
+    const dot = s.lastIndexOf(".");
+    if (comma >= 0 && dot >= 0) {
+      if (comma > dot) s = s.replace(/\./g, "").replace(",", ".");
+      else s = s.replace(/,/g, "");
+    } else if (comma >= 0) {
+      const decimals = s.length - comma - 1;
+      if (decimals === 3 && comma > 0) s = s.replace(/,/g, "");
+      else s = s.replace(/\./g, "").replace(",", ".");
+    } else if (dot >= 0) {
+      const decimals = s.length - dot - 1;
+      if (decimals === 3 && dot > 0) s = s.replace(/\./g, "");
+    }
+
+    const n = Number(s);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function formatNum(n) { return Math.round(Number(n) || 0).toLocaleString("es-AR"); }
+  function formatMoney(n) { return "$" + Math.round(Number(n) || 0).toLocaleString("es-AR"); }
+  function formatPct(n) { return !n ? "0%" : (Number(n) * 100).toLocaleString("es-AR", { maximumFractionDigits: 2 }) + "%"; }
+
+  function parseCSV(text) {
+    const rows = [];
+    let row = [], field = "", quote = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i], n = text[i + 1];
+      if (c === '"' && quote && n === '"') { field += '"'; i++; }
+      else if (c === '"') quote = !quote;
+      else if (c === "," && !quote) { row.push(field); field = ""; }
+      else if ((c === "\n" || c === "\r") && !quote) {
+        if (field || row.length) { row.push(field); rows.push(row); row = []; field = ""; }
+        if (c === "\r" && n === "\n") i++;
+      } else field += c;
+    }
+    if (field || row.length) { row.push(field); rows.push(row); }
+    return rows.filter(r => r.some(x => String(x).trim() !== ""));
+  }
+
+  function parsePublishedHtml(text) {
+    const doc = new DOMParser().parseFromString(text, "text/html");
+    const tables = [...doc.querySelectorAll("table")];
+    if (!tables.length) return [];
+    const candidates = tables.map(table => [...table.querySelectorAll("tr")]
+      .map(tr => [...tr.querySelectorAll("td,th")].map(td => td.textContent.trim()))
+      .filter(r => r.some(Boolean))
+    ).filter(r => r.length);
+    candidates.sort((a, b) => scoreRows(b) - scoreRows(a));
+    return candidates[0] || [];
+  }
+
+  function scoreRows(rows) {
+    const joined = normalizeKey(rows.slice(0, 12).map(r => r.join(" ")).join(" "));
+    const targets = ["mes", "fecha", "periodo", "inicio del informe", "importe gastado", "inversion", "gasto", "clics todos", "clicks todos", "clics", "clicks", "alcance", "impresiones", "ctr", "frecuencia"];
+    return targets.reduce((a, t) => a + (joined.includes(t) ? 1 : 0), 0) + Math.min(rows.length, 80) / 100;
+  }
+
+  function tableToRows(table) {
+    if (!table || !table.cols || !table.rows) return [];
+    const headers = table.cols.map((c, i) => String(c.label || c.id || `Columna ${i + 1}`).trim());
+    const body = table.rows.map(r => (r.c || []).map(cell => {
+      if (!cell) return "";
+      if (cell.f !== undefined && cell.f !== null) return String(cell.f);
+      if (cell.v !== undefined && cell.v !== null) return String(cell.v);
+      return "";
+    }));
+    return [headers, ...body].filter(r => r.some(x => String(x).trim() !== ""));
+  }
+
+  function buildGvizAttempts() {
+    const bases = [`https://docs.google.com/spreadsheets/d/e/${PUB_ID}/gviz/tq`];
+    if (SPREADSHEET_ID.trim()) bases.push(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID.trim()}/gviz/tq`);
+    const attempts = [];
+    for (const base of bases) {
+      for (const gid of SHEET_GIDS) {
+        for (const headers of [1, 0]) {
+          attempts.push({ base, gid, sheet:"", headers, label:`gviz${gid ? " gid=" + gid : " sin gid"} headers=${headers}` });
+        }
+      }
+      for (const sheet of SHEET_NAMES.filter(Boolean)) {
+        for (const headers of [1, 0]) {
+          attempts.push({ base, gid:"", sheet, headers, label:`gviz sheet=${sheet} headers=${headers}` });
+        }
+      }
+    }
+    return attempts;
+  }
+
+  function makeGvizUrl(item, callbackName) {
+    const params = [
+      `tqx=${encodeURIComponent(`out:json;responseHandler:${callbackName}`)}`,
+      `tq=${encodeURIComponent("select *")}`,
+      `headers=${item.headers}`,
+      `cacheBust=${Date.now()}`
+    ];
+    if (item.gid) params.push(`gid=${encodeURIComponent(item.gid)}`);
+    if (item.sheet) params.push(`sheet=${encodeURIComponent(item.sheet)}`);
+    return `${item.base}?${params.join("&")}`;
+  }
+
+  function loadGviz(item, index) {
+    return new Promise((resolve, reject) => {
+      const callbackName = `__sabrinaSheetCallback_${Date.now()}_${index}`;
+      const script = document.createElement("script");
+      let done = false;
+      let oldSetResponse;
+      const timeout = setTimeout(() => fail(new Error("sin respuesta del endpoint gviz")), 15000);
+
+      function cleanup() {
+        clearTimeout(timeout);
+        script.remove();
+        try { delete window[callbackName]; } catch(e) { window[callbackName] = undefined; }
+        if (oldSetResponse) window.google.visualization.Query.setResponse = oldSetResponse;
+      }
+
+      function fail(err) {
+        if (done) return;
+        done = true;
+        cleanup();
+        reject(err);
+      }
+
+      function receive(response) {
+        if (done) return;
+        done = true;
+        cleanup();
+        if (!response || response.status === "error") {
+          const msg = response?.errors?.[0]?.detailed_message || response?.errors?.[0]?.message || "Google Sheets devolvió un error";
+          reject(new Error(msg));
+          return;
+        }
+        const rows = tableToRows(response.table);
+        if (rows.length >= 2) resolve({ rows, source:item.label });
+        else reject(new Error("sin filas útiles"));
+      }
+
+      window[callbackName] = receive;
+      window.google = window.google || {};
+      window.google.visualization = window.google.visualization || {};
+      window.google.visualization.Query = window.google.visualization.Query || {};
+      oldSetResponse = window.google.visualization.Query.setResponse;
+      window.google.visualization.Query.setResponse = receive;
+
+      script.onerror = () => fail(new Error("error cargando script gviz"));
+      script.src = makeGvizUrl(item, callbackName);
+      document.head.appendChild(script);
+    });
+  }
+
+  async function tryFetchText(url, label) {
+    const res = await fetch(url, { cache:"no-store" });
+    if (!res.ok) throw new Error(`${label} HTTP ${res.status}`);
+    const text = await res.text();
+    if (!text || text.length < 20) throw new Error(`${label} respuesta vacía`);
+    return text;
+  }
+
+  function proxyUrl(url) {
+    return "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
+  }
+
+  async function loadFetchFallbacks() {
+    const csvUrls = [
+      `https://docs.google.com/spreadsheets/d/e/${PUB_ID}/pub?output=csv`,
+      `https://docs.google.com/spreadsheets/d/e/${PUB_ID}/pub?gid=0&single=true&output=csv`
+    ];
+    const htmlUrl = `https://docs.google.com/spreadsheets/d/e/${PUB_ID}/pubhtml`;
+    const errors = [];
+
+    for (const url of csvUrls) {
+      try {
+        const text = await tryFetchText(url, "csv directo");
+        const rows = parseCSV(text);
+        if (rows.length >= 2) return { rows, source:"CSV publicado directo" };
+      } catch(e) { errors.push(e.message); }
+    }
+
+    for (const url of csvUrls) {
+      try {
+        const text = await tryFetchText(proxyUrl(url), "csv proxy");
+        const rows = parseCSV(text);
+        if (rows.length >= 2) return { rows, source:"CSV publicado vía proxy" };
+      } catch(e) { errors.push(e.message); }
+    }
+
+    try {
+      const text = await tryFetchText(proxyUrl(htmlUrl), "html proxy");
+      const rows = parsePublishedHtml(text);
+      if (rows.length >= 2) return { rows, source:"HTML publicado vía proxy" };
+    } catch(e) { errors.push(e.message); }
+
+    throw new Error(errors.slice(0, 8).join(" | "));
+  }
+
+  async function fetchSheetRows() {
+    // Carga estable: primero intenta leer el CSV publicado directo desde Google.
+    // Si el navegador o GitHub bloquean esa lectura, usa una única alternativa por proxy.
+    // No vuelve al modo diagnóstico de múltiples fuentes para evitar pedidos repetidos de red.
+    const csvUrl = `https://docs.google.com/spreadsheets/d/e/${PUB_ID}/pub?output=csv`;
+    const errors = [];
+
+    try {
+      const text = await tryFetchText(csvUrl, "csv directo");
+      const rows = parseCSV(text);
+      if (rows.length >= 2) return { rows, source:"CSV publicado directo" };
+      errors.push("csv directo: CSV sin filas útiles");
+    } catch (e) {
+      errors.push("csv directo: " + e.message);
+    }
+
+    try {
+      const text = await tryFetchText(proxyUrl(csvUrl), "csv proxy");
+      const rows = parseCSV(text);
+      if (rows.length >= 2) return { rows, source:"CSV publicado vía proxy" };
+      errors.push("csv proxy: CSV sin filas útiles");
+    } catch (e) {
+      errors.push("csv proxy: " + e.message);
+    }
+
+    throw new Error("No se pudo leer Google Sheets. " + errors.join(" | "));
+  }
+
+  function findHeaderRow(rows) {
+    let best = 0, bestScore = -1;
+    rows.forEach((r, i) => {
+      const score = scoreRows([r]);
+      if (score > bestScore) { bestScore = score; best = i; }
+    });
+    return bestScore > 0 ? best : 0;
+  }
+
+  function pick(obj, names) {
+    const keys = Object.keys(obj);
+    for (const n of names) {
+      const wanted = normalizeKey(n);
+      let found = keys.find(k => normalizeKey(k) === wanted);
+      if (found) return obj[found];
+      found = keys.find(k => {
+        const kk = normalizeKey(k);
+        return kk.includes(wanted) || wanted.includes(kk);
+      });
+      if (found) return obj[found];
+    }
+    return "";
+  }
+
+
+  function looksLikeMonthText(v) {
+    const raw = String(v || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    if (!raw) return false;
+    const hasMonth = /(ene|enero|feb|febrero|mar|marzo|abr|abril|may|mayo|jun|junio|jul|julio|ago|agosto|sep|sept|septiembre|oct|octubre|nov|noviembre|dic|diciembre)/.test(raw);
+    const hasYear = /20\d{2}/.test(raw);
+    const hasDate = /(\d{1,2})[\/\-](\d{1,2})[\/\-](20\d{2})/.test(raw) || /(20\d{2})[\/\-](\d{1,2})[\/\-](\d{1,2})/.test(raw);
+    return (hasMonth && hasYear) || hasDate;
+  }
+
+  function findMonthValue(obj) {
+    const direct = pick(obj, [
+      "Mes", "Fecha", "Periodo", "Período", "Mes año", "Mes y año", "Nombre del mes", "Día", "Dia", "Date", "Inicio del informe", "Fin del informe", "Reporting starts", "Reporting ends"
+    ]);
+    if (looksLikeMonthText(direct)) return direct;
+    const rawValues = Array.isArray(obj.__rawValues) ? obj.__rawValues : [];
+    const found = rawValues.find(looksLikeMonthText);
+    return found || "";
+  }
+
+  function rowToData(obj, index) {
+    const mesRaw = findMonthValue(obj);
+    const explicitMonth = looksLikeMonthText(mesRaw);
+    const mes = normalizeMonthLabel(mesRaw, index);
+    const inversion = toNumber(pick(obj, [
+      "Inversión", "Inversion", "Importe gastado", "Importe gastado ARS", "Importe gastado (ARS)", "Amount spent", "Gasto", "Monto gastado", "Importe invertido", "Dinero gastado", "Coste", "Costo"
+    ]));
+    const consultas = toNumber(pick(obj, [
+      "Consultas x anuncios", "Consultas", "Consulta", "Resultados", "Results"
+    ]));
+    const costoConsultaSheet = toNumber(pick(obj, [
+      "Costo por Consulta", "Costo por consulta", "Costo x Consulta", "Costo x consulta", "Costo por consultas", "Costo x consultas", "Costo por resultados", "Costo por Resultado"
+    ]));
+    const interesados = toNumber(pick(obj, [
+      "Clicks todos", "Clics todos", "Clics (todos)", "Clicks (todos)", "Todos los clicks", "Todos los clics", "Clics", "Clicks", "Clics en todos", "Clicks en todos", "All clicks", "Link clicks"
+    ]));
+    const costoInteresadoSheet = toNumber(pick(obj, [
+      "Costo x Intesados", "Costo x Interesados", "Costo por interesado", "Costo por interesados", "Costo x interesado", "Costo por click todos", "Costo por clicks todos"
+    ]));
+    const alcance = toNumber(pick(obj, ["Alcance de cuentas", "Alcance", "Reach"]));
+    const impresiones = toNumber(pick(obj, ["Impresiones", "Impressions"]));
+    let ctr = toNumber(pick(obj, ["CTR", "CTR todos", "CTR (todos)", "Porcentaje de clics", "Porcentaje de clicks", "CTR (all)"]));
+    if (ctr > 1 && ctr <= 100) ctr = ctr / 100;
+    const frecuenciaRaw = toNumber(pick(obj, ["Frecuencia", "Frequency"]));
+    const frecuencia = frecuenciaRaw || (alcance ? impresiones / alcance : 0);
+    if (!ctr && impresiones && interesados) ctr = interesados / impresiones;
+    const label = String(obj.__rowLabel || pick(obj, ["Columna 1", "Anuncio", "Nombre del anuncio", "Campaña", "Nombre de la campaña"]) || "");
+    const labelKey = normalizeKey(label);
+    const isSummary = /(^| )(total|totales|resultado|resultados|resumen|general)( |$)/.test(labelKey);
+    const cpc = costoConsultaSheet || (consultas ? inversion / consultas : 0);
+    const cpi = costoInteresadoSheet || (interesados ? inversion / interesados : 0);
+    return { mes, inversion, consultas, cpc, interesados, alcance, impresiones, ctr, frecuencia, cpi, year: extractYear(mes), order:index, label, isSummary, explicitMonth, rowIndex: obj.__rowIndex };
+  }
+
+  function rowsToObjects(parsed) {
+    const headerIndex = findHeaderRow(parsed);
+    const headers = parsed[headerIndex].map((h, i) => String(h || `Columna ${i + 1}`).trim());
+    const objects = parsed.slice(headerIndex + 1)
+      .filter(r => r.some(x => String(x || "").trim() !== ""))
+      .map((r, idx) => {
+        const obj = Object.fromEntries(headers.map((h, i) => [h || `Columna ${i + 1}`, r[i] ?? ""]));
+        obj.__rowIndex = headerIndex + 2 + idx;
+        obj.__rowLabel = r[0] ?? "";
+        obj.__rawValues = r;
+        return obj;
+      });
+    return { objects, headers, headerIndex };
+  }
+
+  function aggregateData(rows) {
+    const map = new Map();
+    rows.forEach((r, index) => {
+      if (!r.mes || !(r.inversion || r.consultas || r.interesados || r.alcance || r.impresiones)) return;
+      const key = r.mes;
+      if (!map.has(key)) map.set(key, { mes:key, inversion:0, consultas:0, interesados:0, alcance:0, impresiones:0, order:r.order ?? index, year:extractYear(key) });
+      const g = map.get(key);
+      g.inversion += r.inversion || 0;
+      g.consultas += r.consultas || 0;
+      g.interesados += r.interesados || 0;
+      g.alcance += r.alcance || 0;
+      g.impresiones += r.impresiones || 0;
+      g.order = Math.min(g.order, r.order ?? index);
+    });
+    return [...map.values()].map(g => {
+      g.cpc = g.consultas ? g.inversion / g.consultas : 0;
+      g.cpi = g.interesados ? g.inversion / g.interesados : 0;
+      g.ctr = g.impresiones ? g.interesados / g.impresiones : 0;
+      g.frecuencia = g.alcance ? g.impresiones / g.alcance : 0;
+      g.sortValue = monthSortValue(g.mes, g.order);
+      return g;
+    }).sort((a, b) => a.sortValue - b.sortValue);
+  }
+
+  function convertRows(parsed) {
+    const converted = rowsToObjects(parsed);
+    const mapped = converted.objects.map(rowToData).filter(r => r.mes && (r.inversion || r.consultas || r.interesados || r.alcance || r.impresiones));
+
+    // Prioridad de lectura:
+    // 1) Fila mensual explícita (por ejemplo, una fila cuyo primer campo diga "Mayo 2026").
+    //    Esta es la referencia principal para el dashboard.
+    // 2) Fila Total/Resumen si existe.
+    // 3) Suma de filas útiles solo como último recurso.
+    const monthlyRows = mapped.filter(r => r.explicitMonth);
+    const summaryRows = mapped.filter(r => r.isSummary);
+    let dataSource = mapped;
+    let aggregationMode = "Suma de filas útiles";
+
+    if (monthlyRows.length) {
+      dataSource = monthlyRows;
+      aggregationMode = "Fila mensual explícita detectada";
+    } else if (summaryRows.length) {
+      dataSource = summaryRows;
+      aggregationMode = "Fila de total/resumen detectada";
+    }
+
+    return {
+      data: aggregateData(dataSource),
+      headers: converted.headers,
+      headerIndex: converted.headerIndex,
+      objectCount: converted.objects.length,
+      usefulCount: mapped.length,
+      monthlyCount: monthlyRows.length,
+      monthlyLabels: monthlyRows.map(r => `Fila ${r.rowIndex}: ${r.mes} · consultas ${r.consultas} · interesados ${r.interesados}`).slice(0, 8),
+      summaryCount: summaryRows.length,
+      summaryLabels: summaryRows.map(r => `Fila ${r.rowIndex}: ${r.label || "sin etiqueta"}`).slice(0, 5),
+      aggregationMode
+    };
+  }
+
+  function capitalizeText(text) {
+    const s = String(text || "").trim();
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  }
+
+  function monthBaseLabel(row) {
+    if (row && Number.isFinite(row.sortValue) && row.sortValue < 999900) {
+      const year = Math.floor(row.sortValue / 100);
+      const month = row.sortValue % 100;
+      const d = new Date(year, month, 1);
+      return capitalizeText(d.toLocaleDateString("es-AR", { month:"long", year:"numeric" }));
+    }
+    return capitalizeText(row?.mes || "");
+  }
+
+  function monthStatus(row) {
+    if (!row || !Number.isFinite(row.sortValue) || row.sortValue >= 999900) return "";
+    const now = new Date();
+    const currentMonth = now.getFullYear() * 100 + now.getMonth();
+    return row.sortValue === currentMonth ? "en curso" : "completo";
+  }
+
+  function monthOptionLabel(row) {
+    const status = monthStatus(row);
+    return monthBaseLabel(row) + (status ? ` (${status})` : "");
+  }
+
+  function setupMonthFilter() {
+    const select = $("monthFilter");
+    const current = select.value;
+    select.innerHTML = '<option value="all">Todos los meses</option>' + rawRows.map(r => `<option value="${r.mes}">${monthOptionLabel(r)}</option>`).join("");
+    if ([...select.options].some(o => o.value === current)) select.value = current;
+    else if (rawRows.length) select.value = rawRows[rawRows.length - 1].mes;
+    else select.value = "all";
+  }
+
+  function filteredRows() {
+    const selectedMonth = $("monthFilter").value;
+    return selectedMonth === "all" ? rawRows : rawRows.filter(r => r.mes === selectedMonth);
+  }
+
+  function selectedDelta(rows) {
+    const selected = rows[rows.length - 1];
+    if (!selected) return null;
+    const idx = rawRows.findIndex(r => r.mes === selected.mes);
+    const previous = idx > 0 ? rawRows[idx - 1] : null;
+    return previous && previous.interesados ? (selected.interesados - previous.interesados) / previous.interesados : null;
+  }
+
+  function sum(rows, k) { return rows.reduce((a, r) => a + (Number(r[k]) || 0), 0); }
+
+  function weightedCtr(rows) {
+    const impresiones = sum(rows, "impresiones");
+    const interesados = sum(rows, "interesados");
+    return impresiones ? interesados / impresiones : 0;
+  }
+
+  function render() {
+    const rows = filteredRows();
+    const inversion = sum(rows, "inversion");
+    const consultas = sum(rows, "consultas");
+    const interesados = sum(rows, "interesados");
+    const alcance = sum(rows, "alcance");
+    const impresiones = sum(rows, "impresiones");
+    const cpc = consultas ? inversion / consultas : 0;
+    const cpi = interesados ? inversion / interesados : 0;
+    const frecuencia = alcance ? impresiones / alcance : 0;
+    const ctr = weightedCtr(rows);
+
+    $("kConsultas").textContent = formatNum(consultas);
+    $("kCpc").textContent = formatMoney(cpc);
+    $("kInteresados").textContent = formatNum(interesados);
+    $("kCpi").textContent = formatMoney(cpi);
+    $("kInversion").textContent = formatMoney(inversion);
+    $("kAlcance").textContent = formatNum(alcance);
+    $("kImpresiones").textContent = formatNum(impresiones);
+    $("kCtr").textContent = formatPct(ctr);
+    $("kFrecuencia").textContent = frecuencia.toLocaleString("es-AR", { maximumFractionDigits: 2 });
+    $("kMeses").textContent = rows.length;
+
+    const last = rows[rows.length - 1], prev = rows[rows.length - 2];
+    const delta = selectedDelta(rows);
+    $("kInteresadosSub").textContent = delta === null ? "Personas interesadas acumuladas." : `${delta >= 0 ? "+" : ""}${(delta * 100).toLocaleString("es-AR", { maximumFractionDigits: 1 })}% frente al mes anterior.`;
+    setBadge(delta);
+
+    renderInsight(rows, cpi, interesados, inversion, consultas, cpc);
+    renderTable(rows);
+    renderCharts(rows);
+  }
+
+  function setBadge(delta) {
+    const badge = $("badgeInteresados");
+    if (delta === null) { badge.innerHTML = '<span class="dot"></span>Sin comparación'; return; }
+    if (delta >= .12) badge.innerHTML = '<span class="dot" style="background:var(--ok)"></span>Buen movimiento';
+    else if (delta >= -.08) badge.innerHTML = '<span class="dot" style="background:var(--warn)"></span>Estable';
+    else badge.innerHTML = '<span class="dot" style="background:var(--bad)"></span>A revisar';
+  }
+
+  function renderInsight(rows, cpi, interesados, inversion, consultas, cpc) {
+    if (!rows.length) { $("insight").textContent = "No hay datos disponibles para el período seleccionado."; return; }
+    const bestConsultas = [...rows].sort((a, b) => b.consultas - a.consultas)[0];
+    const bestInteresados = [...rows].sort((a, b) => b.interesados - a.interesados)[0];
+    const alcanceTotal = sum(rows, "alcance");
+    const partes = [
+      `En el período seleccionado se generaron ${formatNum(consultas)} consultas y ${formatNum(interesados)} interesados.`,
+      `La inversión total fue de ${formatMoney(inversion)}.`,
+      consultas ? `Cada consulta costó en promedio ${formatMoney(cpc)}.` : "Todavía no hay consultas registradas para calcular el costo por consulta.",
+      alcanceTotal ? `Los anuncios llegaron a ${formatNum(alcanceTotal)} cuentas.` : "Todavía no hay datos de alcance para este período.",
+      bestConsultas && bestConsultas.consultas ? `El mes con más consultas fue ${bestConsultas.mes}.` : (bestInteresados ? `El mes con más interesados fue ${bestInteresados.mes}.` : "")
+    ];
+    $("insight").textContent = partes.filter(Boolean).join(" ");
+  }
+
+  function renderTable(rows) {
+    $("tbody").innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.mes}</td>
+        <td>${formatMoney(r.inversion)}</td>
+        <td>${formatNum(r.consultas)}</td>
+        <td>${formatMoney(r.cpc)}</td>
+        <td>${formatNum(r.interesados)}</td>
+        <td>${formatMoney(r.cpi)}</td>
+        <td>${formatNum(r.alcance)}</td>
+        <td>${formatNum(r.impresiones)}</td>
+        <td>${formatPct(r.ctr)}</td>
+        <td>${r.frecuencia.toLocaleString("es-AR", { maximumFractionDigits: 2 })}</td>
+      </tr>`).join("");
+  }
+
+  function destroyCharts() { charts.forEach(c => c.destroy()); charts = []; }
+
+  function renderCharts(rows) {
+    if (typeof Chart === "undefined") return;
+    destroyCharts();
+    const labels = rows.map(r => r.mes);
+    const azul = getComputedStyle(document.documentElement).getPropertyValue("--azul").trim();
+    const dorado = getComputedStyle(document.documentElement).getPropertyValue("--dorado").trim();
+    Chart.defaults.font.family = "Inter, system-ui, Arial";
+    Chart.defaults.color = "#526664";
+    const EQUIVALENCIA_INTERESADOS_POR_CONSULTA = 100;
+    charts.push(new Chart($("chartInteresados"), {
+      type:"bar",
+      data:{ labels, datasets:[
+        {
+          label:"Consultas",
+          data:rows.map(r => r.consultas),
+          realData:rows.map(r => r.consultas),
+          backgroundColor:dorado,
+          borderRadius:10
+        },
+        {
+          label:"Interesados",
+          data:rows.map(r => r.interesados / EQUIVALENCIA_INTERESADOS_POR_CONSULTA),
+          realData:rows.map(r => r.interesados),
+          backgroundColor:azul,
+          borderRadius:10
+        }
+      ] },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{ mode:"index", intersect:false },
+        plugins:{
+          legend:{ display:true, labels:{ usePointStyle:true, boxWidth:10 } },
+          tooltip:{ callbacks:{
+            label:(ctx) => `${ctx.dataset.label}: ${formatNum(ctx.dataset.realData?.[ctx.dataIndex] ?? ctx.raw)}`,
+            afterBody:() => ["Equivalencia visual: 1 consulta = 100 interesados"]
+          } }
+        },
+        scales:{
+          x:{ grid:{ display:false } },
+          y:{
+            beginAtZero:true,
+            title:{ display:true, text:"Escala equivalente" },
+            ticks:{ callback:v => formatNum(v) }
+          }
+        }
+      }
+    }));
+    charts.push(new Chart($("chartCpi"), {
+      type:"line",
+      data:{ labels, datasets:[{ label:"Costo por consulta", data:rows.map(r => r.cpc), borderColor:dorado, backgroundColor:"rgba(212,163,58,.13)", fill:true, tension:.35, pointRadius:4 }] },
+      options:baseOptions("money")
+    }));
+    charts.push(new Chart($("chartMix"), {
+      type:"line",
+      data:{ labels, datasets:[
+        {
+          label:"Inversión",
+          data:rows.map(r => r.inversion),
+          realData:rows.map(r => r.inversion),
+          borderColor:dorado,
+          backgroundColor:"rgba(212,163,58,.12)",
+          yAxisID:"yMoney",
+          tension:.35,
+          pointRadius:4
+        },
+        {
+          label:"Consultas",
+          data:rows.map(r => r.consultas),
+          realData:rows.map(r => r.consultas),
+          borderColor:"#2e8b57",
+          backgroundColor:"rgba(46,139,87,.10)",
+          yAxisID:"yQty",
+          tension:.35,
+          pointRadius:4
+        },
+        {
+          label:"Interesados",
+          data:rows.map(r => r.interesados / EQUIVALENCIA_INTERESADOS_POR_CONSULTA),
+          realData:rows.map(r => r.interesados),
+          borderColor:azul,
+          backgroundColor:"rgba(8,60,103,.10)",
+          yAxisID:"yQty",
+          tension:.35,
+          pointRadius:4
+        }
+      ]},
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{ mode:"index", intersect:false },
+        plugins:{
+          legend:{ labels:{ usePointStyle:true } },
+          tooltip:{ callbacks:{
+            label:(ctx) => {
+              const real = ctx.dataset.realData?.[ctx.dataIndex] ?? ctx.raw;
+              return ctx.dataset.label + ": " + (ctx.dataset.yAxisID === "yMoney" ? formatMoney(real) : formatNum(real));
+            },
+            afterBody:() => ["Resultados: 1 consulta = 100 interesados en escala visual"]
+          } }
+        },
+        scales:{
+          x:{ grid:{ display:false } },
+          yMoney:{
+            position:"left",
+            title:{ display:true, text:"Inversión" },
+            ticks:{ callback:v => formatMoney(v) }
+          },
+          yQty:{
+            position:"right",
+            beginAtZero:true,
+            title:{ display:true, text:"Resultados · escala equivalente" },
+            grid:{ drawOnChartArea:false },
+            ticks:{ callback:v => formatNum(v) }
+          }
+        }
+      }
+    }));
+  }
+
+  function baseOptions(kind, showLegend = false) {
+    return {
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{ display:showLegend, labels:{ usePointStyle:true, boxWidth:10 } },
+        tooltip:{ callbacks:{ label:(ctx) => `${ctx.dataset.label}: ${kind === "money" ? formatMoney(ctx.raw) : formatNum(ctx.raw)}` } }
+      },
+      scales:{
+        x:{ grid:{ display:false } },
+        y:{ beginAtZero:true, ticks:{ callback:v => kind === "money" ? formatMoney(v) : formatNum(v) } }
+      }
+    };
+  }
+
+  async function loadData() {
+    setStatus("Cargando datos desde Google Sheets…");
+    setDebug([]);
+    try {
+      const result = await fetchSheetRows();
+      const converted = convertRows(result.rows);
+      rawRows = converted.data;
+
+      const debugLines = [
+        `Fuente: ${result.source}`,
+        `Filas leídas: ${result.rows.length}`,
+        `Fila de encabezados detectada: ${converted.headerIndex + 1}`,
+        `Columnas detectadas: ${converted.headers.join(" | ")}`,
+        `Registros totales después del encabezado: ${converted.objectCount}`,
+        `Registros útiles con métricas: ${converted.usefulCount}`,
+        `Modo de agregación: ${converted.aggregationMode}`,
+        `Filas mensuales explícitas detectadas: ${converted.monthlyCount || 0}`,
+        ...((converted.monthlyLabels && converted.monthlyLabels.length) ? [`Filas mensuales usadas: ${converted.monthlyLabels.join(" | ")}`] : []),
+        `Filas de total/resumen detectadas: ${converted.summaryCount}`,
+        ...(converted.summaryLabels.length ? [`Resumen usado: ${converted.summaryLabels.join(" | ")}`] : []),
+        `Períodos agrupados: ${rawRows.length}`,
+        `Mes predeterminado para filas sin fecha: ${DEFAULT_MONTH}`,
+        `Control Mayo 2026 - Interesados esperados: 752`
+      ];
+      setDebug(debugLines);
+
+      if (!rawRows.length) {
+        throw new Error("Se leyó la hoja, pero no se detectaron columnas válidas. Revisar que existan columnas como Mes/Fecha, Importe gastado, Clics (todos), Alcance e Impresiones. Columnas encontradas: " + converted.headers.join(" | "));
+      }
+
+      setupMonthFilter();
+      render();
+      setStatus(`Datos actualizados: ${new Date().toLocaleString("es-AR")} · Fuente: ${result.source} · Períodos: ${rawRows.length}.`, true);
+    } catch (err) {
+      console.error(err);
+      setStatus("Error: " + err.message);
+      setDebug([err.stack || err.message]);
+    }
+  }
+
+  $("reloadBtn").addEventListener("click", loadData);
+  $("monthFilter").addEventListener("change", render);
+  loadData();
+})();
+
+</script>
+</body>
+</html>
