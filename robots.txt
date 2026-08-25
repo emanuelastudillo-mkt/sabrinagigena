@@ -1,4 +1,5 @@
 User-agent: *
 Disallow: /metricas/
+Disallow: /visor/
 
 Sitemap: https://sabrinagigena.com/sitemap.xml

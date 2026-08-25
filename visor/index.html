@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
+  <meta name="googlebot" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
+  <meta name="theme-color" content="#0e2c38">
+  <link rel="icon" href="../favicon.png" type="image/png">
+  <title>Visor comparativo | Sabrina Gigena</title>
+  <style>
+    :root{--ink:#143644;--ink2:#0e2c38;--paper:#f7f6f1;--card:#fff;--mint:#eaf2ed;--muted:#68777e;--line:#dbe1df;--shadow:0 18px 45px rgba(20,54,68,.12);--radius:24px;--pos:50%}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--paper);color:var(--ink)}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}button,input{font:inherit}img{display:block;max-width:100%}.wrap{width:min(1100px,calc(100% - 28px));margin:auto}
+    .header{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;min-width:0}.brand-photo{width:46px;height:46px;flex:0 0 46px;border-radius:50%;overflow:hidden;background:#efe8df;border:1px solid rgba(20,54,68,.08)}.brand-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 18%;transform:scale(1.42);transform-origin:50% 22%}.brand-copy{display:flex;flex-direction:column;line-height:1.05}.brand-copy strong{font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:500;letter-spacing:-.02em;white-space:nowrap}.brand-copy small{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:5px;font-weight:800}.private{font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:var(--muted);border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 11px}
+    main{padding:34px 0 54px}.intro{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:20px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.16em;font-weight:800;color:#1f5968}h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,5vw,56px);font-weight:500;letter-spacing:-.035em;line-height:1;margin:7px 0 0}.intro p{max-width:430px;margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+    .viewer-card{background:var(--card);border:1px solid rgba(20,54,68,.09);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}.viewer{position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;border-radius:18px;background:linear-gradient(135deg,#eaf2ed,#eef0ec);touch-action:none;user-select:none;isolation:isolate}.photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .2s}.photo.loaded{opacity:1}.after-wrap{position:absolute;inset:0;clip-path:inset(0 0 0 var(--pos));z-index:2}.after-wrap .photo{position:absolute}.empty{position:absolute;inset:0;display:grid;place-items:center;padding:28px;text-align:center;color:var(--muted);z-index:0}.empty-inner{max-width:470px}.empty strong{display:block;color:var(--ink);font-family:Georgia,serif;font-size:28px;font-weight:500;margin-bottom:7px}.divider{position:absolute;top:0;bottom:0;left:var(--pos);width:2px;background:#fff;z-index:5;transform:translateX(-1px);box-shadow:0 0 0 1px rgba(0,0,0,.1)}.handle{position:absolute;left:var(--pos);top:50%;z-index:6;width:52px;height:52px;border-radius:50%;background:#fff;color:var(--ink);transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.22);border:1px solid rgba(20,54,68,.08);font-weight:900;font-size:18px;pointer-events:none}.handle:before{content:"‹";margin-right:5px}.handle:after{content:"›";margin-left:5px}.label{position:absolute;top:14px;z-index:7;background:rgba(14,44,56,.82);color:#fff;backdrop-filter:blur(8px);border-radius:999px;padding:8px 11px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.label-before{left:14px}.label-after{right:14px}.range{position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:10;cursor:ew-resize;margin:0}
+    .controls{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-top:12px}.file-btn,.action-btn{min-height:46px;border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;padding:10px 14px;font-weight:800;font-size:12px;cursor:pointer}.file-btn:hover,.action-btn:hover{background:var(--mint)}.file-btn input{display:none}.action-btn{background:var(--ink);color:#fff;border-color:var(--ink)}.action-btn:hover{background:var(--ink2)}.hint{font-size:11px;color:var(--muted);margin:11px 3px 0;line-height:1.5}.hint code{background:#eef1ee;padding:2px 5px;border-radius:5px;color:var(--ink)}
+    @media(max-width:720px){.wrap{width:min(100% - 18px,1100px)}.header{min-height:64px}.brand-photo{width:40px;height:40px;flex-basis:40px}.brand-copy strong{font-size:17px}.brand-copy small{font-size:7px}.private{font-size:8px;padding:7px 9px}main{padding:24px 0 30px}.intro{display:block;margin-bottom:15px}.intro p{margin-top:12px;font-size:13px}.viewer-card{padding:8px;border-radius:18px}.viewer{aspect-ratio:4/5;border-radius:13px}.handle{width:46px;height:46px}.controls{grid-template-columns:1fr 1fr}.action-btn{grid-column:1/-1}.label{top:10px;font-size:9px;padding:7px 9px}.label-before{left:10px}.label-after{right:10px}}
+  </style>
+</head>
+<body>
+  <header class="wrap header">
+    <div class="brand" aria-label="Sabrina Gigena">
+      <span class="brand-photo"><img src="../assets/images/sabrina-gigena-persona.png" alt="Sabrina Gigena"></span>
+      <span class="brand-copy"><strong>Sabrina Gigena</strong><small>Servicios Inmobiliarios</small></span>
+    </div>
+    <span class="private">Visor privado</span>
+  </header>
+
+  <main class="wrap">
+    <div class="intro">
+      <div><span class="eyebrow">Comparador visual</span><h1>Visor de imágenes</h1></div>
+      <p>Deslizá el control para comparar dos fotografías sobre el mismo encuadre. Funciona con mouse, teclado y gestos táctiles.</p>
+    </div>
+
+    <section class="viewer-card">
+      <div class="viewer" id="viewer">
+        <div class="empty" id="emptyState"><div class="empty-inner"><strong>Cargá dos fotografías</strong><span>Las imágenes seleccionadas se procesan únicamente en este dispositivo y no se suben al sitio.</span></div></div>
+        <img class="photo" id="beforeImg" alt="Imagen anterior">
+        <div class="after-wrap"><img class="photo" id="afterImg" alt="Imagen posterior"></div>
+        <span class="label label-before">Antes</span><span class="label label-after">Después</span>
+        <span class="divider" aria-hidden="true"></span><span class="handle" aria-hidden="true"></span>
+        <input class="range" id="compareRange" type="range" min="0" max="100" value="50" aria-label="Comparar imágenes">
+      </div>
+
+      <div class="controls">
+        <label class="file-btn">Cargar foto izquierda<input id="beforeFile" type="file" accept="image/*"></label>
+        <label class="file-btn">Cargar foto derecha<input id="afterFile" type="file" accept="image/*"></label>
+        <button class="action-btn" id="swapBtn" type="button">Intercambiar</button>
+      </div>
+      <p class="hint">También admite imágenes mediante URL usando los parámetros <code>?antes=</code> y <code>&despues=</code>. La página no está enlazada desde el sitio público.</p>
+    </section>
+  </main>
+
+  <script>
+    (()=>{
+      const root=document.documentElement,range=document.getElementById('compareRange'),beforeImg=document.getElementById('beforeImg'),afterImg=document.getElementById('afterImg'),beforeFile=document.getElementById('beforeFile'),afterFile=document.getElementById('afterFile'),swapBtn=document.getElementById('swapBtn'),empty=document.getElementById('emptyState');
+      let beforeObjectUrl=null,afterObjectUrl=null;
+      const setPosition=value=>{const v=Math.max(0,Math.min(100,Number(value)||0));root.style.setProperty('--pos',v+'%');range.value=v};
+      const updateEmpty=()=>{const both=beforeImg.classList.contains('loaded')&&afterImg.classList.contains('loaded');empty.style.display=both?'none':'grid'};
+      const setImage=(img,src)=>{if(!src)return;img.onload=()=>{img.classList.add('loaded');updateEmpty()};img.onerror=()=>{img.classList.remove('loaded');updateEmpty()};img.src=src};
+      const loadFile=(file,side)=>{if(!file||!file.type.startsWith('image/'))return;const url=URL.createObjectURL(file);if(side==='before'){if(beforeObjectUrl)URL.revokeObjectURL(beforeObjectUrl);beforeObjectUrl=url;setImage(beforeImg,url)}else{if(afterObjectUrl)URL.revokeObjectURL(afterObjectUrl);afterObjectUrl=url;setImage(afterImg,url)}};
+      range.addEventListener('input',e=>setPosition(e.target.value));
+      range.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')setPosition(Number(range.value)-2);if(e.key==='ArrowRight')setPosition(Number(range.value)+2)});
+      beforeFile.addEventListener('change',e=>loadFile(e.target.files[0],'before'));afterFile.addEventListener('change',e=>loadFile(e.target.files[0],'after'));
+      swapBtn.addEventListener('click',()=>{const a=beforeImg.src,b=afterImg.src,al=beforeImg.classList.contains('loaded'),bl=afterImg.classList.contains('loaded');if(bl)setImage(beforeImg,b);else beforeImg.classList.remove('loaded');if(al)setImage(afterImg,a);else afterImg.classList.remove('loaded');updateEmpty();setPosition(50)});
+      const params=new URLSearchParams(location.search),beforeParam=params.get('antes'),afterParam=params.get('despues');if(beforeParam)setImage(beforeImg,beforeParam);if(afterParam)setImage(afterImg,afterParam);setPosition(50);updateEmpty();
+    })();
+  </script>
+</body>
+</html>
