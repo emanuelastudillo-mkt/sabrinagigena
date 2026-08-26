@@ -1,0 +1,86 @@
+
+/* V10 — mobile catalog + compact Sabrina hero */
+.mobile-hero-kicker{display:none}
+
+@media (max-width:720px){
+  /* Home: start directly with Sabrina */
+  .hero-copy{display:none!important}
+  .hero-grid{display:block!important}
+  .hero{padding:12px 0 8px!important}
+  .hero-image{
+    display:block!important;
+    min-height:250px!important;
+    height:250px!important;
+    border-radius:20px!important;
+  }
+  .mobile-hero-kicker{
+    display:inline-flex;
+    position:absolute;
+    z-index:6;
+    left:14px;
+    top:13px;
+    color:#fff;
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    text-shadow:0 2px 8px rgba(0,0,0,.22);
+  }
+  .hero-image-label{
+    left:14px!important;
+    right:92px!important;
+    bottom:14px!important;
+  }
+  .hero-image-label strong{
+    font-size:14px!important;
+    line-height:1.28!important;
+  }
+  .hero-sabrina{
+    width:96px!important;
+    right:3px!important;
+    bottom:0!important;
+  }
+
+  /* Two properties per row */
+  .property-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+  .property-card{border-radius:15px!important}
+  .card-media{aspect-ratio:1/1!important}
+  .card-media .tag,
+  .card-media .status{
+    top:7px!important;
+    padding:5px 7px!important;
+    font-size:8px!important;
+    letter-spacing:.04em!important;
+  }
+  .card-media .tag{left:7px!important;max-width:65%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .card-media .status{right:7px!important}
+  .card-body{padding:11px!important}
+  .location{font-size:8px!important;letter-spacing:.07em!important;min-height:24px}
+  .property-card h3{
+    font-size:18px!important;
+    line-height:1.05!important;
+    margin:5px 0 8px!important;
+    min-height:38px;
+  }
+  .facts{gap:4px!important;margin:7px 0!important}
+  .fact{font-size:8px!important;padding:4px 6px!important}
+  .price-label{font-size:8px!important;margin-top:9px!important}
+  .price{font-size:16px!important;line-height:1.05!important}
+  .card-action{font-size:9px!important;padding-top:9px!important;margin-top:10px!important}
+  .arrow{font-size:15px!important}
+  .home-catalog{padding-top:24px!important}
+  .section-head{margin-bottom:14px!important}
+  .section-head h2{font-size:30px!important}
+  .text-link{font-size:10px!important}
+}
+
+@media (max-width:390px){
+  .property-grid{gap:8px!important}
+  .card-body{padding:9px!important}
+  .property-card h3{font-size:16px!important;min-height:34px}
+  .price{font-size:15px!important}
+  .hero-image-label strong{font-size:13px!important}
+}
