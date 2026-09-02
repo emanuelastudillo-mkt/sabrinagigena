@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 env:
-  SITE_URL: "https://emanuelastudillo-mkt.github.io/sabrinagigena"
+  SITE_URL: "https://sabrinagigena.com"
 
 concurrency:
   group: actualizar-catalogo-propiedades
@@ -46,6 +46,7 @@ jobs:
             propiedades/ \
             sitemap.xml \
             robots.txt \
+            CNAME \
             ':(glob)*.html'
 
           if [ -d propiedades-no-index ]; then
