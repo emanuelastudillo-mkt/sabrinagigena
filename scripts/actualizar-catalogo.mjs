@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import {
   mkdir,
+  readdir,
   readFile,
   writeFile,
   unlink
@@ -20,7 +21,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.11';
+const SITE_VERSION = 'V22.12';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -46,6 +47,7 @@ const IMAGE_WIDTH = 1080;
 const IMAGE_HEIGHT = 1350;
 const IMAGE_QUALITY = 82;
 const MAX_GALLERY_PHOTOS = 10;
+const META_MAX_IMAGES = MAX_GALLERY_PHOTOS + 1;
 const IMAGE_PIPELINE_VERSION = 'watermark-v1-primary-first';
 const WATERMARK_TEXT = 'Sabrina Gigena Inmobiliaria';
 
@@ -55,6 +57,8 @@ const repoRoot = path.resolve(__dirname, '..');
 
 const dataDir = path.join(repoRoot, 'data');
 const imagesDir = path.join(repoRoot, 'assets', 'images', 'propiedades');
+const metaImagesDir = path.join(repoRoot, 'assets', 'images', 'meta');
+const metaCatalogPath = path.join(repoRoot, 'meta-catalog.csv');
 const stockPath = path.join(dataDir, 'propiedades.json');
 const imageStatePath = path.join(dataDir, 'image-sync.json');
 const imageManifestPath = path.join(imagesDir, 'manifest.json');
@@ -192,6 +196,19 @@ function parseCSV(text) {
     clean(header).replace(/^\uFEFF/, '') || ('col_' + index)
   );
 
+  const seenHeaders = new Set();
+  const duplicateHeaders = new Set();
+  for (const header of headers) {
+    const key = normalizedHeader(header);
+    if (seenHeaders.has(key)) duplicateHeaders.add(header);
+    seenHeaders.add(key);
+  }
+  if (duplicateHeaders.size) {
+    throw new Error(
+      'Hay encabezados duplicados en Google Sheets: ' + [...duplicateHeaders].join(', ')
+    );
+  }
+
   return rows.map(values =>
     Object.fromEntries(headers.map((header, index) => [header, clean(values[index])]))
   );
@@ -220,9 +237,11 @@ function publicDataRow(row) {
     'CARPETA GOOGLE DRIVE'
   ]);
 
-  return Object.fromEntries(
-    Object.entries(row || {}).filter(([header]) => !privateHeaders.has(normalizedHeader(header)))
-  );
+  return Object.fromEntries(Object.entries(row || {}).filter(([header]) => {
+    const normalized = normalizedHeader(header);
+    const hasPrivatePrefix = /^(?:PRIVADO|INTERNO|NO PUBLICAR)(?: |$)/.test(normalized);
+    return !privateHeaders.has(normalized) && !hasPrivatePrefix;
+  }));
 }
 
 function propertyId(row) {
@@ -578,6 +597,16 @@ async function writeTextIfChanged(filePath, content) {
   return true;
 }
 
+async function writeBufferIfChanged(filePath, content) {
+  if (existsSync(filePath)) {
+    const current = await readFile(filePath);
+    if (current.equals(content)) return false;
+  }
+  await mkdir(path.dirname(filePath), { recursive: true });
+  await writeFile(filePath, content);
+  return true;
+}
+
 async function writeJsonIfChanged(filePath, value) {
   return writeTextIfChanged(filePath, stableJson(value));
 }
@@ -740,6 +769,192 @@ function absoluteUrl(relative) {
   if (/^https?:\/\//i.test(value)) return value;
   const logical = logicalInternalPath(value);
   return SITE_ORIGIN + (logical ? sitePath(logical) : sitePath(value));
+}
+
+function csvCell(value) {
+  return '"' + clean(value).replace(/"/g, '""') + '"';
+}
+
+function metaCoordinate(row, minimum, maximum, ...fields) {
+  const raw = rowValue(row, ...fields).replace(/\s/g, '').replace(',', '.');
+  if (!raw) return '';
+  const value = Number(raw);
+  return Number.isFinite(value) && value >= minimum && value <= maximum
+    ? String(value)
+    : '';
+}
+
+function metaAvailability(row) {
+  const status = normalize(rowValue(row, 'Estado'));
+  if (status === 'RESERVADA' || status === 'RESERVADO') return 'SALE_PENDING';
+  return normalize(rowValue(row, 'Operación', 'Operacion')).includes('ALQUILER')
+    ? 'FOR_RENT'
+    : 'FOR_SALE';
+}
+
+function metaListingType(row) {
+  return normalize(rowValue(row, 'Operación', 'Operacion')).includes('ALQUILER')
+    ? 'FOR_RENT_BY_AGENT'
+    : 'FOR_SALE_BY_AGENT';
+}
+
+function metaPropertyType(row) {
+  const type = normalize(rowValue(row, 'Tipo de propiedad'));
+  if (type.includes('DEPARTAMENTO') || type.includes('APARTAMENTO')) return 'APARTMENT';
+  if (type.includes('TERRENO') || type.includes('LOTE')) return 'LAND';
+  if (type.includes('PH')) return 'CONDO';
+  if (type.includes('CASA') || type.includes('QUINTA')) return 'HOUSE';
+  return 'OTHER';
+}
+
+function metaYearBuilt(row) {
+  const explicit = numberValue(rowValue(row, 'Año de construcción', 'Ano de construccion'));
+  if (explicit >= 1800 && explicit <= new Date().getUTCFullYear() + 2) return explicit;
+
+  const age = numberValue(rowValue(row, 'Antigüedad (años)', 'Antiguedad (anos)'));
+  return age > 0 ? new Date().getUTCFullYear() - age : '';
+}
+
+function metaAddress(row) {
+  const zone = rowValue(row, 'Barrio / Zona');
+  const city = rowValue(row, 'Localidad');
+  const postalCode = rowValue(row, 'Código postal', 'Codigo postal');
+  return {
+    addr1: zone || city,
+    city,
+    region: 'Buenos Aires',
+    country: 'AR',
+    postal_code: postalCode
+  };
+}
+
+async function metaImages(row) {
+  const id = propertyId(row);
+  const sourceFiles = Array.isArray(currentImageManifest[id])
+    ? currentImageManifest[id].slice(0, META_MAX_IMAGES)
+    : [];
+  const version = clean(currentImageManifest._version) || '1';
+  const urls = [];
+
+  for (const sourceFile of sourceFiles) {
+    const sourcePath = path.join(imagesDir, sourceFile);
+    if (!existsSync(sourcePath)) continue;
+
+    const targetFile = sourceFile.replace(/\.webp$/i, '.jpg');
+    const targetPath = path.join(metaImagesDir, targetFile);
+    const output = await sharp(sourcePath)
+      .flatten({ background: '#ffffff' })
+      .jpeg({ quality: 90, chromaSubsampling: '4:4:4' })
+      .toBuffer();
+
+    await writeBufferIfChanged(targetPath, output);
+    urls.push(
+      SITE_URL + '/assets/images/meta/' + encodeURIComponent(targetFile) +
+      '?v=' + encodeURIComponent(version)
+    );
+  }
+
+  return urls;
+}
+
+async function generateMetaCatalog(rows) {
+  await mkdir(metaImagesDir, { recursive: true });
+
+  const headers = [
+    'home_listing_id',
+    'name',
+    'availability',
+    'address',
+    'latitude',
+    'longitude',
+    'neighborhood[0]',
+    ...Array.from({ length: META_MAX_IMAGES }, (_, index) => 'image[' + index + '].url'),
+    'price',
+    'url',
+    'description',
+    'num_beds',
+    'num_baths',
+    'num_rooms',
+    'property_type',
+    'listing_type',
+    'area_size',
+    'area_unit',
+    'year_built',
+    'agent_name',
+    'agent_phone',
+    'agent_email'
+  ];
+  const lines = [headers.map(csvCell).join(',')];
+  const expectedImages = new Set();
+  const report = {
+    items: 0,
+    skippedWithoutPrice: 0,
+    skippedWithoutImage: 0,
+    skippedWithoutLocation: 0
+  };
+
+  for (const row of publicRowsSorted(rows)) {
+    const price = priceInfo(row);
+    if (!price.amount || !price.currency) {
+      report.skippedWithoutPrice += 1;
+      continue;
+    }
+
+    const address = metaAddress(row);
+    const latitude = metaCoordinate(row, -90, 90, 'Latitud aproximada');
+    const longitude = metaCoordinate(row, -180, 180, 'Longitud aproximada');
+    if (!address.addr1 || !address.city || !address.postal_code || !latitude || !longitude) {
+      report.skippedWithoutLocation += 1;
+      continue;
+    }
+
+    const images = await metaImages(row);
+    if (!images.length) {
+      report.skippedWithoutImage += 1;
+      continue;
+    }
+
+    images.forEach(image => {
+      const pathname = new URL(image).pathname;
+      expectedImages.add(decodeURIComponent(path.basename(pathname)));
+    });
+
+    const values = [
+      propertyId(row),
+      propertyTitle(row).slice(0, 150),
+      metaAvailability(row),
+      JSON.stringify(address),
+      latitude,
+      longitude,
+      rowValue(row, 'Barrio / Zona').slice(0, 20),
+      ...Array.from({ length: META_MAX_IMAGES }, (_, index) => images[index] || ''),
+      String(price.amount) + ' ' + price.currency,
+      SITE_URL + propertyRoute(row),
+      summaryText(row, 5000),
+      numberValue(rowValue(row, 'Dormitorios')) || '',
+      numberValue(rowValue(row, 'Baños', 'Banos')) || '',
+      numberValue(rowValue(row, 'Ambientes')) || '',
+      metaPropertyType(row),
+      metaListingType(row),
+      numberValue(rowValue(row, 'Superficie total (m²)', 'Superficie total (m2)')) || '',
+      'SQM',
+      metaYearBuilt(row),
+      'Sabrina Gigena',
+      CONTACT_PHONE,
+      CONTACT_EMAIL
+    ];
+
+    lines.push(values.map(csvCell).join(','));
+    report.items += 1;
+  }
+
+  for (const file of await readdir(metaImagesDir)) {
+    if (!/\.jpe?g$/i.test(file) || expectedImages.has(file)) continue;
+    await unlink(path.join(metaImagesDir, file));
+  }
+
+  await writeTextIfChanged(metaCatalogPath, '\uFEFF' + lines.join('\n') + '\n');
+  return report;
 }
 
 function propertyLocation(row) {
@@ -1719,6 +1934,7 @@ async function main() {
   const generation = await generatePropertyPages(rows, archiveState.rows);
   const publicRows = generation.publicRows;
   await updateCatalogPages(rows);
+  const metaReport = await generateMetaCatalog(rows);
   await writeTextIfChanged(sitemapPath, sitemapXml(publicRows, generatedAt));
   await writeRobots();
 
@@ -1728,6 +1944,12 @@ async function main() {
   );
   console.log('Propiedades públicas generadas: ' + publicRows.length + '.');
   console.log('Propiedades no index conservadas: ' + archiveState.rowCount + '.');
+  console.log(
+    'Meta catálogo: ' + metaReport.items + ' propiedades · ' +
+    metaReport.skippedWithoutPrice + ' sin precio · ' +
+    metaReport.skippedWithoutImage + ' sin imagen · ' +
+    metaReport.skippedWithoutLocation + ' sin ubicación aproximada completa.'
+  );
   console.log(
     'Imágenes: ' + imageReport.downloaded + ' nuevas/actualizadas · ' +
     imageReport.unchanged + ' sin cambios · ' +

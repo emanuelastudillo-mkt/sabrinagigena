@@ -15,6 +15,8 @@ La sincronización se ejecuta automáticamente una vez por día y también puede
 - propiedades/NOMBRE-ID/index.html: URL pública estable de cada propiedad.
 - propiedades-no-index/NOMBRE-ID/index.html: copia histórica no indexable.
 - assets/images/propiedades/: imágenes descargadas y optimizadas a WebP.
+- assets/images/meta/: copias JPEG de las imágenes necesarias para el catálogo de Meta.
+- meta-catalog.csv: feed inmobiliario público, actualizado para Meta Commerce Manager.
 - sitemap.xml y robots.txt.
 
 ## Estados que se publican
@@ -85,6 +87,49 @@ La versión V22.11 instala el píxel de Meta con el identificador `1421470373195
 - también queda presente en las copias históricas de propiedades vendidas o retiradas;
 - incluye la alternativa `noscript` para navegadores sin JavaScript;
 - el generador elimina cualquier copia anterior del mismo bloque antes de insertarlo, por lo que el píxel no se duplica al ejecutar nuevamente el workflow.
+
+## Nuevas columnas en Google Sheets
+
+Agregar columnas no rompe la web siempre que cada encabezado sea único. El generador busca los datos por el **nombre del encabezado**, no por la letra de la columna; por eso se pueden insertar o mover columnas sin perder la relación con el catálogo.
+
+No se deben borrar ni renombrar estas columnas base:
+
+- `ID`
+- `Estado`
+- `Nombre` o `Título`
+- `Tipo de propiedad`
+- `Localidad`
+
+También deben conservarse exactamente `Imagen principal` y `Foto 1` a `Foto 10` para mantener el orden de las fotografías. No hay que reutilizar un `ID` para otra propiedad ni duplicar nombres de columnas. Si el generador detecta encabezados duplicados, detiene el workflow antes de modificar la web.
+
+Una columna interna o clasificada debe comenzar con `Privado -`, `Interno -` o `No publicar -`. Esas columnas se excluyen automáticamente de los JSON públicos. También continúan protegidas las columnas `Propiedad propia / colega`, `Dirección`, `Link Google Maps` y `Carpeta Google Drive`.
+
+El mejor proceso para solicitar una columna nueva es informar:
+
+1. nombre exacto del encabezado;
+2. dos o tres valores de ejemplo;
+3. si es pública o privada;
+4. en qué lugar debe mostrarse o utilizarse;
+5. qué debe ocurrir cuando la celda esté vacía;
+6. si existen valores permitidos, por ejemplo `Sí / No` o una lista de estados.
+
+Primero conviene crear el encabezado y completar una sola propiedad de prueba. Después de adaptar y validar el generador se puede completar el resto de las filas.
+
+## Catálogo inmobiliario para Meta
+
+La versión V22.12 genera automáticamente:
+
+    https://sabrinagigena.com/meta-catalog.csv
+
+El archivo utiliza el esquema de inmuebles con `home_listing_id`. Sólo incluye propiedades `Disponible` o `Reservada` que tengan precio público, al menos una imagen sincronizada y ubicación aproximada completa. Las imágenes del feed se convierten a JPEG y se guardan en `assets/images/meta/`.
+
+Para que una propiedad pueda ingresar al feed se deben agregar y completar estas columnas públicas:
+
+- `Código postal`
+- `Latitud aproximada`
+- `Longitud aproximada`
+
+Las coordenadas deben señalar el centro aproximado del barrio o localidad, nunca la puerta de la propiedad. El feed no utiliza `Dirección` ni `Link Google Maps`. Las instrucciones de conexión se encuentran en `META-CATALOGO.md`.
 
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
 
