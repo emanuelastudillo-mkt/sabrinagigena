@@ -20,15 +20,15 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.7';
+const SITE_VERSION = 'V22.8';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
 const IMAGE_WIDTH = 1080;
 const IMAGE_HEIGHT = 1350;
 const IMAGE_QUALITY = 82;
-const MAX_PROPERTY_PHOTOS = 12;
-const IMAGE_PIPELINE_VERSION = 'watermark-v1';
+const MAX_GALLERY_PHOTOS = 10;
+const IMAGE_PIPELINE_VERSION = 'watermark-v1-primary-first';
 const WATERMARK_TEXT = 'Sabrina Gigena Inmobiliaria';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -416,21 +416,18 @@ function sourceKey(url) {
 
 function photoSources(row) {
   const sources = [];
-  const hasNumberedPhotoColumns = Object.keys(row || {}).some(header => {
-    const match = normalizedHeader(header).match(/^FOTO\s+(\d+)$/);
-    const order = match ? Number(match[1]) : 0;
-    return order >= 1 && order <= MAX_PROPERTY_PHOTOS;
-  });
-
-  for (let order = 1; order <= MAX_PROPERTY_PHOTOS; order += 1) {
-    const url = rowValue(row, 'Foto ' + order);
-    if (isDirectImageReference(url)) sources.push({ order, url });
+  const primary = rowValue(row, 'Imagen principal');
+  if (isDirectImageReference(primary)) {
+    sources.push({ order: 1, field: 'Imagen principal', url: primary });
   }
 
-  if (!hasNumberedPhotoColumns) {
-    const legacyPrimary = rowValue(row, 'Imagen principal');
-    if (isDirectImageReference(legacyPrimary)) {
-      sources.push({ order: 1, url: legacyPrimary });
+  // La portada ocupa siempre foto-01. Foto 1...Foto 10 (AM...AV) forman la galería
+  // desde foto-02 en adelante, respetando una relación estable por columna.
+  for (let galleryOrder = 1; galleryOrder <= MAX_GALLERY_PHOTOS; galleryOrder += 1) {
+    const field = 'Foto ' + galleryOrder;
+    const url = rowValue(row, field);
+    if (isDirectImageReference(url)) {
+      sources.push({ order: galleryOrder + 1, field, url });
     }
   }
 
@@ -581,7 +578,9 @@ async function syncPropertyImages(row, previousState, report) {
     const filePath = path.join(imagesDir, file);
     // La versión del procesamiento forma parte de la identidad para que un
     // cambio de marca de agua regenere incluso fotos cuyo enlace no cambió.
-    const key = sourceKey(source.url) + '|pipeline:' + IMAGE_PIPELINE_VERSION;
+    const contentKey = sourceKey(source.url);
+    const key = contentKey + '|column:' + normalizedHeader(source.field) +
+      '|pipeline:' + IMAGE_PIPELINE_VERSION;
     const previous = previousByFile.get(file);
 
     if (previous && previous.source === key && existsSync(filePath)) {
@@ -591,11 +590,11 @@ async function syncPropertyImages(row, previousState, report) {
     }
 
     try {
-      let output = optimizedBySource.get(key);
+      let output = optimizedBySource.get(contentKey);
       if (!output) {
         const input = await downloadImageBuffer(source.url);
         output = await toOptimizedWebp(input);
-        optimizedBySource.set(key, output);
+        optimizedBySource.set(contentKey, output);
       }
       let written = true;
 
@@ -712,7 +711,8 @@ function generatedPropertyImages(row) {
 
 function propertyImages(row) {
   // Las fichas y tarjetas usan exclusivamente archivos sincronizados desde
-  // Foto 1...Foto 12 dentro de assets/images/propiedades/. No se agregan
+  // Imagen principal y Foto 1...Foto 10 dentro de assets/images/propiedades/.
+  // No se agregan
   // respaldos antiguos porque podrían haber sido eliminados del repositorio.
   return generatedPropertyImages(row);
 }
@@ -1602,7 +1602,7 @@ async function main() {
     console.warn(
       'Aviso: ' + imageReport.foldersOnly +
       ' propiedad(es) tienen solamente una carpeta de Drive. ' +
-      'Agregá enlaces individuales en Foto 1, Foto 2, Foto 3... hasta Foto 12.'
+      'Agregá Imagen principal y enlaces individuales en Foto 1, Foto 2... hasta Foto 10.'
     );
   }
 
