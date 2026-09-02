@@ -19,7 +19,7 @@
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://emanuelastudillo-mkt.github.io/sabrinagigena/assets/images/propiedades/S001.webp?v=c6eff0ebab0b</image:loc>
+      <image:loc>https://emanuelastudillo-mkt.github.io/sabrinagigena/assets/images/propiedades/S001-foto-01.webp?v=2f7b838ce52f</image:loc>
       <image:title>Casa Santa Brigida</image:title>
     </image:image>
     <image:image>
@@ -53,7 +53,7 @@
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://emanuelastudillo-mkt.github.io/sabrinagigena/assets/images/propiedades/S002.webp?v=c6eff0ebab0b</image:loc>
+      <image:loc>https://emanuelastudillo-mkt.github.io/sabrinagigena/assets/images/propiedades/S002-foto-01.webp?v=2f7b838ce52f</image:loc>
       <image:title>Loteo La Loma Etapa III</image:title>
     </image:image>
     <image:image>
@@ -83,7 +83,7 @@
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://emanuelastudillo-mkt.github.io/sabrinagigena/assets/images/propiedades/S003.webp?v=c6eff0ebab0b</image:loc>
+      <image:loc>https://emanuelastudillo-mkt.github.io/sabrinagigena/assets/images/propiedades/S003-foto-01.webp?v=2f7b838ce52f</image:loc>
       <image:title>Loteo La Loma Etapa III</image:title>
     </image:image>
     <image:image>
@@ -113,7 +113,7 @@
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://emanuelastudillo-mkt.github.io/sabrinagigena/assets/images/propiedades/S004.webp?v=c6eff0ebab0b</image:loc>
+      <image:loc>https://emanuelastudillo-mkt.github.io/sabrinagigena/assets/images/propiedades/S004-foto-01.webp?v=2f7b838ce52f</image:loc>
       <image:title>Terreno Lomadas de Capilla</image:title>
     </image:image>
     <image:image>
@@ -151,7 +151,7 @@
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://emanuelastudillo-mkt.github.io/sabrinagigena/assets/images/propiedades/S005.webp?v=c6eff0ebab0b</image:loc>
+      <image:loc>https://emanuelastudillo-mkt.github.io/sabrinagigena/assets/images/propiedades/S005-foto-01.webp?v=2f7b838ce52f</image:loc>
       <image:title>Casa Casco Urbano</image:title>
     </image:image>
   </url>
@@ -160,5 +160,9 @@
     <lastmod>2026-09-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://emanuelastudillo-mkt.github.io/sabrinagigena/assets/images/propiedades/S006-foto-01.webp?v=2f7b838ce52f</image:loc>
+      <image:title>Casa en Parada Robles</image:title>
+    </image:image>
   </url>
 </urlset>
