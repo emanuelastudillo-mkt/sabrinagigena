@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 2,
+  "files": [
+    "propiedades/casa-santa-brigida-s001/index.html",
+    "propiedades/loteo-la-loma-etapa-iii-s002/index.html",
+    "propiedades/loteo-la-loma-etapa-iii-s003/index.html",
+    "propiedades/terreno-lomadas-de-capilla-s004/index.html"
+  ],
+  "activeRoutes": [
+    "/propiedades/casa-santa-brigida-s001/",
+    "/propiedades/loteo-la-loma-etapa-iii-s002/",
+    "/propiedades/loteo-la-loma-etapa-iii-s003/",
+    "/propiedades/terreno-lomadas-de-capilla-s004/"
+  ],
+  "archivedRoutes": []
+}
