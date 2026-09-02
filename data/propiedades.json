@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-02T20:07:36.767Z",
+  "generatedAt": "2026-09-02T21:19:53.110Z",
   "source": "https://docs.google.com/spreadsheets/d/1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI/export?format=csv&gid=779453685",
   "spreadsheetId": "1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI",
   "sheetGid": "779453685",
   "rowCount": 8,
-  "contentHash": "842d6af7c2c51ac9b231bbf18e9d784f914ce9d3f966459b9e0d3ff02b07eaa9",
+  "contentHash": "5af7a79b083710d9bb9942bfd8223beeeb26713bc45e030ccdbefba1f67a7af8",
   "rows": [
     {
       "ID": "S001",
@@ -14,7 +14,7 @@
       "Tipo de propiedad": "Casa",
       "Nombre": "Casa Santa Brigida",
       "Precio USD": "125.000",
-      "Precio ARS": "193.000.000",
+      "Precio ARS": "193.100.000",
       "Mostrar precio": "Sí",
       "Moneda principal": "USD",
       "Localidad": "Los Cardales",
@@ -350,7 +350,7 @@
       "Tipo de propiedad": "Casa",
       "Nombre": "Casa Alpina Lagomarsino",
       "Precio USD": "125.000",
-      "Precio ARS": "193.000.000",
+      "Precio ARS": "193.100.000",
       "Mostrar precio": "Sí",
       "Moneda principal": "USD",
       "Localidad": "Lagomarsino - Pilar",

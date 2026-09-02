@@ -3,4 +3,4 @@ Allow: /
 Disallow: /metricas/
 Disallow: /visor/
 
-Sitemap: https://emanuelastudillo-mkt.github.io/sabrinagigena/sitemap.xml
+Sitemap: https://sabrinagigena.com/sitemap.xml
