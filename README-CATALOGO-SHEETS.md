@@ -39,9 +39,9 @@ Todas las páginas individuales se generan con la misma estructura y en el mismo
 
 1. galería principal con tres espacios fijos;
 2. título, ubicación, descripción breve y precios;
-3. doce datos técnicos;
+3. trece datos técnicos, incluida la superficie semicubierta;
 4. descripción comercial;
-5. seis características y servicios;
+5. siete características y servicios, incluida la aptitud para crédito hipotecario;
 6. ubicación aproximada;
 7. galería de fotos adicionales;
 8. tarjeta de contacto.
@@ -50,10 +50,11 @@ Si un dato todavía no está cargado, su espacio no desaparece: muestra **A cons
 
 ## Imágenes
 
-El catálogo usa primero **Imagen principal** y después las columnas **Foto 1** a **Foto 10**:
+El catálogo usa primero **Imagen principal** y después las columnas **Foto 1** a **Foto 12**:
 
-- **Imagen principal**, ubicada en la columna Q, es siempre la portada de la propiedad y crea `ID-foto-01.webp`.
-- **Foto 1** a **Foto 10**, ubicadas de AM a AV, aparecen después en ese orden y crean `ID-foto-02.webp` a `ID-foto-11.webp`.
+- **Imagen principal** es siempre la portada de la propiedad y crea `ID-foto-01.webp`.
+- **Foto 1** a **Foto 12** aparecen después en ese orden y crean `ID-foto-02.webp` a `ID-foto-13.webp`.
+- No se usan letras fijas de columna: al insertar nuevas columnas, el generador localiza las imágenes por sus encabezados.
 - Cada columna no vacía genera su propio archivo y conserva su posición. Si falta una foto intermedia, las siguientes no cambian de nombre.
 - La relación columna/archivo se mantiene incluso si dos celdas tienen temporalmente el mismo enlace. En ese caso se crearán dos WebP iguales hasta que se carguen enlaces diferentes.
 - Cada enlace se descarga y se convierte a WebP conservando la proporción vertical 1080 × 1350.
@@ -100,7 +101,7 @@ No se deben borrar ni renombrar estas columnas base:
 - `Tipo de propiedad`
 - `Localidad`
 
-También deben conservarse exactamente `Imagen principal` y `Foto 1` a `Foto 10` para mantener el orden de las fotografías. No hay que reutilizar un `ID` para otra propiedad ni duplicar nombres de columnas. Si el generador detecta encabezados duplicados, detiene el workflow antes de modificar la web.
+También deben conservarse exactamente `Imagen principal` y `Foto 1` a `Foto 12` para mantener el orden de las fotografías. No hay que reutilizar un `ID` para otra propiedad ni duplicar nombres de columnas. Si el generador detecta encabezados duplicados, detiene el workflow antes de modificar la web.
 
 Una columna interna o clasificada debe comenzar con `Privado -`, `Interno -` o `No publicar -`. Esas columnas se excluyen automáticamente de los JSON públicos. También continúan protegidas las columnas `Propiedad propia / colega`, `Dirección`, `Link Google Maps` y `Carpeta Google Drive`.
 
@@ -129,6 +130,8 @@ Para que una propiedad pueda ingresar al feed se deben agregar y completar estas
 - `Latitud aproximada`
 - `Longitud aproximada`
 
+La versión V22.13 reconoce directamente los encabezados actuales de la hoja: `Código Postal`, `Latitud aproximada` y `Longitud aproximada`. No es necesario moverlos a una letra específica.
+
 Las coordenadas deben señalar el centro aproximado del barrio o localidad, nunca la puerta de la propiedad. El feed no utiliza `Dirección` ni `Link Google Maps`. Las instrucciones de conexión se encuentran en `META-CATALOGO.md`.
 
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
@@ -144,6 +147,8 @@ La versión del procesamiento forma parte del registro de cada imagen. Por eso, 
 - La columna **Propiedad propia / colega** es información clasificada: no se imprime en el HTML ni se guarda en los JSON públicos.
 - La dirección y el enlace exacto de Google Maps tampoco se publican.
 - Cada ficha genera un mapa de zona usando solamente **Barrio / Zona** y **Localidad**, acompañado por una aclaración de que la ubicación es aproximada.
+- `Superficie semicubierta(m²)` aparece como dato técnico fijo en todas las fichas y como dato resumido en las tarjetas cuando tiene valor.
+- `Apta para Crédito Hipotecario` aparece con `Sí`, `No` o `A consultar` en todas las fichas. Cuando el valor es `Sí`, también se destaca en las tarjetas y se incorpora a la búsqueda del catálogo.
 
 ## ¿Hace falta Apps Script en Google Sheets?
 

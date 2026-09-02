@@ -21,7 +21,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.12';
+const SITE_VERSION = 'V22.13';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -46,7 +46,7 @@ const CATALOG_SEO = {
 const IMAGE_WIDTH = 1080;
 const IMAGE_HEIGHT = 1350;
 const IMAGE_QUALITY = 82;
-const MAX_GALLERY_PHOTOS = 10;
+const MAX_GALLERY_PHOTOS = 12;
 const META_MAX_IMAGES = MAX_GALLERY_PHOTOS + 1;
 const IMAGE_PIPELINE_VERSION = 'watermark-v1-primary-first';
 const WATERMARK_TEXT = 'Sabrina Gigena Inmobiliaria';
@@ -458,7 +458,7 @@ function photoSources(row) {
     sources.push({ order: 1, field: 'Imagen principal', url: primary });
   }
 
-  // La portada ocupa siempre foto-01. Foto 1...Foto 10 (AM...AV) forman la galería
+  // La portada ocupa siempre foto-01. Foto 1...Foto 12 forman la galería
   // desde foto-02 en adelante, respetando una relación estable por columna.
   for (let galleryOrder = 1; galleryOrder <= MAX_GALLERY_PHOTOS; galleryOrder += 1) {
     const field = 'Foto ' + galleryOrder;
@@ -758,7 +758,7 @@ function generatedPropertyImages(row) {
 
 function propertyImages(row) {
   // Las fichas y tarjetas usan exclusivamente archivos sincronizados desde
-  // Imagen principal y Foto 1...Foto 10 dentro de assets/images/propiedades/.
+  // Imagen principal y Foto 1...Foto 12 dentro de assets/images/propiedades/.
   // No se agregan
   // respaldos antiguos porque podrían haber sido eliminados del repositorio.
   return generatedPropertyImages(row);
@@ -997,6 +997,14 @@ function propertyFacts(row) {
   const facts = [];
   const total = formatArea(rowValue(row, 'Superficie total (m²)', 'Superficie total (m2)'));
   const covered = formatArea(rowValue(row, 'Superficie cubierta (m²)', 'Superficie cubierta (m2)'));
+  const semiCovered = formatArea(rowValue(
+    row,
+    'Superficie semicubierta(m²)',
+    'Superficie semicubierta (m²)',
+    'Superficie semicubierta(m2)',
+    'Superficie semicubierta (m2)',
+    'Superficie semicubierta'
+  ));
   const rooms = numberValue(rowValue(row, 'Ambientes'));
   const bedrooms = numberValue(rowValue(row, 'Dormitorios'));
   const bathrooms = numberValue(rowValue(row, 'Baños', 'Banos'));
@@ -1004,6 +1012,10 @@ function propertyFacts(row) {
 
   if (total) facts.push(total);
   if (covered) facts.push(covered + ' cubiertos');
+  if (semiCovered) facts.push(semiCovered + ' semicubiertos');
+  if (isYes(rowValue(row, 'Apta para Crédito Hipotecario', 'Apta para credito hipotecario'))) {
+    facts.push('Apta para crédito hipotecario');
+  }
   if (rooms) facts.push(formatNumber(rooms, 0) + (rooms === 1 ? ' ambiente' : ' ambientes'));
   if (bedrooms) facts.push(formatNumber(bedrooms, 0) + (bedrooms === 1 ? ' dormitorio' : ' dormitorios'));
   if (bathrooms) facts.push(formatNumber(bathrooms, 0) + (bathrooms === 1 ? ' baño' : ' baños'));
@@ -1011,7 +1023,7 @@ function propertyFacts(row) {
   if (isYes(rowValue(row, 'Pileta'))) facts.push('Pileta');
   if (hasNoExpenses(row)) facts.push('Sin expensas');
 
-  return facts.slice(0, 6);
+  return facts.slice(0, 8);
 }
 
 function propertyTags(row) {
@@ -1023,7 +1035,10 @@ function propertyTags(row) {
     rowValue(row, 'Servicios disponibles'),
     isYes(rowValue(row, 'Pileta')) ? 'pileta' : '',
     isYes(rowValue(row, 'Jardín / parque', 'Jardin / parque')) ? 'jardin parque' : '',
-    hasNoExpenses(row) ? 'sin expensas' : ''
+    hasNoExpenses(row) ? 'sin expensas' : '',
+    isYes(rowValue(row, 'Apta para Crédito Hipotecario', 'Apta para credito hipotecario'))
+      ? 'apta credito hipotecario'
+      : ''
   ];
 
   const type = normalize(rowValue(row, 'Tipo de propiedad'));
@@ -1337,6 +1352,16 @@ function specificationItems(row) {
   return [
     { label: 'Superficie total', value: area('Superficie total (m²)', 'Superficie total (m2)') },
     { label: 'Superficie cubierta', value: area('Superficie cubierta (m²)', 'Superficie cubierta (m2)') },
+    {
+      label: 'Superficie semicubierta',
+      value: area(
+        'Superficie semicubierta(m²)',
+        'Superficie semicubierta (m²)',
+        'Superficie semicubierta(m2)',
+        'Superficie semicubierta (m2)',
+        'Superficie semicubierta'
+      )
+    },
     { label: 'Superficie libre', value: area('Superficie libre (m²)', 'Superficie libre (m2)') },
     { label: 'Ambientes', value: quantity('Ambientes') },
     { label: 'Dormitorios', value: quantity('Dormitorios') },
@@ -1363,6 +1388,7 @@ function featureItems(row) {
     return { value: raw, tone: 'info' };
   };
   const booleanFields = [
+    ['Apta para crédito hipotecario', 'Apta para Crédito Hipotecario'],
     ['Cocina', 'Cocina'],
     ['Living / comedor', 'Living / comedor'],
     ['Jardín / parque', 'Jardín / parque'],
@@ -1960,7 +1986,7 @@ async function main() {
     console.warn(
       'Aviso: ' + imageReport.foldersOnly +
       ' propiedad(es) tienen solamente una carpeta de Drive. ' +
-      'Agregá Imagen principal y enlaces individuales en Foto 1, Foto 2... hasta Foto 10.'
+      'Agregá Imagen principal y enlaces individuales en Foto 1, Foto 2... hasta Foto 12.'
     );
   }
 
