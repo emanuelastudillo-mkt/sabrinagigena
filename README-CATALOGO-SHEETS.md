@@ -37,6 +37,8 @@ El catálogo usa las columnas **Foto 1** a **Foto 12**:
 
 - **Foto 1** es la portada de la propiedad.
 - **Foto 2** a **Foto 12** forman la galería en ese orden.
+- Cada columna no vacía genera su propio archivo: por ejemplo, AM (**Foto 1**) crea `ID-foto-01.webp` y AV (**Foto 10**) crea `ID-foto-10.webp`.
+- La relación columna/archivo se mantiene incluso si dos celdas tienen temporalmente el mismo enlace. En ese caso se crearán dos WebP iguales hasta que se carguen enlaces diferentes.
 - Cada enlace se descarga y se convierte a WebP conservando la proporción vertical 1080 × 1350.
 - Si cambia el enlace de una columna, se reemplaza su WebP estable.
 - Si el enlace se vacía, el WebP anterior se elimina del repositorio en la siguiente sincronización.

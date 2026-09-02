@@ -20,7 +20,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.2';
+const SITE_VERSION = 'V22.3';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -434,15 +434,7 @@ function photoSources(row) {
     }
   }
 
-  const unique = [];
-  const seen = new Set();
-  for (const source of sources) {
-    const key = sourceKey(source.url);
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
-    unique.push(source);
-  }
-  return unique;
+  return sources;
 }
 
 function imageDownloadCandidates(url) {
@@ -549,6 +541,7 @@ async function syncPropertyImages(row, previousState, report) {
   const previousByFile = new Map(previousItems.map(item => [clean(item.file), item]));
   const sources = photoSources(row);
   const nextItems = [];
+  const optimizedBySource = new Map();
 
   for (let index = 0; index < sources.length; index += 1) {
     const source = sources[index];
@@ -564,8 +557,12 @@ async function syncPropertyImages(row, previousState, report) {
     }
 
     try {
-      const input = await downloadImageBuffer(source.url);
-      const output = await toOptimizedWebp(input);
+      let output = optimizedBySource.get(key);
+      if (!output) {
+        const input = await downloadImageBuffer(source.url);
+        output = await toOptimizedWebp(input);
+        optimizedBySource.set(key, output);
+      }
       let written = true;
 
       if (existsSync(filePath)) {
