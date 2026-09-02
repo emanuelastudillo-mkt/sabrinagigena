@@ -3,7 +3,8 @@ name: Actualizar catálogo e imágenes
 on:
   workflow_dispatch:
   schedule:
-    - cron: "20 */6 * * *"
+    # 09:20 UTC = 06:20 en Argentina (UTC-3)
+    - cron: "20 9 * * *"
 
 permissions:
   contents: write
