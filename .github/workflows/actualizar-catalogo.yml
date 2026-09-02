@@ -40,10 +40,13 @@ jobs:
             data/ \
             assets/images/propiedades/ \
             propiedades/ \
-            propiedades-no-index/ \
             sitemap.xml \
             robots.txt \
             ':(glob)*.html'
+
+          if [ -d propiedades-no-index ]; then
+            git add -A -- propiedades-no-index/
+          fi
 
           if git diff --cached --quiet; then
             echo "No hubo cambios para publicar."
@@ -55,3 +58,4 @@ jobs:
 
           git commit -m "chore: actualizar catálogo e imágenes"
           git push
+
