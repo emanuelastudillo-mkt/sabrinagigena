@@ -52,7 +52,7 @@
     if(input)input.addEventListener('input',()=>applyFilters(true));
   }
 
-  $$('a[href^="propiedad-"]').forEach(link=>link.addEventListener('click',()=>{
+  $$('.property-card a[href]').forEach(link=>link.addEventListener('click',()=>{
     try{sessionStorage.setItem('sgPropertyReturn',location.pathname+location.search+location.hash)}catch(_){}
   }));
   const backButton=$('[data-back-button]');
@@ -60,23 +60,27 @@
     let returnUrl=''; try{returnUrl=sessionStorage.getItem('sgPropertyReturn')||''}catch(_){}
     if(returnUrl&&returnUrl!==(location.pathname+location.search+location.hash)){location.href=returnUrl;return}
     try{if(document.referrer){const ref=new URL(document.referrer);if(ref.origin===location.origin){history.back();return}}}catch(_){}
-    location.href='propiedades.html';
+    const marker='/propiedades/'; const markerIndex=location.pathname.indexOf(marker);
+    const basePath=markerIndex>=0?location.pathname.slice(0,markerIndex):'';
+    location.href=basePath+marker;
   });
 
   const rotator=$('[data-about-rotator]');
   if(rotator){
-    const options=[
-      ['assets/images/about-1.webp','Entorno residencial y jardín'],
-      ['assets/images/about-2.webp','Jardín residencial al atardecer'],
-      ['assets/images/about-3.webp','Interior cálido de vivienda'],
-      ['assets/images/about-4.webp','Propiedad con jardín y pileta'],
-      ['assets/images/about-5.webp','Vista general de propiedad']
-    ];
-    let previous=-1; try{previous=Number(sessionStorage.getItem('sgAboutImage')??-1)}catch(_){}
-    let index=Math.floor(Math.random()*options.length);
-    if(options.length>1&&index===previous)index=(index+1+Math.floor(Math.random()*(options.length-1)))%options.length;
-    rotator.src=options[index][0]; rotator.alt=options[index][1];
-    try{sessionStorage.setItem('sgAboutImage',String(index))}catch(_){}
+    const source=$('#catalog-rotator-images'); let options=[];
+    try{
+      const parsed=JSON.parse(source?.textContent||'[]');
+      if(Array.isArray(parsed))options=parsed.filter(item=>item&&typeof item.src==='string'&&item.src.trim());
+    }catch(_){}
+    if(!options.length){
+      rotator.hidden=true; rotator.removeAttribute('src'); rotator.alt='';
+    }else{
+      let previous=-1; try{previous=Number(sessionStorage.getItem('sgAboutImage')??-1)}catch(_){}
+      let index=Math.floor(Math.random()*options.length);
+      if(options.length>1&&index===previous)index=(index+1+Math.floor(Math.random()*(options.length-1)))%options.length;
+      rotator.hidden=false; rotator.src=options[index].src; rotator.alt=options[index].alt||'Propiedad disponible';
+      try{sessionStorage.setItem('sgAboutImage',String(index))}catch(_){}
+    }
   }
 
   const lightbox=$('.lightbox');

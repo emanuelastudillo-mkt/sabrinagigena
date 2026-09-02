@@ -20,6 +20,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
+const SITE_VERSION = 'V22.1';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -651,14 +652,19 @@ async function loadManualImages() {
     : {};
 }
 
-function propertyImages(row) {
+function generatedPropertyImages(row) {
   const id = propertyId(row);
   const version = clean(currentImageManifest._version) || '1';
-  const generated = Array.isArray(currentImageManifest[id])
+  return Array.isArray(currentImageManifest[id])
     ? currentImageManifest[id].map(file =>
       sitePath('/assets/images/propiedades/' + encodeURIComponent(file) + '?v=' + encodeURIComponent(version))
     )
     : [];
+}
+
+function propertyImages(row) {
+  const id = propertyId(row);
+  const generated = generatedPropertyImages(row);
   const manual = Array.isArray(manualImages[id])
     ? manualImages[id]
       .map(clean)
@@ -829,6 +835,41 @@ function injectCatalogIntoGrid(html, markerName, content) {
     '\n' + endMarker + '\n' + html.slice(emptyStart);
 }
 
+function activeCatalogRotatorImages(rows) {
+  return rows.flatMap(row =>
+    generatedPropertyImages(row).map((src, index) => ({
+      src,
+      alt: propertyTitle(row) + ' · foto ' + (index + 1),
+      propertyId: propertyId(row)
+    }))
+  );
+}
+
+function injectAboutRotatorData(html, images) {
+  const payload = '<script id="catalog-rotator-images" type="application/json">' +
+    JSON.stringify(images).replace(/</g, '\\u003c') + '</script>';
+  const marked = replaceMarkedContent(html, 'SHEET_ABOUT_IMAGES', payload);
+  if (marked) return marked;
+
+  const scriptIndex = html.lastIndexOf('<script src=');
+  const insertAt = scriptIndex === -1 ? html.lastIndexOf('</body>') : scriptIndex;
+  if (insertAt === -1) throw new Error('No se encontró dónde insertar las imágenes rotativas');
+
+  const block = '<!-- SHEET_ABOUT_IMAGES_START -->\n' + payload +
+    '\n<!-- SHEET_ABOUT_IMAGES_END -->\n';
+  return html.slice(0, insertAt) + block + html.slice(insertAt);
+}
+
+function updateAboutRotatorElement(html, images) {
+  const first = images[0];
+  const replacement = first
+    ? '<img data-about-rotator src="' + escapeAttribute(first.src) + '" alt="' +
+      escapeAttribute(first.alt) + '" loading="lazy" decoding="async">'
+    : '<img data-about-rotator hidden alt="">';
+
+  return html.replace(/<img\b[^>]*\bdata-about-rotator\b[^>]*>/i, replacement);
+}
+
 async function updateCatalogPages(rows) {
   const publicRows = publicRowsSorted(rows);
   const catalogCards = publicRows.length
@@ -837,15 +878,18 @@ async function updateCatalogPages(rows) {
   const featuredCards = publicRows.length
     ? publicRows.slice(0, 6).map(propertyCard).join('\n')
     : '';
+  const rotatorImages = activeCatalogRotatorImages(publicRows);
 
   let indexHtml = await readFile(indexPath, 'utf8');
   indexHtml = injectCatalogIntoGrid(indexHtml, 'SHEET_FEATURED', featuredCards);
+  indexHtml = injectAboutRotatorData(indexHtml, rotatorImages);
+  indexHtml = updateAboutRotatorElement(indexHtml, rotatorImages);
   indexHtml = indexHtml.replace(
     /href=["']\/?propiedades\.html["']/g,
     'href="' + sitePath('/propiedades/') + '"'
   );
   indexHtml = applyDeploymentPaths(indexHtml);
-  indexHtml = indexHtml.replace(/Versión V\d+(?:\.\d+)?/g, 'Versión V22');
+  indexHtml = indexHtml.replace(/Versión V\d+(?:\.\d+)?/g, 'Versión ' + SITE_VERSION);
   await writeTextIfChanged(indexPath, indexHtml);
 
   let catalogHtml = await readFile(catalogIndexPath, 'utf8');
@@ -862,7 +906,7 @@ async function updateCatalogPages(rows) {
       'href="' + sitePath('/propiedades/') + '"'
     );
   catalogHtml = applyDeploymentPaths(catalogHtml);
-  catalogHtml = catalogHtml.replace(/Versión V\d+(?:\.\d+)?/g, 'Versión V22');
+  catalogHtml = catalogHtml.replace(/Versión V\d+(?:\.\d+)?/g, 'Versión ' + SITE_VERSION);
   await writeTextIfChanged(catalogIndexPath, catalogHtml);
 
 }
@@ -949,7 +993,8 @@ function siteFooter() {
     '<a href="https://wa.me/' + CONTACT_WHATSAPP + '" target="_blank" rel="noopener noreferrer">WhatsApp</a>' +
     '<a href="https://www.instagram.com/sabrina_gigena_inmobiliaria/" target="_blank" rel="noopener noreferrer">Instagram</a>' +
     '<a href="https://www.facebook.com/profile.php?id=61579988094625" target="_blank" rel="noopener noreferrer">Facebook</a>' +
-    '</div></div></div><div class="copyright">© 2026 ' + SITE_NAME + '. · Versión V22</div></div></footer>';
+    '</div></div></div><div class="copyright">© 2026 ' + SITE_NAME + '. · Versión ' +
+    SITE_VERSION + '</div></div></footer>';
 }
 
 function propertySchema(row, canonical, images) {

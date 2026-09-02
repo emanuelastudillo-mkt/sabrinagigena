@@ -42,6 +42,8 @@ La columna **Imagen principal** se descarga como portada. Para agregar una galer
 
 También se aceptan los nombres **Foto 2**, **Foto 3** o **Imagen principal 2**, **Imagen principal 3**, etc. El orden siempre comienza por Imagen principal y continúa según la secuencia numérica.
 
+El bloque de portada **Menos vueltas. Más información útil para decidir** utiliza exclusivamente imágenes descargadas desde esas columnas del Sheet. Solo considera propiedades con estado **Disponible** o **Reservada**: al marcar una propiedad como Vendida o Pausada, todas sus imágenes se retiran automáticamente de esa rotación.
+
 El workflow define `SITE_URL` con la dirección pública de GitHub Pages. El generador obtiene de allí el prefijo `/sabrinagigena/`, necesario para que imágenes, estilos y enlaces internos funcionen dentro de un sitio de proyecto.
 
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
