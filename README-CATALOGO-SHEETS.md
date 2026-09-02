@@ -65,7 +65,7 @@ El workflow define `SITE_URL` con la dirección pública de GitHub Pages. El gen
 
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
 
-data/imagenes-manuales.json conserva como respaldo las galerías que ya existían en la web. Cuando una fila tenga enlaces en **Foto 1** a **Foto 12**, esas imágenes se muestran primero y se actualizan automáticamente.
+Las fichas, las tarjetas y el bloque rotativo usan exclusivamente archivos sincronizados dentro de `assets/images/propiedades/`. Las fotografías antiguas guardadas fuera de esa carpeta no se usan como respaldo, por lo que pueden eliminarse sin generar imágenes rotas.
 
 ## Información pública y privacidad
 

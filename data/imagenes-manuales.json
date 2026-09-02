@@ -1,36 +1,4 @@
 {
-  "schemaVersion": 1,
-  "properties": {
-    "S001": [
-      "assets/images/jardin.webp",
-      "assets/images/fachada.webp",
-      "assets/images/fachada-2.webp",
-      "assets/images/living-comedor.webp",
-      "assets/images/cocina.webp",
-      "assets/images/habitacion.webp"
-    ],
-    "S002": [
-      "assets/images/la-loma-1.webp",
-      "assets/images/la-loma-2.webp",
-      "assets/images/la-loma-3.webp",
-      "assets/images/la-loma-4.webp",
-      "assets/images/la-loma-5.webp"
-    ],
-    "S003": [
-      "assets/images/la-loma-1.webp",
-      "assets/images/la-loma-2.webp",
-      "assets/images/la-loma-3.webp",
-      "assets/images/la-loma-4.webp",
-      "assets/images/la-loma-5.webp"
-    ],
-    "S004": [
-      "assets/images/las-lomadas-frente.jpg",
-      "assets/images/las-lomadas-calle-1.jpg",
-      "assets/images/las-lomadas-calle-2.jpg",
-      "assets/images/las-lomadas-calle-3.jpg",
-      "assets/images/las-lomadas-desde-fondo-1.jpg",
-      "assets/images/las-lomadas-desde-fondo-2.jpg",
-      "assets/images/las-lomadas-vertical-sol.jpg"
-    ]
-  }
+  "schemaVersion": 2,
+  "properties": {}
 }

@@ -20,7 +20,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.5';
+const SITE_VERSION = 'V22.6';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -38,7 +38,6 @@ const imagesDir = path.join(repoRoot, 'assets', 'images', 'propiedades');
 const stockPath = path.join(dataDir, 'propiedades.json');
 const imageStatePath = path.join(dataDir, 'image-sync.json');
 const imageManifestPath = path.join(imagesDir, 'manifest.json');
-const manualImagesPath = path.join(dataDir, 'imagenes-manuales.json');
 const generatedPagesPath = path.join(dataDir, 'generated-pages.json');
 const archivedPropertiesPath = path.join(dataDir, 'propiedades-no-index.json');
 const indexPath = path.join(repoRoot, 'index.html');
@@ -47,7 +46,6 @@ const sitemapPath = path.join(repoRoot, 'sitemap.xml');
 const robotsPath = path.join(repoRoot, 'robots.txt');
 
 let currentImageManifest = { _version: 'empty' };
-let manualImages = {};
 
 function clean(value) {
   return (value ?? '').toString().trim();
@@ -666,13 +664,6 @@ async function syncImages(rows) {
   return report;
 }
 
-async function loadManualImages() {
-  const config = await readJson(manualImagesPath, { schemaVersion: 1, properties: {} });
-  manualImages = config && typeof config.properties === 'object'
-    ? config.properties
-    : {};
-}
-
 function generatedPropertyImages(row) {
   const id = propertyId(row);
   const version = clean(currentImageManifest._version) || '1';
@@ -684,15 +675,10 @@ function generatedPropertyImages(row) {
 }
 
 function propertyImages(row) {
-  const id = propertyId(row);
-  const generated = generatedPropertyImages(row);
-  const manual = Array.isArray(manualImages[id])
-    ? manualImages[id]
-      .map(clean)
-      .filter(Boolean)
-      .map(image => sitePath('/' + image.replace(/^\.?\//, '')))
-    : [];
-  return [...new Set([...generated, ...manual])];
+  // Las fichas y tarjetas usan exclusivamente archivos sincronizados desde
+  // Foto 1...Foto 12 dentro de assets/images/propiedades/. No se agregan
+  // respaldos antiguos porque podrían haber sido eliminados del repositorio.
+  return generatedPropertyImages(row);
 }
 
 function absoluteUrl(relative) {
@@ -1557,7 +1543,6 @@ async function main() {
   }
 
   await writeJsonIfChanged(archivedPropertiesPath, archiveState);
-  await loadManualImages();
   const imageReport = await syncImages(rowsForImageSync(rows, archiveState.rows));
   const generation = await generatePropertyPages(rows, archiveState.rows);
   const publicRows = generation.publicRows;
