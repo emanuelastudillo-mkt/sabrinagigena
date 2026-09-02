@@ -20,12 +20,14 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.1';
+const SITE_VERSION = 'V22.2';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
-const IMAGE_WIDTH = 1800;
+const IMAGE_WIDTH = 1080;
+const IMAGE_HEIGHT = 1350;
 const IMAGE_QUALITY = 82;
+const MAX_PROPERTY_PHOTOS = 12;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -192,6 +194,19 @@ function rowValue(row, ...names) {
   return '';
 }
 
+function publicDataRow(row) {
+  const privateHeaders = new Set([
+    'PROPIEDAD PROPIA COLEGA',
+    'DIRECCION',
+    'LINK GOOGLE MAPS',
+    'CARPETA GOOGLE DRIVE'
+  ]);
+
+  return Object.fromEntries(
+    Object.entries(row || {}).filter(([header]) => !privateHeaders.has(normalizedHeader(header)))
+  );
+}
+
 function propertyId(row) {
   return rowValue(row, 'ID')
     .replace(/\.[a-z0-9]+$/i, '')
@@ -326,29 +341,39 @@ function showPrice(row) {
 }
 
 function priceInfo(row) {
-  if (!showPrice(row)) return { label: 'Consultar valor', amount: 0, currency: '' };
+  if (!showPrice(row)) {
+    return { label: 'Consultar valor', secondaryLabel: '', amount: 0, currency: '' };
+  }
 
   const primary = normalize(rowValue(row, 'Moneda principal'));
   const usd = numberValue(rowValue(row, 'Precio USD'));
   const ars = numberValue(rowValue(row, 'Precio ARS'));
+  const usdLabel = usd
+    ? 'U$S ' + new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(usd)
+    : '';
+  const arsLabel = ars
+    ? 'ARS $ ' + new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(ars)
+    : '';
 
-  if ((primary === 'USD' && usd) || (!ars && usd)) {
+  if ((primary === 'ARS' && ars) || (!usd && ars)) {
     return {
-      label: 'U$S ' + new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(usd),
-      amount: usd,
-      currency: 'USD'
-    };
-  }
-
-  if (ars) {
-    return {
-      label: '$ ' + new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(ars),
+      label: arsLabel,
+      secondaryLabel: usdLabel,
       amount: ars,
       currency: 'ARS'
     };
   }
 
-  return { label: 'Consultar valor', amount: 0, currency: '' };
+  if (usd) {
+    return {
+      label: usdLabel,
+      secondaryLabel: arsLabel,
+      amount: usd,
+      currency: 'USD'
+    };
+  }
+
+  return { label: 'Consultar valor', secondaryLabel: '', amount: 0, currency: '' };
 }
 
 function isDriveFolderUrl(url) {
@@ -391,24 +416,23 @@ function sourceKey(url) {
 
 function photoSources(row) {
   const sources = [];
-  const primary = rowValue(row, 'Imagen principal');
+  const hasNumberedPhotoColumns = Object.keys(row || {}).some(header => {
+    const match = normalizedHeader(header).match(/^FOTO\s+(\d+)$/);
+    const order = match ? Number(match[1]) : 0;
+    return order >= 1 && order <= MAX_PROPERTY_PHOTOS;
+  });
 
-  if (isDirectImageReference(primary)) {
-    sources.push({ order: 0, url: primary });
+  for (let order = 1; order <= MAX_PROPERTY_PHOTOS; order += 1) {
+    const url = rowValue(row, 'Foto ' + order);
+    if (isDirectImageReference(url)) sources.push({ order, url });
   }
 
-  for (const [key, rawValue] of Object.entries(row || {})) {
-    const header = normalizedHeader(key);
-    if (header === 'IMAGEN PRINCIPAL') continue;
-
-    const match = header.match(/^(?:FOTO|IMAGEN(?: PRINCIPAL)?)\s*(\d+)(?:\s|$)/);
-    const url = clean(rawValue);
-    if (!match || !isDirectImageReference(url)) continue;
-
-    sources.push({ order: Number(match[1]) || 999, url });
+  if (!hasNumberedPhotoColumns) {
+    const legacyPrimary = rowValue(row, 'Imagen principal');
+    if (isDirectImageReference(legacyPrimary)) {
+      sources.push({ order: 1, url: legacyPrimary });
+    }
   }
-
-  sources.sort((a, b) => a.order - b.order);
 
   const unique = [];
   const seen = new Set();
@@ -484,7 +508,7 @@ async function toOptimizedWebp(buffer) {
     .rotate()
     .resize({
       width: IMAGE_WIDTH,
-      height: IMAGE_WIDTH,
+      height: IMAGE_HEIGHT,
       fit: 'inside',
       withoutEnlargement: true
     })
@@ -528,7 +552,7 @@ async function syncPropertyImages(row, previousState, report) {
 
   for (let index = 0; index < sources.length; index += 1) {
     const source = sources[index];
-    const file = index === 0 ? id + '.webp' : id + '-' + index + '.webp';
+    const file = id + '-foto-' + String(source.order).padStart(2, '0') + '.webp';
     const filePath = path.join(imagesDir, file);
     const key = sourceKey(source.url);
     const previous = previousByFile.get(file);
@@ -720,16 +744,22 @@ function hasNoExpenses(row) {
 function propertyFacts(row) {
   const facts = [];
   const total = formatArea(rowValue(row, 'Superficie total (m²)', 'Superficie total (m2)'));
+  const covered = formatArea(rowValue(row, 'Superficie cubierta (m²)', 'Superficie cubierta (m2)'));
+  const rooms = numberValue(rowValue(row, 'Ambientes'));
   const bedrooms = numberValue(rowValue(row, 'Dormitorios'));
   const bathrooms = numberValue(rowValue(row, 'Baños', 'Banos'));
+  const garages = numberValue(rowValue(row, 'Cocheras'));
 
   if (total) facts.push(total);
+  if (covered) facts.push(covered + ' cubiertos');
+  if (rooms) facts.push(formatNumber(rooms, 0) + (rooms === 1 ? ' ambiente' : ' ambientes'));
   if (bedrooms) facts.push(formatNumber(bedrooms, 0) + (bedrooms === 1 ? ' dormitorio' : ' dormitorios'));
   if (bathrooms) facts.push(formatNumber(bathrooms, 0) + (bathrooms === 1 ? ' baño' : ' baños'));
+  if (garages) facts.push(formatNumber(garages, 0) + (garages === 1 ? ' cochera' : ' cocheras'));
   if (isYes(rowValue(row, 'Pileta'))) facts.push('Pileta');
   if (hasNoExpenses(row)) facts.push('Sin expensas');
 
-  return facts.slice(0, 3);
+  return facts.slice(0, 6);
 }
 
 function propertyTags(row) {
@@ -772,6 +802,8 @@ function propertyCard(row) {
     .map(fact => '<span class="fact">' + escapeHtml(fact) + '</span>')
     .join('');
   const status = statusLabel(row);
+  const price = priceInfo(row);
+  const summary = summaryText(row, 150);
 
   return '<article class="property-card" data-search="' +
     escapeAttribute(propertySearchText(row)) +
@@ -781,10 +813,14 @@ function propertyCard(row) {
     '<span class="tag">' + escapeHtml(type) + '</span>' +
     '<span class="status status-' + slugify(status) + '">' + escapeHtml(status) + '</span>' +
     '</div><div class="card-body"><div class="location">' + escapeHtml(location) +
-    '</div><h3>' + escapeHtml(title) + '</h3><div class="facts">' + facts +
+    '</div><h3>' + escapeHtml(title) + '</h3><p class="card-summary">' + escapeHtml(summary) +
+    '</p><div class="facts">' + facts +
     '</div><div class="price-label">Valor</div><div class="price">' +
-    escapeHtml(priceInfo(row).label) +
-    '</div><div class="card-action"><span>Ver propiedad</span><span class="arrow" aria-hidden="true">→</span>' +
+    escapeHtml(price.label) + '</div>' +
+    (price.secondaryLabel
+      ? '<div class="price-secondary">' + escapeHtml(price.secondaryLabel) + '</div>'
+      : '') +
+    '<div class="card-action"><span>Ver propiedad</span><span class="arrow" aria-hidden="true">→</span>' +
     '</div></div></a></article>';
 }
 
@@ -1021,7 +1057,6 @@ function propertySchema(row, canonical, images) {
           image: images.map(absoluteUrl),
           address: {
             '@type': 'PostalAddress',
-            streetAddress: rowValue(row, 'Dirección', 'Direccion'),
             addressLocality: rowValue(row, 'Localidad'),
             addressRegion: 'Buenos Aires',
             addressCountry: 'AR'
@@ -1092,16 +1127,23 @@ function contentSections(row) {
       escapeHtml(features) + '</p></section>');
   }
 
-  const address = rowValue(row, 'Dirección', 'Direccion');
   const location = propertyLocation(row);
-  const mapUrl = rowValue(row, 'Link Google Maps');
-  if (address || location || mapUrl) {
-    let locationHtml = '<p>' + escapeHtml([address, location].filter(Boolean).join(' · ')) + '</p>';
-    if (mapUrl) {
-      locationHtml += '<p><a class="text-link" href="' + escapeAttribute(mapUrl) +
-        '" target="_blank" rel="noopener noreferrer">Ver ubicación en Google Maps →</a></p>';
-    }
-    sections.push('<section class="content-block"><h2>Ubicación</h2>' + locationHtml + '</section>');
+  if (location) {
+    const approximateQuery = [location, 'Provincia de Buenos Aires', 'Argentina']
+      .filter(Boolean)
+      .join(', ');
+    const encodedQuery = encodeURIComponent(approximateQuery);
+    const embedUrl = 'https://www.google.com/maps?q=' + encodedQuery + '&z=13&output=embed';
+    const mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodedQuery;
+    const locationHtml = '<p>' + escapeHtml(location) + '</p>' +
+      '<div class="approximate-map"><iframe src="' + escapeAttribute(embedUrl) +
+      '" title="Mapa aproximado de ' + escapeAttribute(location) +
+      '" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>' +
+      '<p class="map-note">La ubicación indicada es aproximada para proteger la privacidad de la propiedad.</p>' +
+      '<p><a class="text-link" href="' + escapeAttribute(mapUrl) +
+      '" target="_blank" rel="noopener noreferrer">Abrir zona aproximada en Google Maps →</a></p>';
+    sections.push('<section class="content-block location-block"><h2>Ubicación aproximada</h2>' +
+      locationHtml + '</section>');
   }
 
   return sections.join('');
@@ -1188,7 +1230,7 @@ function propertyPageHtml(row, activeRows = []) {
     .map(item => '<div class="spec"><strong>' + escapeHtml(item.value) +
       '</strong><span>' + escapeHtml(item.label) + '</span></div>')
     .join('');
-  const price = priceInfo(row).label;
+  const price = priceInfo(row);
   const pageTitle = archived
     ? archiveStatus + ' · ' + title
     : title;
@@ -1236,9 +1278,13 @@ function propertyPageHtml(row, activeRows = []) {
         : '') +
       '<div class="location">' + escapeHtml(locationType) + '</div><h1>' +
       escapeHtml(title) + '</h1><p class="lead">' + escapeHtml(summaryText(row, 320)) +
-      '</p><div class="detail-price">' + escapeHtml(archived ? archiveStatus : price) + '</div>' +
-      (archived && price !== 'Consultar valor'
-        ? '<p class="historic-price">Último valor publicado: ' + escapeHtml(price) + '</p>'
+      '</p><div class="detail-price">' + escapeHtml(archived ? archiveStatus : price.label) + '</div>' +
+      (!archived && price.secondaryLabel
+        ? '<p class="detail-price-secondary">' + escapeHtml(price.secondaryLabel) + '</p>'
+        : '') +
+      (archived && price.label !== 'Consultar valor'
+        ? '<p class="historic-price">Últimos valores publicados: ' + escapeHtml(price.label) +
+          (price.secondaryLabel ? ' · ' + escapeHtml(price.secondaryLabel) : '') + '</p>'
         : '') +
       '</header>',
     specs ? '<div class="spec-grid">' + specs + '</div>' : '',
@@ -1398,7 +1444,7 @@ function buildArchiveState(rows, previousStockRows, previousState) {
   const currentById = new Map(rows.map(row => [propertyId(row), row]));
   const archiveById = new Map(
     (previousState?.rows || [])
-      .map(row => [propertyId(row), row])
+      .map(row => [propertyId(row), publicDataRow(row)])
       .filter(([id]) => id)
   );
 
@@ -1411,7 +1457,7 @@ function buildArchiveState(rows, previousStockRows, previousState) {
 
     const previous = archiveById.get(id);
     archiveById.set(id, {
-      ...row,
+      ...publicDataRow(row),
       _archivedAt: previous?._archivedAt || now,
       _archiveReason: statusLabel(row) || 'Fuera de publicación'
     });
@@ -1422,7 +1468,7 @@ function buildArchiveState(rows, previousStockRows, previousState) {
     if (!id || currentById.has(id) || archiveById.has(id)) continue;
 
     archiveById.set(id, {
-      ...previousRow,
+      ...publicDataRow(previousRow),
       Estado: isPublicProperty(previousRow)
         ? 'Pausada'
         : (rowValue(previousRow, 'Estado') || 'Pausada'),
@@ -1454,7 +1500,8 @@ function rowsForImageSync(rows, archiveRows) {
 async function main() {
   const csvText = await loadCsvText();
   const rows = validateRows(parseCSV(csvText));
-  const contentHash = hashRows(rows);
+  const storedRows = rows.map(publicDataRow);
+  const contentHash = hashRows(storedRows);
   const existing = await readJson(stockPath, null);
   const previousArchive = await readJson(archivedPropertiesPath, {
     schemaVersion: 1,
@@ -1484,7 +1531,7 @@ async function main() {
       sheetGid: '779453685',
       rowCount: rows.length,
       contentHash,
-      rows
+      rows: storedRows
     });
   }
 
@@ -1513,7 +1560,7 @@ async function main() {
     console.warn(
       'Aviso: ' + imageReport.foldersOnly +
       ' propiedad(es) tienen solamente una carpeta de Drive. ' +
-      'Agregá enlaces individuales en Imagen principal, Foto 2, Foto 3...'
+      'Agregá enlaces individuales en Foto 1, Foto 2, Foto 3... hasta Foto 12.'
     );
   }
 

@@ -8,7 +8,7 @@ La sincronización se ejecuta automáticamente cada seis horas y también puede 
 
 ## Qué actualiza
 
-- data/propiedades.json: copia normalizada del catálogo publicado.
+- data/propiedades.json: copia normalizada y pública del catálogo, sin campos clasificados ni ubicación exacta.
 - data/propiedades-no-index.json: historial de propiedades vendidas, pausadas o retiradas.
 - index.html: propiedades destacadas de la portada.
 - propiedades/index.html: catálogo completo, buscador y filtros en /propiedades/.
@@ -33,14 +33,14 @@ Las filas vacías preparadas en el Sheet no se procesan.
 
 ## Imágenes
 
-La columna **Imagen principal** se descarga como portada. Para agregar una galería automática, crear columnas con enlaces individuales:
+El catálogo usa las columnas **Foto 1** a **Foto 12**:
 
-- Imagen 2
-- Imagen 3
-- Imagen 4
-- etc.
-
-También se aceptan los nombres **Foto 2**, **Foto 3** o **Imagen principal 2**, **Imagen principal 3**, etc. El orden siempre comienza por Imagen principal y continúa según la secuencia numérica.
+- **Foto 1** es la portada de la propiedad.
+- **Foto 2** a **Foto 12** forman la galería en ese orden.
+- Cada enlace se descarga y se convierte a WebP conservando la proporción vertical 1080 × 1350.
+- Si cambia el enlace de una columna, se reemplaza su WebP estable.
+- Si el enlace se vacía, el WebP anterior se elimina del repositorio en la siguiente sincronización.
+- En hojas antiguas que todavía no tengan columnas Foto, **Imagen principal** funciona como respaldo de compatibilidad. En la hoja actual, vaciar una columna Foto elimina su imagen sincronizada.
 
 El bloque de portada **Menos vueltas. Más información útil para decidir** utiliza exclusivamente imágenes descargadas desde esas columnas del Sheet. Solo considera propiedades con estado **Disponible** o **Reservada**: al marcar una propiedad como Vendida o Pausada, todas sus imágenes se retiran automáticamente de esa rotación.
 
@@ -48,7 +48,15 @@ El workflow define `SITE_URL` con la dirección pública de GitHub Pages. El gen
 
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
 
-data/imagenes-manuales.json conserva como respaldo las galerías que ya existían en la web. Cuando una fila tenga enlaces individuales en el Sheet, las fotos nuevas se anteponen y se actualizan automáticamente.
+data/imagenes-manuales.json conserva como respaldo las galerías que ya existían en la web. Cuando una fila tenga enlaces en **Foto 1** a **Foto 12**, esas imágenes se muestran primero y se actualizan automáticamente.
+
+## Información pública y privacidad
+
+- Las fichas de portada y del catálogo muestran más datos útiles: descripción breve, superficies, ambientes, dormitorios, baños, cocheras, pileta y expensas cuando corresponda.
+- Cuando están cargados ambos importes, se muestran **Precio USD** y **Precio ARS**. **Moneda principal** define cuál aparece primero.
+- La columna **Propiedad propia / colega** es información clasificada: no se imprime en el HTML ni se guarda en los JSON públicos.
+- La dirección y el enlace exacto de Google Maps tampoco se publican.
+- Cada ficha genera un mapa de zona usando solamente **Barrio / Zona** y **Localidad**, acompañado por una aclaración de que la ubicación es aproximada.
 
 ## ¿Hace falta Apps Script en Google Sheets?
 
