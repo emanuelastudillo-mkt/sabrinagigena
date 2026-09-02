@@ -400,7 +400,7 @@ function photoSources(row) {
     const header = normalizedHeader(key);
     if (header === 'IMAGEN PRINCIPAL') continue;
 
-    const match = header.match(/^(?:FOTO|IMAGEN)\s*(\d+)(?:\s|$)/);
+    const match = header.match(/^(?:FOTO|IMAGEN(?: PRINCIPAL)?)\s*(\d+)(?:\s|$)/);
     const url = clean(rawValue);
     if (!match || !isDirectImageReference(url)) continue;
 
