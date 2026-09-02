@@ -44,6 +44,7 @@ jobs:
             data/ \
             assets/images/propiedades/ \
             propiedades/ \
+            meta-catalog.csv \
             sitemap.xml \
             robots.txt \
             CNAME \
@@ -51,6 +52,10 @@ jobs:
 
           if [ -d propiedades-no-index ]; then
             git add -A -- propiedades-no-index/
+          fi
+
+          if [ -d assets/images/meta ]; then
+            git add -A -- assets/images/meta/
           fi
 
           if git diff --cached --quiet; then
