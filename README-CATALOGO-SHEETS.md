@@ -67,6 +67,16 @@ El workflow define `SITE_URL` como `https://sabrinagigena.com`. Al ser un domini
 
 El archivo `CNAME` conserva `sabrinagigena.com` como dominio personalizado de GitHub Pages. Cada sincronización también actualiza canonical, Open Graph, sitemap y robots para utilizar el dominio propio.
 
+## SEO local y franja superior
+
+La versión V22.10 concentra el posicionamiento local en **Capilla del Señor**, **Parque Sakura** y **Exaltación de la Cruz**:
+
+- La franja superior muestra únicamente esas tres zonas y ya no incluye **Consultas por WhatsApp**.
+- La portada y el catálogo reciben títulos y descripciones propios, canonical del dominio y etiquetas Open Graph/Twitter coherentes.
+- El catálogo incorpora las tres zonas en su título principal y la portada las menciona en contenido visible.
+- Los datos estructurados `RealEstateAgent` declaran las tres zonas mediante `areaServed`, tanto en las páginas generales como en cada ficha.
+- El generador vuelve a aplicar estos ajustes en cada sincronización para evitar que un workflow posterior restaure el contenido anterior.
+
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
 
 Las fichas, las tarjetas y el bloque rotativo usan exclusivamente archivos sincronizados dentro de `assets/images/propiedades/`. Las fotografías antiguas guardadas fuera de esa carpeta no se usan como respaldo, por lo que pueden eliminarse sin generar imágenes rotas.

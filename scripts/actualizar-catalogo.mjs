@@ -20,10 +20,27 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.9';
+const SITE_VERSION = 'V22.10';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
+const SOCIAL_PROFILES = [
+  'https://www.instagram.com/sabrina_gigena_inmobiliaria/',
+  'https://www.facebook.com/profile.php?id=61579988094625'
+];
+const SEO_AREAS = ['Capilla del Señor', 'Parque Sakura', 'Exaltación de la Cruz'];
+const HOME_SEO = {
+  title: 'Inmobiliaria en Capilla del Señor, Parque Sakura y Exaltación de la Cruz',
+  description: 'Casas, lotes y terrenos en Capilla del Señor, Parque Sakura y Exaltación de la Cruz. Catálogo actualizado y asesoramiento de Sabrina Gigena.',
+  path: '/',
+  image: '/assets/images/floracion-duraznos-hero.webp'
+};
+const CATALOG_SEO = {
+  title: 'Propiedades en Capilla del Señor, Parque Sakura y Exaltación de la Cruz',
+  description: 'Explorá propiedades disponibles en Capilla del Señor, Parque Sakura y Exaltación de la Cruz: casas, lotes y terrenos con información clara.',
+  path: '/propiedades/',
+  image: '/assets/images/floracion-duraznos-hero.webp'
+};
 const IMAGE_WIDTH = 1080;
 const IMAGE_HEIGHT = 1350;
 const IMAGE_QUALITY = 82;
@@ -925,6 +942,84 @@ function updateAboutRotatorElement(html, images) {
   return html.replace(/<img\b[^>]*\bdata-about-rotator\b[^>]*>/i, replacement);
 }
 
+function topbarMarkup() {
+  return '<div class="topbar" aria-hidden="true"><div class="topbar-track">' +
+    SEO_AREAS.map(area => '<span>' + escapeHtml(area.toUpperCase()) + '</span>').join('') +
+    '</div></div>';
+}
+
+function businessSchema() {
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateAgent',
+    '@id': SITE_URL + '/#business',
+    name: SITE_NAME,
+    url: SITE_URL + '/',
+    image: absoluteUrl('/favicon.png'),
+    description: 'Servicios inmobiliarios en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.',
+    telephone: CONTACT_PHONE,
+    email: CONTACT_EMAIL,
+    sameAs: SOCIAL_PROFILES,
+    areaServed: SEO_AREAS.map(name => ({ '@type': 'Place', name }))
+  }).replace(/</g, '\\u003c');
+}
+
+function updateStaticSeo(html, seo) {
+  const title = escapeHtml(seo.title);
+  const description = escapeAttribute(seo.description);
+  const canonical = absoluteUrl(seo.path);
+  const socialImage = absoluteUrl(seo.image);
+
+  return html
+    .replace(/<title>[\s\S]*?<\/title>/i, '<title>' + title + '</title>')
+    .replace(/<meta\s+name=["']description["'][^>]*>/i,
+      '<meta name="description" content="' + description + '">')
+    .replace(/<link\s+rel=["']canonical["'][^>]*>/i,
+      '<link rel="canonical" href="' + escapeAttribute(canonical) + '">')
+    .replace(/<meta\s+property=["']og:title["'][^>]*>/i,
+      '<meta property="og:title" content="' + escapeAttribute(seo.title) + '">')
+    .replace(/<meta\s+property=["']og:description["'][^>]*>/i,
+      '<meta property="og:description" content="' + description + '">')
+    .replace(/<meta\s+property=["']og:url["'][^>]*>/i,
+      '<meta property="og:url" content="' + escapeAttribute(canonical) + '">')
+    .replace(/<meta\s+property=["']og:image["'][^>]*>/i,
+      '<meta property="og:image" content="' + escapeAttribute(socialImage) + '">')
+    .replace(/<meta\s+name=["']twitter:title["'][^>]*>/i,
+      '<meta name="twitter:title" content="' + escapeAttribute(seo.title) + '">')
+    .replace(/<meta\s+name=["']twitter:description["'][^>]*>/i,
+      '<meta name="twitter:description" content="' + description + '">')
+    .replace(/<meta\s+name=["']twitter:image["'][^>]*>/i,
+      '<meta name="twitter:image" content="' + escapeAttribute(socialImage) + '">')
+    .replace(/<script\s+type=["']application\/ld\+json["']>[\s\S]*?<\/script>/i,
+      '<script type="application/ld+json">' + businessSchema() + '</script>');
+}
+
+function updateSharedSeoCopy(html) {
+  return html
+    .replace(/<div class="topbar"\s+aria-hidden="true"><div class="topbar-track">[\s\S]*?<\/div><\/div>/i,
+      topbarMarkup())
+    .replace(/Servicios inmobiliarios con foco en [^<]+\./gi,
+      'Servicios inmobiliarios en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.');
+}
+
+function updateHomeSeoCopy(html) {
+  return updateSharedSeoCopy(html)
+    .replace(/(<div class="home-hero-note"><p>)[\s\S]*?(<\/p><\/div>)/i,
+      '$1Asesoramiento inmobiliario en Capilla del Señor, Parque Sakura y Exaltación de la Cruz, con transparencia, calidez y seguridad jurídica.$2')
+    .replace(/(<section id="servicios"[\s\S]*?<div class="section-head">[\s\S]*?<h2>)[\s\S]*?(<\/h2>)/i,
+      '$1Inmobiliaria en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.$2')
+    .replace(/(<article class="service"><strong>Conocimiento local<\/strong><span>)[\s\S]*?(<\/span><\/article>)/i,
+      '$1Experiencia en Capilla del Señor, Parque Sakura y todo Exaltación de la Cruz.$2');
+}
+
+function updateCatalogSeoCopy(html) {
+  return updateSharedSeoCopy(html)
+    .replace(/(<section class="catalog-hero"[\s\S]*?<h1>)[\s\S]*?(<\/h1>)/i,
+      '$1Propiedades en Capilla del Señor, Parque Sakura y Exaltación de la Cruz$2')
+    .replace(/(<section class="catalog-hero"[\s\S]*?<h1>[\s\S]*?<\/h1><p>)[\s\S]*?(<\/p>)/i,
+      '$1Casas, lotes y terrenos disponibles. Buscá por localidad, tipo de propiedad o característica.$2');
+}
+
 async function updateCatalogPages(rows) {
   const publicRows = publicRowsSorted(rows);
   const catalogCards = publicRows.length
@@ -936,6 +1031,8 @@ async function updateCatalogPages(rows) {
   const rotatorImages = activeCatalogRotatorImages(publicRows);
 
   let indexHtml = await readFile(indexPath, 'utf8');
+  indexHtml = updateStaticSeo(indexHtml, HOME_SEO);
+  indexHtml = updateHomeSeoCopy(indexHtml);
   indexHtml = injectCatalogIntoGrid(indexHtml, 'SHEET_FEATURED', featuredCards);
   indexHtml = injectAboutRotatorData(indexHtml, rotatorImages);
   indexHtml = updateAboutRotatorElement(indexHtml, rotatorImages);
@@ -948,6 +1045,12 @@ async function updateCatalogPages(rows) {
   await writeTextIfChanged(indexPath, indexHtml);
 
   let catalogHtml = await readFile(catalogIndexPath, 'utf8');
+  const catalogSeo = {
+    ...CATALOG_SEO,
+    image: rotatorImages[0]?.src || CATALOG_SEO.image
+  };
+  catalogHtml = updateStaticSeo(catalogHtml, catalogSeo);
+  catalogHtml = updateCatalogSeoCopy(catalogHtml);
   catalogHtml = injectCatalogIntoGrid(catalogHtml, 'SHEET_CATALOG', catalogCards);
   catalogHtml = catalogHtml.replace(
     /<span class="count-number">\d+<\/span>/,
@@ -1041,10 +1144,7 @@ function featureMarkup(row) {
 }
 
 function siteHeader() {
-  return '<div class="topbar" aria-hidden="true"><div class="topbar-track">' +
-    '<span>CAPILLA DEL SEÑOR</span><span>CAMPANA</span><span>PAVÓN</span>' +
-    '<span>PARQUE SAKURA</span><span>EXALTACIÓN DE LA CRUZ</span><span>CONSULTAS POR WHATSAPP</span>' +
-    '</div></div><header class="site-header"><div class="container header-inner">' +
+  return topbarMarkup() + '<header class="site-header"><div class="container header-inner">' +
     '<a class="brand" href="' + sitePath('/index.html') + '" aria-label="' + SITE_NAME + '">' +
     '<span class="brand-mark"><img src="' + sitePath('/favicon.png') + '" alt=""></span><span class="brand-copy">' +
     '<strong>Sabrina Gigena</strong><small>Servicios Inmobiliarios</small></span></a>' +
@@ -1062,7 +1162,7 @@ function siteFooter() {
     '<a class="brand footer-brand" href="' + sitePath('/index.html') + '"><span class="brand-mark"><img src="' +
     sitePath('/favicon.png') + '" alt=""></span>' +
     '<span class="brand-copy"><strong>Sabrina Gigena</strong><small>Servicios Inmobiliarios</small></span></a>' +
-    '<p>Servicios inmobiliarios con foco en Capilla del Señor, Campana, Pavón, Parque Sakura y Exaltación de la Cruz.</p>' +
+    '<p>Servicios inmobiliarios en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.</p>' +
     '</div><div><h4>Navegación</h4><div class="footer-links"><a href="' + sitePath('/index.html') + '">Inicio</a>' +
     '<a href="' + sitePath('/propiedades/') + '">Propiedades</a><a href="' +
     sitePath('/index.html#servicios') + '">Servicios</a></div></div>' +
@@ -1084,8 +1184,12 @@ function propertySchema(row, canonical, images) {
         '@id': SITE_URL + '/#business',
         name: SITE_NAME,
         url: SITE_URL,
+        image: absoluteUrl('/favicon.png'),
+        description: 'Servicios inmobiliarios en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.',
         telephone: CONTACT_PHONE,
-        email: CONTACT_EMAIL
+        email: CONTACT_EMAIL,
+        sameAs: SOCIAL_PROFILES,
+        areaServed: SEO_AREAS.map(name => ({ '@type': 'Place', name }))
       },
       {
         '@type': 'WebPage',
