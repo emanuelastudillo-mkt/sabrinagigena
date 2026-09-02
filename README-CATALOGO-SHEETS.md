@@ -40,7 +40,7 @@ La columna **Imagen principal** se descarga como portada. Para agregar una galer
 - Imagen 4
 - etc.
 
-También se aceptan los nombres **Foto 2**, **Foto 3**, **Foto 4**, etc. El orden siempre será Imagen principal, Imagen 2, Imagen 3 y así sucesivamente.
+También se aceptan los nombres **Foto 2**, **Foto 3** o **Imagen principal 2**, **Imagen principal 3**, etc. El orden siempre comienza por Imagen principal y continúa según la secuencia numérica.
 
 El workflow define `SITE_URL` con la dirección pública de GitHub Pages. El generador obtiene de allí el prefijo `/sabrinagigena/`, necesario para que imágenes, estilos y enlaces internos funcionen dentro de un sitio de proyecto.
 
