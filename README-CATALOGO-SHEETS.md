@@ -77,6 +77,15 @@ La versión V22.10 concentra el posicionamiento local en **Capilla del Señor**,
 - Los datos estructurados `RealEstateAgent` declaran las tres zonas mediante `areaServed`, tanto en las páginas generales como en cada ficha.
 - El generador vuelve a aplicar estos ajustes en cada sincronización para evitar que un workflow posterior restaure el contenido anterior.
 
+## Meta Pixel
+
+La versión V22.11 instala el píxel de Meta con el identificador `1421470373195307`:
+
+- registra el evento estándar `PageView` en la portada, el catálogo y todas las fichas;
+- también queda presente en las copias históricas de propiedades vendidas o retiradas;
+- incluye la alternativa `noscript` para navegadores sin JavaScript;
+- el generador elimina cualquier copia anterior del mismo bloque antes de insertarlo, por lo que el píxel no se duplica al ejecutar nuevamente el workflow.
+
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
 
 Las fichas, las tarjetas y el bloque rotativo usan exclusivamente archivos sincronizados dentro de `assets/images/propiedades/`. Las fotografías antiguas guardadas fuera de esa carpeta no se usan como respaldo, por lo que pueden eliminarse sin generar imágenes rotas.

@@ -20,10 +20,11 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.10';
+const SITE_VERSION = 'V22.11';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
+const META_PIXEL_ID = '1421470373195307';
 const SOCIAL_PROFILES = [
   'https://www.instagram.com/sabrina_gigena_inmobiliaria/',
   'https://www.facebook.com/profile.php?id=61579988094625'
@@ -994,6 +995,33 @@ function updateStaticSeo(html, seo) {
       '<script type="application/ld+json">' + businessSchema() + '</script>');
 }
 
+function metaPixelHeadMarkup() {
+  return '<!-- Meta Pixel Code -->\n<script>\n' +
+    '!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?' +
+    'n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;' +
+    'n.push=n;n.loaded=!0;n.version=\'2.0\';n.queue=[];t=b.createElement(e);t.async=!0;' +
+    't.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}' +
+    '(window,document,\'script\',\'https://connect.facebook.net/en_US/fbevents.js\');\n' +
+    'fbq(\'init\', \'' + META_PIXEL_ID + '\');\nfbq(\'track\', \'PageView\');\n' +
+    '</script>\n<!-- End Meta Pixel Code -->';
+}
+
+function metaPixelNoScriptMarkup() {
+  return '<!-- Meta Pixel NoScript -->\n<noscript><img height="1" width="1" style="display:none" ' +
+    'src="https://www.facebook.com/tr?id=' + META_PIXEL_ID +
+    '&amp;ev=PageView&amp;noscript=1" alt=""></noscript>\n<!-- End Meta Pixel NoScript -->';
+}
+
+function updateMetaPixel(html) {
+  const withoutPreviousPixel = html
+    .replace(/\s*<!-- Meta Pixel Code -->[\s\S]*?<!-- End Meta Pixel Code -->\s*/gi, '\n')
+    .replace(/\s*<!-- Meta Pixel NoScript -->[\s\S]*?<!-- End Meta Pixel NoScript -->\s*/gi, '\n');
+
+  return withoutPreviousPixel
+    .replace(/<\/head>/i, metaPixelHeadMarkup() + '\n</head>')
+    .replace(/(<body\b[^>]*>)/i, '$1\n' + metaPixelNoScriptMarkup());
+}
+
 function updateSharedSeoCopy(html) {
   return html
     .replace(/<div class="topbar"\s+aria-hidden="true"><div class="topbar-track">[\s\S]*?<\/div><\/div>/i,
@@ -1033,6 +1061,7 @@ async function updateCatalogPages(rows) {
   let indexHtml = await readFile(indexPath, 'utf8');
   indexHtml = updateStaticSeo(indexHtml, HOME_SEO);
   indexHtml = updateHomeSeoCopy(indexHtml);
+  indexHtml = updateMetaPixel(indexHtml);
   indexHtml = injectCatalogIntoGrid(indexHtml, 'SHEET_FEATURED', featuredCards);
   indexHtml = injectAboutRotatorData(indexHtml, rotatorImages);
   indexHtml = updateAboutRotatorElement(indexHtml, rotatorImages);
@@ -1051,6 +1080,7 @@ async function updateCatalogPages(rows) {
   };
   catalogHtml = updateStaticSeo(catalogHtml, catalogSeo);
   catalogHtml = updateCatalogSeoCopy(catalogHtml);
+  catalogHtml = updateMetaPixel(catalogHtml);
   catalogHtml = injectCatalogIntoGrid(catalogHtml, 'SHEET_CATALOG', catalogCards);
   catalogHtml = catalogHtml.replace(
     /<span class="count-number">\d+<\/span>/,
@@ -1386,7 +1416,7 @@ function propertyPageHtml(row, activeRows = []) {
     rowValue(row, 'Tipo de propiedad')
   ].filter(Boolean).join(' · ') || 'Información de la propiedad';
 
-  return [
+  const html = [
     '<!doctype html><html lang="es-AR"><head>',
     '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">',
     '<meta name="theme-color" content="#071b26"><meta name="color-scheme" content="dark">',
@@ -1452,7 +1482,9 @@ function propertyPageHtml(row, activeRows = []) {
         : 'Hola Sabrina, quiero consultar por ' + title + ' (' + propertyId(row) + ').') +
       '" target="_blank" rel="noopener noreferrer" aria-label="Consultar por WhatsApp">WhatsApp</a>',
     '<script src="' + sitePath('/assets/js/main.js') + '" defer></script></body></html>'
-  ].join('\n') + '\n';
+  ].join('\n');
+
+  return updateMetaPixel(html) + '\n';
 }
 
 function normalizedGeneratedPath(file) {
