@@ -1,11 +1,13 @@
 {
   "schemaVersion": 2,
   "files": [
+    "propiedades/casa-alpina-lagomarsino-s008/index.html",
     "propiedades/casa-casco-urbano-s005/index.html",
     "propiedades/casa-en-parada-robles-s006/index.html",
     "propiedades/casa-santa-brigida-s001/index.html",
     "propiedades/loteo-la-loma-etapa-iii-s002/index.html",
     "propiedades/loteo-la-loma-etapa-iii-s003/index.html",
+    "propiedades/terreno-el-lazo-s007/index.html",
     "propiedades/terreno-lomadas-de-capilla-s004/index.html"
   ],
   "activeRoutes": [
@@ -14,7 +16,9 @@
     "/propiedades/loteo-la-loma-etapa-iii-s003/",
     "/propiedades/terreno-lomadas-de-capilla-s004/",
     "/propiedades/casa-casco-urbano-s005/",
-    "/propiedades/casa-en-parada-robles-s006/"
+    "/propiedades/casa-en-parada-robles-s006/",
+    "/propiedades/terreno-el-lazo-s007/",
+    "/propiedades/casa-alpina-lagomarsino-s008/"
   ],
   "archivedRoutes": []
 }
