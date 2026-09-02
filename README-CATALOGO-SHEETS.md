@@ -63,7 +63,9 @@ El catálogo usa primero **Imagen principal** y después las columnas **Foto 1**
 
 El bloque de portada **Menos vueltas. Más información útil para decidir** utiliza exclusivamente imágenes descargadas desde esas columnas del Sheet. Solo considera propiedades con estado **Disponible** o **Reservada**: al marcar una propiedad como Vendida o Pausada, todas sus imágenes se retiran automáticamente de esa rotación.
 
-El workflow define `SITE_URL` con la dirección pública de GitHub Pages. El generador obtiene de allí el prefijo `/sabrinagigena/`, necesario para que imágenes, estilos y enlaces internos funcionen dentro de un sitio de proyecto.
+El workflow define `SITE_URL` como `https://sabrinagigena.com`. Al ser un dominio propio publicado desde la raíz, el generador crea rutas como `/assets/` y `/propiedades/`, sin el antiguo prefijo `/sabrinagigena/`.
+
+El archivo `CNAME` conserva `sabrinagigena.com` como dominio personalizado de GitHub Pages. Cada sincronización también actualiza canonical, Open Graph, sitemap y robots para utilizar el dominio propio.
 
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
 
