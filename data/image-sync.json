@@ -2,15 +2,39 @@
   "schemaVersion": 1,
   "properties": {
     "S001": {
-      "items": []
+      "items": [
+        {
+          "file": "S001.webp",
+          "source": "drive:14vwrUnTGKYATYoD9mTe8xpGtCTKeFqB5",
+          "logicalOrder": 0
+        }
+      ]
     },
     "S002": {
-      "items": []
+      "items": [
+        {
+          "file": "S002.webp",
+          "source": "drive:17j9ms2oh0kaowWyGEMW4AzJ5evGwF8Bk",
+          "logicalOrder": 0
+        }
+      ]
     },
     "S003": {
-      "items": []
+      "items": [
+        {
+          "file": "S003.webp",
+          "source": "drive:1DPxxxF5NWVx4cXm6XP7APuYpEj0AQcAK",
+          "logicalOrder": 0
+        }
+      ]
     },
     "S004": {
+      "items": []
+    },
+    "S005": {
+      "items": []
+    },
+    "S006": {
       "items": []
     }
   }
