@@ -35,10 +35,14 @@ Las filas vacías preparadas en el Sheet no se procesan.
 
 La columna **Imagen principal** se descarga como portada. Para agregar una galería automática, crear columnas con enlaces individuales:
 
-- Foto 2
-- Foto 3
-- Foto 4
+- Imagen 2
+- Imagen 3
+- Imagen 4
 - etc.
+
+También se aceptan los nombres **Foto 2**, **Foto 3**, **Foto 4**, etc. El orden siempre será Imagen principal, Imagen 2, Imagen 3 y así sucesivamente.
+
+El workflow define `SITE_URL` con la dirección pública de GitHub Pages. El generador obtiene de allí el prefijo `/sabrinagigena/`, necesario para que imágenes, estilos y enlaces internos funcionen dentro de un sitio de proyecto.
 
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
 

@@ -15,6 +15,10 @@ const CSV_URL =
   'https://docs.google.com/spreadsheets/d/1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI/export?format=csv&gid=779453685';
 
 const SITE_URL = (process.env.SITE_URL || 'https://sabrinagigena.com').replace(/\/+$/, '');
+const SITE_ORIGIN = new URL(SITE_URL).origin;
+const SITE_BASE_PATH = normalizeSiteBasePath(
+  process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
+);
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
@@ -46,6 +50,11 @@ function clean(value) {
   return (value ?? '').toString().trim();
 }
 
+function normalizeSiteBasePath(value) {
+  const normalized = clean(value).replace(/^\/+|\/+$/g, '');
+  return normalized ? '/' + normalized : '';
+}
+
 function normalize(value) {
   return clean(value)
     .normalize('NFD')
@@ -58,6 +67,40 @@ function normalizedHeader(value) {
     .replace(/[^A-Z0-9]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function sitePath(value = '/') {
+  const suffix = '/' + clean(value).replace(/^\/+/, '');
+  if (!SITE_BASE_PATH) return suffix;
+  return suffix === '/' ? SITE_BASE_PATH + '/' : SITE_BASE_PATH + suffix;
+}
+
+function logicalInternalPath(value) {
+  const input = clean(value);
+  if (!input || /^(?:https?:|mailto:|tel:|data:|javascript:|#|\/\/)/i.test(input)) return '';
+
+  const candidate = input.startsWith('/') ? input : '/' + input;
+  const match = candidate.match(
+    /\/(?=(?:assets\/|favicon\.png(?:[?#]|$)|index\.html(?:[?#]|$)|propiedades(?:-no-index)?(?:\/|$)))/i
+  );
+  return match ? candidate.slice(match.index) : '';
+}
+
+function applyDeploymentPaths(html) {
+  const withPaths = html.replace(
+    /\b(href|src)=(["'])([^"']+)\2/gi,
+    (full, attribute, quote, value) => {
+      const logical = logicalInternalPath(value);
+      return logical
+        ? attribute + '=' + quote + sitePath(logical) + quote
+        : full;
+    }
+  );
+
+  return withPaths.replace(
+    /https:\/\/(?:sabrinagigena\.com|emanuelastudillo-mkt\.github\.io\/sabrinagigena)/gi,
+    SITE_URL
+  );
 }
 
 function slugify(value) {
@@ -613,14 +656,14 @@ function propertyImages(row) {
   const version = clean(currentImageManifest._version) || '1';
   const generated = Array.isArray(currentImageManifest[id])
     ? currentImageManifest[id].map(file =>
-      '/assets/images/propiedades/' + encodeURIComponent(file) + '?v=' + encodeURIComponent(version)
+      sitePath('/assets/images/propiedades/' + encodeURIComponent(file) + '?v=' + encodeURIComponent(version))
     )
     : [];
   const manual = Array.isArray(manualImages[id])
     ? manualImages[id]
       .map(clean)
       .filter(Boolean)
-      .map(image => '/' + image.replace(/^\.?\//, ''))
+      .map(image => sitePath('/' + image.replace(/^\.?\//, '')))
     : [];
   return [...new Set([...generated, ...manual])];
 }
@@ -628,7 +671,8 @@ function propertyImages(row) {
 function absoluteUrl(relative) {
   const value = clean(relative);
   if (/^https?:\/\//i.test(value)) return value;
-  return SITE_URL + '/' + value.replace(/^\.?\//, '');
+  const logical = logicalInternalPath(value);
+  return SITE_ORIGIN + (logical ? sitePath(logical) : sitePath(value));
 }
 
 function propertyLocation(row) {
@@ -726,7 +770,7 @@ function propertyCard(row) {
   return '<article class="property-card" data-search="' +
     escapeAttribute(propertySearchText(row)) +
     '" data-tags="' + escapeAttribute(propertyTags(row)) +
-    '"><a href="' + escapeAttribute(propertyRoute(row)) +
+    '"><a href="' + escapeAttribute(sitePath(propertyRoute(row))) +
     '"><div class="card-media">' + imageMarkup +
     '<span class="tag">' + escapeHtml(type) + '</span>' +
     '<span class="status status-' + slugify(status) + '">' + escapeHtml(status) + '</span>' +
@@ -796,7 +840,11 @@ async function updateCatalogPages(rows) {
 
   let indexHtml = await readFile(indexPath, 'utf8');
   indexHtml = injectCatalogIntoGrid(indexHtml, 'SHEET_FEATURED', featuredCards);
-  indexHtml = indexHtml.replace(/href=["']\/?propiedades\.html["']/g, 'href="/propiedades/"');
+  indexHtml = indexHtml.replace(
+    /href=["']\/?propiedades\.html["']/g,
+    'href="' + sitePath('/propiedades/') + '"'
+  );
+  indexHtml = applyDeploymentPaths(indexHtml);
   indexHtml = indexHtml.replace(/Versión V\d+(?:\.\d+)?/g, 'Versión V22');
   await writeTextIfChanged(indexPath, indexHtml);
 
@@ -809,8 +857,11 @@ async function updateCatalogPages(rows) {
   catalogHtml = catalogHtml
     .replace(/<meta name=["']robots["'][^>]*>/gi, '')
     .replace(/https:\/\/sabrinagigena\.com\/propiedades\.html/g, SITE_URL + '/propiedades/')
-    .replace(/href=["']\/?propiedades\.html["']/g, 'href="/propiedades/"')
-    .replace(/\b(href|src)=["'](assets\/|favicon\.png|index\.html)/g, '$1="/$2');
+    .replace(
+      /href=["']\/?propiedades\.html["']/g,
+      'href="' + sitePath('/propiedades/') + '"'
+    );
+  catalogHtml = applyDeploymentPaths(catalogHtml);
   catalogHtml = catalogHtml.replace(/Versión V\d+(?:\.\d+)?/g, 'Versión V22');
   await writeTextIfChanged(catalogIndexPath, catalogHtml);
 
@@ -872,24 +923,27 @@ function siteHeader() {
     '<span>CAPILLA DEL SEÑOR</span><span>CAMPANA</span><span>PAVÓN</span>' +
     '<span>PARQUE SAKURA</span><span>EXALTACIÓN DE LA CRUZ</span><span>CONSULTAS POR WHATSAPP</span>' +
     '</div></div><header class="site-header"><div class="container header-inner">' +
-    '<a class="brand" href="/index.html" aria-label="' + SITE_NAME + '">' +
-    '<span class="brand-mark"><img src="/favicon.png" alt=""></span><span class="brand-copy">' +
+    '<a class="brand" href="' + sitePath('/index.html') + '" aria-label="' + SITE_NAME + '">' +
+    '<span class="brand-mark"><img src="' + sitePath('/favicon.png') + '" alt=""></span><span class="brand-copy">' +
     '<strong>Sabrina Gigena</strong><small>Servicios Inmobiliarios</small></span></a>' +
     '<button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav">' +
     '<span></span><span></span><span></span></button><nav class="nav" id="site-nav" aria-label="Navegación principal">' +
-    '<a href="/index.html">Inicio</a><a class="active" href="/propiedades/" aria-current="page">Propiedades</a>' +
-    '<a href="/index.html#servicios">Servicios</a><a class="header-cta" href="https://wa.me/' +
+    '<a href="' + sitePath('/index.html') + '">Inicio</a><a class="active" href="' +
+    sitePath('/propiedades/') + '" aria-current="page">Propiedades</a>' +
+    '<a href="' + sitePath('/index.html#servicios') + '">Servicios</a><a class="header-cta" href="https://wa.me/' +
     CONTACT_WHATSAPP + '?text=Hola%20Sabrina%2C%20quiero%20hacer%20una%20consulta%20inmobiliaria" ' +
     'target="_blank" rel="noopener noreferrer">Consultar</a></nav></div></header>';
 }
 
 function siteFooter() {
   return '<footer class="footer"><div class="container"><div class="footer-grid"><div>' +
-    '<a class="brand footer-brand" href="/index.html"><span class="brand-mark"><img src="/favicon.png" alt=""></span>' +
+    '<a class="brand footer-brand" href="' + sitePath('/index.html') + '"><span class="brand-mark"><img src="' +
+    sitePath('/favicon.png') + '" alt=""></span>' +
     '<span class="brand-copy"><strong>Sabrina Gigena</strong><small>Servicios Inmobiliarios</small></span></a>' +
     '<p>Servicios inmobiliarios con foco en Capilla del Señor, Campana, Pavón, Parque Sakura y Exaltación de la Cruz.</p>' +
-    '</div><div><h4>Navegación</h4><div class="footer-links"><a href="/index.html">Inicio</a>' +
-    '<a href="/propiedades/">Propiedades</a><a href="/index.html#servicios">Servicios</a></div></div>' +
+    '</div><div><h4>Navegación</h4><div class="footer-links"><a href="' + sitePath('/index.html') + '">Inicio</a>' +
+    '<a href="' + sitePath('/propiedades/') + '">Propiedades</a><a href="' +
+    sitePath('/index.html#servicios') + '">Servicios</a></div></div>' +
     '<div><h4>Contacto</h4><div class="footer-links"><a href="tel:+5492304567715">' + CONTACT_PHONE + '</a>' +
     '<a href="mailto:' + CONTACT_EMAIL + '">' + CONTACT_EMAIL + '</a>' +
     '<a href="https://wa.me/' + CONTACT_WHATSAPP + '" target="_blank" rel="noopener noreferrer">WhatsApp</a>' +
@@ -1026,7 +1080,8 @@ function contactCard(row, archived = false) {
   const buttonLabel = archived ? 'Consultar por opciones similares' : 'Consultar por WhatsApp';
 
   return '<aside class="contact-card"><div class="contact-person"><span class="contact-person-photo">' +
-    '<img src="/assets/images/sabrina-gigena-persona.webp" alt="Sabrina Gigena" loading="lazy"></span>' +
+    '<img src="' + sitePath('/assets/images/sabrina-gigena-persona.webp') +
+    '" alt="Sabrina Gigena" loading="lazy"></span>' +
     '<span><strong>Sabrina Gigena</strong><small>Asesoramiento inmobiliario</small></span></div>' +
     '<span class="eyebrow">Consulta directa</span><h3>' + escapeHtml(heading) + '</h3>' +
     '<p>' + escapeHtml(description) + '</p>' +
@@ -1067,7 +1122,7 @@ function similarPropertiesSection(row, activeRows) {
 
   return '<section class="content-block similar-properties"><div class="content-head"><div>' +
     '<span class="eyebrow">Alternativas disponibles</span><h2>Propiedades similares</h2></div>' +
-    '<a class="text-link" href="/propiedades/">Ver catálogo completo →</a></div>' +
+    '<a class="text-link" href="' + sitePath('/propiedades/') + '">Ver catálogo completo →</a></div>' +
     '<div class="property-grid">' + rows.map(propertyCard).join('') + '</div></section>';
 }
 
@@ -1102,7 +1157,8 @@ function propertyPageHtml(row, activeRows = []) {
     '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">',
     '<meta name="theme-color" content="#071b26"><meta name="color-scheme" content="dark">',
     archived ? '<meta name="robots" content="noindex,nofollow,noarchive">' : '',
-    '<link rel="icon" href="/favicon.png" type="image/png"><link rel="stylesheet" href="/assets/css/site.css">',
+    '<link rel="icon" href="' + sitePath('/favicon.png') + '" type="image/png"><link rel="stylesheet" href="' +
+      sitePath('/assets/css/site.css') + '">',
     '<title>' + escapeHtml(pageTitle) + ' | Sabrina Gigena Inmobiliaria</title>',
     '<meta name="description" content="' + escapeAttribute(metaDescription) + '">',
     '<link rel="canonical" href="' + escapeAttribute(canonical) + '">',
@@ -1123,7 +1179,8 @@ function propertyPageHtml(row, activeRows = []) {
     '<main><section class="detail-hero"><div class="container">',
     '<div class="property-nav-row"><button class="back-button" type="button" data-back-button>' +
       '<span aria-hidden="true">←</span> Volver</button><nav class="breadcrumbs" aria-label="Migas de pan">' +
-      '<a href="/index.html">Inicio</a><span>/</span><a href="/propiedades/">Propiedades</a>' +
+      '<a href="' + sitePath('/index.html') + '">Inicio</a><span>/</span><a href="' +
+      sitePath('/propiedades/') + '">Propiedades</a>' +
       '<span>/</span><span aria-current="page">' + escapeHtml(title) + '</span></nav></div>',
     heroGallery(title, images),
     '</div></section><section class="property-detail"><div class="container detail-layout"><article class="detail-main">',
@@ -1156,7 +1213,7 @@ function propertyPageHtml(row, activeRows = []) {
         ? 'Hola Sabrina, vi ' + title + ' (' + propertyId(row) + ') y quiero opciones similares.'
         : 'Hola Sabrina, quiero consultar por ' + title + ' (' + propertyId(row) + ').') +
       '" target="_blank" rel="noopener noreferrer" aria-label="Consultar por WhatsApp">WhatsApp</a>',
-    '<script src="/assets/js/main.js" defer></script></body></html>'
+    '<script src="' + sitePath('/assets/js/main.js') + '" defer></script></body></html>'
   ].join('\n') + '\n';
 }
 
