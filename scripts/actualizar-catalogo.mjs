@@ -20,7 +20,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.6';
+const SITE_VERSION = 'V22.7';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -28,6 +28,8 @@ const IMAGE_WIDTH = 1080;
 const IMAGE_HEIGHT = 1350;
 const IMAGE_QUALITY = 82;
 const MAX_PROPERTY_PHOTOS = 12;
+const IMAGE_PIPELINE_VERSION = 'watermark-v1';
+const WATERMARK_TEXT = 'Sabrina Gigena Inmobiliaria';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -494,7 +496,7 @@ async function downloadImageBuffer(url) {
 }
 
 async function toOptimizedWebp(buffer) {
-  return sharp(buffer, { failOn: 'none' })
+  const { data, info } = await sharp(buffer, { failOn: 'none' })
     .rotate()
     .resize({
       width: IMAGE_WIDTH,
@@ -502,6 +504,38 @@ async function toOptimizedWebp(buffer) {
       fit: 'inside',
       withoutEnlargement: true
     })
+    .toBuffer({ resolveWithObject: true });
+
+  const shortestSide = Math.min(info.width, info.height);
+  const margin = Math.max(14, Math.round(shortestSide * 0.025));
+  const maxTextWidth = Math.max(180, info.width - margin * 4);
+  const fontSize = Math.max(16, Math.min(38,
+    Math.floor(maxTextWidth / (WATERMARK_TEXT.length * 0.59))
+  ));
+  const horizontalPadding = Math.round(fontSize * 0.9);
+  const boxHeight = Math.round(fontSize * 2.15);
+  const estimatedTextWidth = Math.round(WATERMARK_TEXT.length * fontSize * 0.59);
+  const boxWidth = Math.min(
+    info.width - margin * 2,
+    estimatedTextWidth + horizontalPadding * 2
+  );
+  const boxX = Math.round((info.width - boxWidth) / 2);
+  const boxY = Math.max(margin, info.height - margin - boxHeight);
+  const radius = Math.round(boxHeight / 2);
+  const textY = Math.round(boxY + boxHeight / 2);
+  const watermark = Buffer.from(
+    '<svg width="' + info.width + '" height="' + info.height + '" xmlns="http://www.w3.org/2000/svg">' +
+      '<rect x="' + boxX + '" y="' + boxY + '" width="' + boxWidth + '" height="' + boxHeight +
+        '" rx="' + radius + '" fill="#071b26" fill-opacity="0.62" stroke="#d4b66c" stroke-opacity="0.62"/>' +
+      '<text x="' + Math.round(info.width / 2) + '" y="' + textY +
+        '" text-anchor="middle" dominant-baseline="middle" font-family="Arial, Helvetica, sans-serif"' +
+        ' font-size="' + fontSize + '" font-weight="700" letter-spacing="0.5"' +
+        ' fill="#f7edcf" fill-opacity="0.94">' + WATERMARK_TEXT + '</text>' +
+    '</svg>'
+  );
+
+  return sharp(data, { failOn: 'none' })
+    .composite([{ input: watermark, top: 0, left: 0, blend: 'over' }])
     .webp({ quality: IMAGE_QUALITY, effort: 5 })
     .toBuffer();
 }
@@ -545,7 +579,9 @@ async function syncPropertyImages(row, previousState, report) {
     const source = sources[index];
     const file = id + '-foto-' + String(source.order).padStart(2, '0') + '.webp';
     const filePath = path.join(imagesDir, file);
-    const key = sourceKey(source.url);
+    // La versión del procesamiento forma parte de la identidad para que un
+    // cambio de marca de agua regenere incluso fotos cuyo enlace no cambió.
+    const key = sourceKey(source.url) + '|pipeline:' + IMAGE_PIPELINE_VERSION;
     const previous = previousByFile.get(file);
 
     if (previous && previous.source === key && existsSync(filePath)) {

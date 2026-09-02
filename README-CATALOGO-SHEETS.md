@@ -55,6 +55,8 @@ El catálogo usa las columnas **Foto 1** a **Foto 12**:
 - Cada columna no vacía genera su propio archivo: por ejemplo, AM (**Foto 1**) crea `ID-foto-01.webp` y AV (**Foto 10**) crea `ID-foto-10.webp`.
 - La relación columna/archivo se mantiene incluso si dos celdas tienen temporalmente el mismo enlace. En ese caso se crearán dos WebP iguales hasta que se carguen enlaces diferentes.
 - Cada enlace se descarga y se convierte a WebP conservando la proporción vertical 1080 × 1350.
+- Durante esa conversión se incrusta la marca de agua **Sabrina Gigena Inmobiliaria** en la parte inferior de cada WebP.
+- La fotografía original de Google Drive no se modifica: la marca solo queda incorporada en la copia optimizada que se publica en GitHub.
 - Si cambia el enlace de una columna, se reemplaza su WebP estable.
 - Si el enlace se vacía, el WebP anterior se elimina del repositorio en la siguiente sincronización.
 - En hojas antiguas que todavía no tengan columnas Foto, **Imagen principal** funciona como respaldo de compatibilidad. En la hoja actual, vaciar una columna Foto elimina su imagen sincronizada.
@@ -66,6 +68,8 @@ El workflow define `SITE_URL` con la dirección pública de GitHub Pages. El gen
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
 
 Las fichas, las tarjetas y el bloque rotativo usan exclusivamente archivos sincronizados dentro de `assets/images/propiedades/`. Las fotografías antiguas guardadas fuera de esa carpeta no se usan como respaldo, por lo que pueden eliminarse sin generar imágenes rotas.
+
+La versión del procesamiento forma parte del registro de cada imagen. Por eso, cuando cambia el diseño de la marca de agua, el siguiente workflow vuelve a procesar también las fotos cuyo enlace no cambió.
 
 ## Información pública y privacidad
 
