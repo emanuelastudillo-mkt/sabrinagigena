@@ -20,7 +20,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.3';
+const SITE_VERSION = 'V22.5';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -945,39 +945,53 @@ async function updateCatalogPages(rows) {
 }
 
 function specificationItems(row) {
-  const specs = [];
-  const add = (label, value) => {
-    if (clean(value)) specs.push({ label, value });
+  const pending = 'A consultar';
+  const area = (...fields) => {
+    const raw = rowValue(row, ...fields);
+    if (!clean(raw)) return pending;
+    return formatArea(raw) || (/^0(?:[.,]0+)?$/.test(clean(raw)) ? '0 m²' : clean(raw));
   };
-
-  add('Superficie total', formatArea(rowValue(row, 'Superficie total (m²)', 'Superficie total (m2)')));
-  add('Superficie cubierta', formatArea(rowValue(row, 'Superficie cubierta (m²)', 'Superficie cubierta (m2)')));
-  add('Superficie libre', formatArea(rowValue(row, 'Superficie libre (m²)', 'Superficie libre (m2)')));
-
-  const numericSpecs = [
-    ['Ambientes', 'Ambientes'],
-    ['Dormitorios', 'Dormitorios'],
-    ['Baños', 'Baños'],
-    ['Cocheras', 'Cocheras'],
-    ['Plantas', 'Plantas']
-  ];
-
-  for (const [label, field] of numericSpecs) {
-    const number = numberValue(rowValue(row, field));
-    if (number) add(label, formatNumber(number, 0));
-  }
-
-  const age = numberValue(rowValue(row, 'Antigüedad (años)', 'Antiguedad (anos)'));
-  if (age) add('Antigüedad', formatNumber(age, 0) + ' años');
-  add('Estado general', rowValue(row, 'Estado general'));
-
+  const quantity = (...fields) => {
+    const raw = rowValue(row, ...fields);
+    if (!clean(raw)) return pending;
+    return formatNumber(raw, 0) || clean(raw);
+  };
+  const ageRaw = rowValue(row, 'Antigüedad (años)', 'Antiguedad (anos)');
+  const age = clean(ageRaw)
+    ? (formatNumber(ageRaw, 0) || clean(ageRaw)) + ' años'
+    : pending;
   const expenses = rowValue(row, 'Expensas');
-  if (expenses) add('Expensas', hasNoExpenses(row) ? 'Sin expensas' : expenses);
-  return specs;
+
+  // La cantidad y el orden son fijos: ninguna ficha cambia de geometría
+  // cuando un dato todavía no fue cargado en Google Sheets.
+  return [
+    { label: 'Superficie total', value: area('Superficie total (m²)', 'Superficie total (m2)') },
+    { label: 'Superficie cubierta', value: area('Superficie cubierta (m²)', 'Superficie cubierta (m2)') },
+    { label: 'Superficie libre', value: area('Superficie libre (m²)', 'Superficie libre (m2)') },
+    { label: 'Ambientes', value: quantity('Ambientes') },
+    { label: 'Dormitorios', value: quantity('Dormitorios') },
+    { label: 'Baños', value: quantity('Baños', 'Banos') },
+    { label: 'Cocheras', value: quantity('Cocheras') },
+    { label: 'Plantas', value: quantity('Plantas') },
+    { label: 'Antigüedad', value: age },
+    { label: 'Estado general', value: rowValue(row, 'Estado general') || pending },
+    {
+      label: 'Expensas',
+      value: expenses ? (hasNoExpenses(row) ? 'Sin expensas' : expenses) : pending
+    },
+    { label: 'Operación', value: rowValue(row, 'Operación', 'Operacion') || pending }
+  ];
 }
 
-function featureText(row) {
-  const features = [];
+function featureItems(row) {
+  const status = value => {
+    const raw = clean(value);
+    const normalized = normalize(raw);
+    if (!raw) return { value: 'A consultar', tone: 'pending' };
+    if (isYes(raw)) return { value: 'Sí', tone: 'yes' };
+    if (normalized === 'NO' || normalized === 'N') return { value: 'No', tone: 'no' };
+    return { value: raw, tone: 'info' };
+  };
   const booleanFields = [
     ['Cocina', 'Cocina'],
     ['Living / comedor', 'Living / comedor'],
@@ -985,14 +999,23 @@ function featureText(row) {
     ['Pileta', 'Pileta'],
     ['Quincho / parrilla', 'Quincho / parrilla']
   ];
-
-  for (const [label, field] of booleanFields) {
-    if (isYes(rowValue(row, field))) features.push(label);
-  }
-
   const services = rowValue(row, 'Servicios disponibles');
-  if (services) features.push('Servicios: ' + services);
-  return features.join(' · ');
+  return [
+    ...booleanFields.map(([label, field]) => ({ label, ...status(rowValue(row, field)) })),
+    {
+      label: 'Servicios disponibles',
+      value: services || 'A consultar',
+      tone: services ? 'info' : 'pending'
+    }
+  ];
+}
+
+function featureMarkup(row) {
+  return '<div class="feature-grid">' + featureItems(row)
+    .map(item => '<div class="feature-item"><span>' + escapeHtml(item.label) +
+      '</span><strong class="feature-value is-' + item.tone + '">' +
+      escapeHtml(item.value) + '</strong></div>')
+    .join('') + '</div>';
 }
 
 function siteHeader() {
@@ -1073,58 +1096,51 @@ function propertySchema(row, canonical, images) {
 }
 
 function heroGallery(title, images) {
-  if (!images.length) {
-    return '<div class="gallery-hero is-empty"><div class="gallery-empty">Fotos próximamente</div></div>';
-  }
+  const slot = (index, className) => {
+    if (!images[index]) {
+      return '<div class="' + className + ' gallery-placeholder" role="img" aria-label="Foto ' +
+        (index + 1) + ' no disponible"><span>Foto ' + (index + 1) + '</span><small>Próximamente</small></div>';
+    }
+    return '<img class="' + className + '" src="' + escapeAttribute(images[index]) + '" alt="' +
+      escapeAttribute(index === 0 ? title : title + ' · foto ' + (index + 1)) +
+      '" data-lightbox ' + (index === 0
+        ? 'fetchpriority="high"'
+        : 'loading="lazy" decoding="async"') + '>';
+  };
 
-  const main = '<img class="gallery-main" src="' + escapeAttribute(images[0]) + '" alt="' +
-    escapeAttribute(title) + '" data-lightbox fetchpriority="high">';
-  const sideImages = images.slice(1, 3)
-    .map((image, index) => '<img src="' + escapeAttribute(image) + '" alt="' +
-      escapeAttribute(title + ' · foto ' + (index + 2)) +
-      '" data-lightbox loading="lazy" decoding="async">')
-    .join('');
-  const side = sideImages ? '<div class="gallery-side">' + sideImages + '</div>' : '';
-  return '<div class="gallery-hero' + (side ? '' : ' is-single') + '">' + main + side + '</div>';
+  return '<div class="gallery-hero">' + slot(0, 'gallery-main') +
+    '<div class="gallery-side">' + slot(1, 'gallery-slot') + slot(2, 'gallery-slot') +
+    '</div></div>';
 }
 
 function detailGallery(title, images) {
   const galleryImages = images.slice(3);
-  if (!galleryImages.length) return '';
-
   const items = galleryImages
     .map((image, index) => '<img src="' + escapeAttribute(image) + '" alt="' +
       escapeAttribute(title + ' · foto ' + (index + 4)) +
       '" loading="lazy" decoding="async" data-lightbox>')
     .join('');
+  const galleryContent = items ||
+    '<div class="detail-gallery-empty"><strong>Sin fotos adicionales</strong>' +
+    '<span>La ficha se actualizará cuando se incorporen nuevas imágenes.</span></div>';
 
   return '<section class="content-block gallery-block"><div class="content-head"><div>' +
     '<span class="eyebrow">Imágenes</span><h2>Galería</h2></div><span class="gallery-count">' +
-    galleryImages.length + (galleryImages.length === 1 ? ' foto' : ' fotos') +
-    '</span></div><div class="detail-gallery">' + items + '</div></section>';
+    images.length + (images.length === 1 ? ' foto total' : ' fotos totales') +
+    '</span></div><div class="detail-gallery' + (items ? '' : ' is-empty') + '">' +
+    galleryContent + '</div></section>';
 }
 
 function contentSections(row) {
-  const sections = [];
   const description = rowValue(row, 'Descripción comercial', 'Descripcion comercial');
-
-  if (description) {
-    const paragraphs = description
+  const paragraphs = description
       .split(/\n+/)
       .map(clean)
       .filter(Boolean)
       .map(paragraph => '<p>' + escapeHtml(paragraph) + '</p>')
       .join('');
-    sections.push('<section class="content-block"><h2>Descripción</h2>' + paragraphs + '</section>');
-  }
-
-  const features = featureText(row);
-  if (features) {
-    sections.push('<section class="content-block"><h2>Características y servicios</h2><p>' +
-      escapeHtml(features) + '</p></section>');
-  }
-
   const location = propertyLocation(row);
+  let locationHtml;
   if (location) {
     const approximateQuery = [location, 'Provincia de Buenos Aires', 'Argentina']
       .filter(Boolean)
@@ -1132,18 +1148,24 @@ function contentSections(row) {
     const encodedQuery = encodeURIComponent(approximateQuery);
     const embedUrl = 'https://www.google.com/maps?q=' + encodedQuery + '&z=13&output=embed';
     const mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodedQuery;
-    const locationHtml = '<p>' + escapeHtml(location) + '</p>' +
+    locationHtml = '<p>' + escapeHtml(location) + '</p>' +
       '<div class="approximate-map"><iframe src="' + escapeAttribute(embedUrl) +
       '" title="Mapa aproximado de ' + escapeAttribute(location) +
       '" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>' +
       '<p class="map-note">La ubicación indicada es aproximada para proteger la privacidad de la propiedad.</p>' +
       '<p><a class="text-link" href="' + escapeAttribute(mapUrl) +
       '" target="_blank" rel="noopener noreferrer">Abrir zona aproximada en Google Maps →</a></p>';
-    sections.push('<section class="content-block location-block"><h2>Ubicación aproximada</h2>' +
-      locationHtml + '</section>');
+  } else {
+    locationHtml = '<p>Zona a consultar.</p><div class="approximate-map map-unavailable">' +
+      '<strong>Ubicación próximamente</strong><span>La zona aproximada todavía no fue cargada.</span></div>' +
+      '<p class="map-note">La ubicación exacta nunca se publica para proteger la privacidad de la propiedad.</p>';
   }
 
-  return sections.join('');
+  return '<section class="content-block description-block"><h2>Descripción</h2>' +
+    (paragraphs || '<p class="pending-copy">Consultá por más información sobre esta propiedad.</p>') +
+    '</section><section class="content-block features-block"><h2>Características y servicios</h2>' +
+    featureMarkup(row) + '</section><section class="content-block location-block">' +
+    '<h2>Ubicación aproximada</h2>' + locationHtml + '</section>';
 }
 
 function archivedLabel(row) {
@@ -1216,7 +1238,9 @@ function propertyPageHtml(row, activeRows = []) {
   const archived = !isPublicProperty(row);
   const archiveStatus = archivedLabel(row);
   const canonical = SITE_URL + propertyRoute(row);
-  const baseDescription = summaryText(row, 155);
+  const baseDescription = summaryText(row, 155) ||
+    'Información y consulta sobre esta propiedad con Sabrina Gigena Servicios Inmobiliarios.';
+  const leadText = summaryText(row, 320) || 'Consultá por más información sobre esta propiedad.';
   const metaDescription = archived
     ? archiveStatus + ': ' + baseDescription
     : baseDescription;
@@ -1234,7 +1258,7 @@ function propertyPageHtml(row, activeRows = []) {
   const locationType = [
     propertyLocation(row),
     rowValue(row, 'Tipo de propiedad')
-  ].filter(Boolean).join(' · ');
+  ].filter(Boolean).join(' · ') || 'Información de la propiedad';
 
   return [
     '<!doctype html><html lang="es-AR"><head>',
@@ -1274,7 +1298,7 @@ function propertyPageHtml(row, activeRows = []) {
           '</strong><span>Esta propiedad ya no forma parte del catálogo disponible.</span></div>'
         : '') +
       '<div class="location">' + escapeHtml(locationType) + '</div><h1>' +
-      escapeHtml(title) + '</h1><p class="lead">' + escapeHtml(summaryText(row, 320)) +
+      escapeHtml(title) + '</h1><p class="lead">' + escapeHtml(leadText) +
       '</p><div class="detail-price">' + escapeHtml(archived ? archiveStatus : price.label) + '</div>' +
       (!archived && price.secondaryLabel
         ? '<p class="detail-price-secondary">' + escapeHtml(price.secondaryLabel) + '</p>'
@@ -1284,7 +1308,7 @@ function propertyPageHtml(row, activeRows = []) {
           (price.secondaryLabel ? ' · ' + escapeHtml(price.secondaryLabel) : '') + '</p>'
         : '') +
       '</header>',
-    specs ? '<div class="spec-grid">' + specs + '</div>' : '',
+    '<div class="spec-grid" aria-label="Datos principales">' + specs + '</div>',
     contentSections(row),
     detailGallery(title, images),
     archived ? similarPropertiesSection(row, activeRows) : '',

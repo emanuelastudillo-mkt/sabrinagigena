@@ -4,7 +4,7 @@ Esta versión usa como fuente de verdad la pestaña **Propiedades** del archivo:
 
 https://docs.google.com/spreadsheets/d/1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI/edit?gid=779453685
 
-La sincronización se ejecuta automáticamente cada seis horas y también puede iniciarse de forma manual desde **GitHub → Actions → Actualizar catálogo e imágenes → Run workflow**.
+La sincronización se ejecuta automáticamente una vez por día y también puede iniciarse de forma manual desde **GitHub → Actions → Actualizar catálogo e imágenes → Run workflow**.
 
 ## Qué actualiza
 
@@ -30,6 +30,21 @@ Cuando una propiedad se vende:
 - si una fila desaparece del Sheet sin marcarse como vendida, se archiva automáticamente como retirada del catálogo.
 
 Las filas vacías preparadas en el Sheet no se procesan.
+
+## Plantilla única de las fichas
+
+Todas las páginas individuales se generan con la misma estructura y en el mismo orden:
+
+1. galería principal con tres espacios fijos;
+2. título, ubicación, descripción breve y precios;
+3. doce datos técnicos;
+4. descripción comercial;
+5. seis características y servicios;
+6. ubicación aproximada;
+7. galería de fotos adicionales;
+8. tarjeta de contacto.
+
+Si un dato todavía no está cargado, su espacio no desaparece: muestra **A consultar**. Si faltan imágenes, la plantilla conserva los mismos lugares con la leyenda **Próximamente**. La cantidad de fotos puede variar sin cambiar el diseño del resto de la ficha.
 
 ## Imágenes
 
@@ -68,7 +83,7 @@ No. El Sheet ya puede funcionar como fuente de datos sin instalar ningún script
 2. El generador actualiza catálogo, páginas, imágenes y archivo histórico.
 3. GitHub publica los cambios.
 
-Apps Script solo sería necesario si más adelante se quisiera disparar una actualización instantánea al editar una celda, recorrer automáticamente carpetas completas de Drive o usar permisos privados. Para la actualización programada cada seis horas no hace falta.
+Apps Script solo sería necesario si más adelante se quisiera disparar una actualización instantánea al editar una celda, recorrer automáticamente carpetas completas de Drive o usar permisos privados. Para la actualización programada una vez por día no hace falta.
 
 ## Ejecución local
 
