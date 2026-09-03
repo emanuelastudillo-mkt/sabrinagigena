@@ -14,7 +14,8 @@ La sincronización se ejecuta automáticamente una vez por día y también puede
 - propiedades/index.html: catálogo completo, buscador y filtros en /propiedades/.
 - propiedades/NOMBRE-ID/index.html: URL pública estable de cada propiedad.
 - propiedades-no-index/NOMBRE-ID/index.html: copia histórica no indexable.
-- assets/images/propiedades/: imágenes descargadas y optimizadas a WebP.
+- assets/images/propiedades/: imágenes del catálogo descargadas y optimizadas a WebP.
+- assets/images/atencion-integral/: imágenes propias del bloque de atención integral de la portada.
 - assets/images/meta/: copias JPEG de las imágenes necesarias para el catálogo de Meta.
 - meta-catalog.csv: feed inmobiliario público, actualizado para Meta Commerce Manager.
 - sitemap.xml y robots.txt.
@@ -64,7 +65,7 @@ El catálogo usa primero **Imagen principal** y después las columnas **Foto 1**
 - Si el enlace se vacía, el WebP anterior se elimina del repositorio en la siguiente sincronización.
 - Si se vacía **Imagen principal** o cualquiera de las columnas **Foto**, su WebP anterior se elimina en la siguiente sincronización.
 
-El bloque de portada **Menos vueltas. Más información útil para decidir** utiliza exclusivamente imágenes descargadas desde esas columnas del Sheet. Solo considera propiedades con estado **Disponible** o **Reservada**: al marcar una propiedad como Vendida o Pausada, todas sus imágenes se retiran automáticamente de esa rotación.
+El bloque de portada **Menos vueltas. Más información útil para decidir** utiliza exclusivamente las imágenes guardadas en `assets/images/atencion-integral/`; ya no toma fotografías del catálogo. Cada visita muestra una al azar. Para ampliar la rotación, alcanza con subir más archivos `.webp`, `.jpg`, `.jpeg`, `.png` o `.avif` a esa carpeta: el siguiente workflow los incorpora automáticamente.
 
 El workflow define `SITE_URL` como `https://sabrinagigena.com`. Al ser un dominio propio publicado desde la raíz, el generador crea rutas como `/assets/` y `/propiedades/`, sin el antiguo prefijo `/sabrinagigena/`.
 
@@ -88,6 +89,8 @@ La versión V22.15 evita repetir la misma propuesta en varias secciones:
 - el listado conserva la etiqueta `Disponibles` pero no muestra el título `Propiedades destacadas`;
 - se elimina el bloque redundante de acompañamiento y servicios;
 - el enlace del menú a `#servicios` continúa funcionando y apunta al bloque informativo de Sabrina.
+
+La versión V22.16 mantiene un único `H1` en la portada y cambia al azar solamente el nombre visible de la zona entre **Exaltación de la Cruz**, **Parque Sakura** y **Capilla del Señor**. El `<title>`, la descripción, el canonical y los datos estructurados permanecen estables e incluyen las tres zonas para conservar señales SEO consistentes. El bloque final usa imágenes institucionales independientes del catálogo y comunica atención integral, seguimiento personalizado y calidez.
 
 ## Meta Pixel
 
@@ -161,7 +164,7 @@ Después de publicar el ajuste hay que enviar `https://sabrinagigena.com/sitemap
 
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
 
-Las fichas, las tarjetas y el bloque rotativo usan exclusivamente archivos sincronizados dentro de `assets/images/propiedades/`. Las fotografías antiguas guardadas fuera de esa carpeta no se usan como respaldo, por lo que pueden eliminarse sin generar imágenes rotas.
+Las fichas y las tarjetas usan exclusivamente archivos sincronizados dentro de `assets/images/propiedades/`. El bloque institucional de la portada usa `assets/images/atencion-integral/`. Las fotografías antiguas guardadas fuera de esas dos carpetas no se usan como respaldo, por lo que pueden eliminarse sin generar imágenes rotas.
 
 La versión del procesamiento forma parte del registro de cada imagen. Por eso, cuando cambia el diseño de la marca de agua, el siguiente workflow vuelve a procesar también las fotos cuyo enlace no cambió.
 

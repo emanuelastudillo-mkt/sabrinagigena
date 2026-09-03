@@ -65,9 +65,24 @@
     location.href=basePath+marker;
   });
 
+  const pickRandomIndex=(length,previous=-1)=>{
+    let index=Math.floor(Math.random()*length);
+    if(length>1&&index===previous)index=(index+1+Math.floor(Math.random()*(length-1)))%length;
+    return index;
+  };
+
+  const heroLocation=$('[data-hero-location]');
+  if(heroLocation){
+    const locations=['Exaltación de la Cruz','Parque Sakura','Capilla del Señor'];
+    let previous=-1; try{previous=Number(sessionStorage.getItem('sgHeroLocation')??-1)}catch(_){}
+    const index=pickRandomIndex(locations.length,previous);
+    heroLocation.textContent=locations[index];
+    try{sessionStorage.setItem('sgHeroLocation',String(index))}catch(_){}
+  }
+
   const rotator=$('[data-about-rotator]');
   if(rotator){
-    const source=$('#catalog-rotator-images'); let options=[];
+    const source=$('#about-rotator-images')||$('#catalog-rotator-images'); let options=[];
     try{
       const parsed=JSON.parse(source?.textContent||'[]');
       if(Array.isArray(parsed))options=parsed.filter(item=>item&&typeof item.src==='string'&&item.src.trim());
@@ -76,9 +91,8 @@
       rotator.hidden=true; rotator.removeAttribute('src'); rotator.alt='';
     }else{
       let previous=-1; try{previous=Number(sessionStorage.getItem('sgAboutImage')??-1)}catch(_){}
-      let index=Math.floor(Math.random()*options.length);
-      if(options.length>1&&index===previous)index=(index+1+Math.floor(Math.random()*(options.length-1)))%options.length;
-      rotator.hidden=false; rotator.src=options[index].src; rotator.alt=options[index].alt||'Propiedad disponible';
+      const index=pickRandomIndex(options.length,previous);
+      rotator.hidden=false; rotator.src=options[index].src; rotator.alt=options[index].alt||'Atención inmobiliaria integral de Sabrina Gigena';
       try{sessionStorage.setItem('sgAboutImage',String(index))}catch(_){}
     }
   }

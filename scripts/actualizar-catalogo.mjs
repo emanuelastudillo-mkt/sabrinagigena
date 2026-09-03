@@ -21,7 +21,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.15';
+const SITE_VERSION = 'V22.16';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -60,6 +60,7 @@ const repoRoot = path.resolve(__dirname, '..');
 const dataDir = path.join(repoRoot, 'data');
 const imagesDir = path.join(repoRoot, 'assets', 'images', 'propiedades');
 const metaImagesDir = path.join(repoRoot, 'assets', 'images', 'meta');
+const aboutImagesDir = path.join(repoRoot, 'assets', 'images', 'atencion-integral');
 const metaCatalogPath = path.join(repoRoot, 'meta-catalog.csv');
 const stockPath = path.join(dataDir, 'propiedades.json');
 const imageStatePath = path.join(dataDir, 'image-sync.json');
@@ -1178,19 +1179,35 @@ function activeCatalogRotatorImages(rows) {
   );
 }
 
+async function staticAboutRotatorImages() {
+  if (!existsSync(aboutImagesDir)) return [];
+
+  const entries = await readdir(aboutImagesDir, { withFileTypes: true });
+  return entries
+    .filter(entry => entry.isFile() && /\.(?:avif|jpe?g|png|webp)$/i.test(entry.name))
+    .sort((a, b) => a.name.localeCompare(b.name, 'es', { numeric: true }))
+    .map(entry => ({
+      src: sitePath('/assets/images/atencion-integral/' + encodeURIComponent(entry.name)),
+      alt: 'Atención inmobiliaria integral y cercana de Sabrina Gigena'
+    }));
+}
+
 function injectAboutRotatorData(html, images) {
-  const payload = '<script id="catalog-rotator-images" type="application/json">' +
+  const payload = '<script id="about-rotator-images" type="application/json">' +
     JSON.stringify(images).replace(/</g, '\\u003c') + '</script>';
-  const marked = replaceMarkedContent(html, 'SHEET_ABOUT_IMAGES', payload);
+  const withCurrentMarkers = html
+    .replace(/<!--\s*SHEET_ABOUT_IMAGES_START\s*-->/gi, '<!-- ABOUT_IMAGES_START -->')
+    .replace(/<!--\s*SHEET_ABOUT_IMAGES_END\s*-->/gi, '<!-- ABOUT_IMAGES_END -->');
+  const marked = replaceMarkedContent(withCurrentMarkers, 'ABOUT_IMAGES', payload);
   if (marked) return marked;
 
-  const scriptIndex = html.lastIndexOf('<script src=');
-  const insertAt = scriptIndex === -1 ? html.lastIndexOf('</body>') : scriptIndex;
+  const scriptIndex = withCurrentMarkers.lastIndexOf('<script src=');
+  const insertAt = scriptIndex === -1 ? withCurrentMarkers.lastIndexOf('</body>') : scriptIndex;
   if (insertAt === -1) throw new Error('No se encontró dónde insertar las imágenes rotativas');
 
-  const block = '<!-- SHEET_ABOUT_IMAGES_START -->\n' + payload +
-    '\n<!-- SHEET_ABOUT_IMAGES_END -->\n';
-  return html.slice(0, insertAt) + block + html.slice(insertAt);
+  const block = '<!-- ABOUT_IMAGES_START -->\n' + payload +
+    '\n<!-- ABOUT_IMAGES_END -->\n';
+  return withCurrentMarkers.slice(0, insertAt) + block + withCurrentMarkers.slice(insertAt);
 }
 
 function updateAboutRotatorElement(html, images) {
@@ -1363,9 +1380,12 @@ function updateSharedSeoCopy(html) {
 }
 
 function updateHomeSeoCopy(html) {
+  const aboutWhatsappUrl = 'https://wa.me/' + CONTACT_WHATSAPP + '?text=' +
+    encodeURIComponent('Hola Sabrina, quiero contarte qué estoy buscando.');
+
   return updateSharedSeoCopy(html)
     .replace(/(<div class="home-hero-copy">[\s\S]*?<h1>)[\s\S]*?(<\/h1>)/i,
-      '$1Encontrá tu lugar<br>en Exaltación<br>de la Cruz.$2')
+      '$1Encontrá tu lugar<br>en <span data-hero-location>Exaltación de la Cruz</span>.$2')
     .replace(/(<div class="home-hero-note"><p>)[\s\S]*?(<\/p><\/div>)/i,
       '$1Casas, lotes y terrenos seleccionados para distintas formas de vivir e invertir.$2')
     .replace(
@@ -1376,6 +1396,19 @@ function updateHomeSeoCopy(html) {
     .replace(
       /<section(?: id="servicios")? class="section"><div class="container about-strip">/i,
       '<section id="servicios" class="section"><div class="container about-strip">'
+    )
+    .replace(
+      /(<div class="container about-strip">[\s\S]*?<h2>)[\s\S]*?(<\/h2>)/i,
+      '$1Menos vueltas. Más información útil para decidir.$2'
+    )
+    .replace(
+      /(<div class="container about-strip">[\s\S]*?<h2>[\s\S]*?<\/h2><p>)[\s\S]*?(<\/p>)/i,
+      '$1Te acompañamos de forma integral en cada etapa, con seguimiento personalizado, respuestas claras y la calidez necesaria para que tomes decisiones con seguridad.$2'
+    )
+    .replace(
+      /<a class="btn" href="https:\/\/wa\.me\/5492304567715\?text=[^"]*" target="_blank" rel="noopener noreferrer">(?:Contar|Contanos)[^<]*<\/a>/i,
+      '<a class="btn" href="' + escapeAttribute(aboutWhatsappUrl) +
+        '" target="_blank" rel="noopener noreferrer">Contanos qué estás buscando</a>'
     );
 }
 
@@ -1396,14 +1429,15 @@ async function updateCatalogPages(rows) {
     ? publicRows.slice(0, 6).map(propertyCard).join('\n')
     : '';
   const rotatorImages = activeCatalogRotatorImages(publicRows);
+  const aboutImages = await staticAboutRotatorImages();
 
   let indexHtml = await readFile(indexPath, 'utf8');
   indexHtml = updateStaticSeo(indexHtml, HOME_SEO);
   indexHtml = updateHomeSeoCopy(indexHtml);
   indexHtml = updateMetaPixel(indexHtml);
   indexHtml = injectCatalogIntoGrid(indexHtml, 'SHEET_FEATURED', featuredCards);
-  indexHtml = injectAboutRotatorData(indexHtml, rotatorImages);
-  indexHtml = updateAboutRotatorElement(indexHtml, rotatorImages);
+  indexHtml = injectAboutRotatorData(indexHtml, aboutImages);
+  indexHtml = updateAboutRotatorElement(indexHtml, aboutImages);
   indexHtml = indexHtml.replace(
     /href=["']\/?propiedades\.html["']/g,
     'href="' + sitePath('/propiedades/') + '"'
