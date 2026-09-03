@@ -20,6 +20,8 @@ El feed incluye únicamente propiedades con estado `Disponible` o `Reservada` qu
 
 Las coordenadas deben corresponder al centro aproximado del barrio o localidad. El archivo público no utiliza la dirección exacta ni el enlace privado de Google Maps.
 
+El generador acepta tanto el formato decimal normal (`-34.316898`) como el formato que Google Sheets puede exportar según la configuración regional argentina (`-34.316.898`). En ambos casos publica la coordenada normalizada `-34.316898`.
+
 Cada foto sincronizada se convierte también a JPEG dentro de `assets/images/meta/`. Si la propiedad deja de estar disponible, desaparece del feed y se eliminan sus JPEG de Meta en la próxima actualización, sin borrar su ficha histórica.
 
 ## Conexión en Meta
@@ -34,6 +36,8 @@ El workflow de GitHub se ejecuta a las 06:20 de Argentina y reconstruye el CSV, 
 
 ## Campos generados
 
-El feed publica identificador, nombre, disponibilidad, ubicación aproximada, hasta once imágenes, precio, URL, descripción, dormitorios, baños, ambientes, tipo, operación, superficie, antigüedad calculada y datos de contacto de Sabrina.
+El feed publica identificador, nombre, disponibilidad, ubicación aproximada, hasta trece imágenes, precio, URL, descripción, dormitorios, baños, ambientes, tipo, operación, superficie, antigüedad calculada y datos de contacto de Sabrina.
+
+La sincronización se detiene antes de reemplazar el archivo si existen propiedades públicas pero el resultado quedaría completamente vacío. Esto evita volver a publicar accidentalmente un CSV que sólo contenga encabezados.
 
 La disponibilidad usa `FOR_SALE`, `FOR_RENT` o `SALE_PENDING`. Los tipos se normalizan a valores compatibles como `HOUSE`, `APARTMENT`, `LAND`, `CONDO` u `OTHER`.

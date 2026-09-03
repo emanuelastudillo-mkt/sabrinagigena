@@ -21,7 +21,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.13';
+const SITE_VERSION = 'V22.14';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -50,6 +50,8 @@ const MAX_GALLERY_PHOTOS = 12;
 const META_MAX_IMAGES = MAX_GALLERY_PHOTOS + 1;
 const IMAGE_PIPELINE_VERSION = 'watermark-v1-primary-first';
 const WATERMARK_TEXT = 'Sabrina Gigena Inmobiliaria';
+const PUBLIC_ROBOTS = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
+const ARCHIVED_ROBOTS = 'noindex,follow';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -775,13 +777,33 @@ function csvCell(value) {
   return '"' + clean(value).replace(/"/g, '""') + '"';
 }
 
-function metaCoordinate(row, minimum, maximum, ...fields) {
-  const raw = rowValue(row, ...fields).replace(/\s/g, '').replace(',', '.');
+function parseCoordinate(rawValue, minimum, maximum) {
+  const raw = clean(rawValue)
+    .replace(/[−–—]/g, '-')
+    .replace(/[°º]/g, '')
+    .replace(/\s+/g, '');
   if (!raw) return '';
-  const value = Number(raw);
-  return Number.isFinite(value) && value >= minimum && value <= maximum
-    ? String(value)
-    : '';
+
+  const candidates = [raw, raw.replace(',', '.')];
+  const groups = raw.split(/[.,]/);
+  if (groups.length > 2 && /^[+-]?\d{1,3}$/.test(groups[0]) &&
+      groups.slice(1).every(group => /^\d+$/.test(group))) {
+    // Google Sheets puede interpretar -34.316898 con configuración regional
+    // argentina y exportarlo como -34.316.898. Se recompone el decimal.
+    candidates.push(groups[0] + '.' + groups.slice(1).join(''));
+  }
+
+  for (const candidate of candidates) {
+    const value = Number(candidate);
+    if (Number.isFinite(value) && value >= minimum && value <= maximum) {
+      return String(value);
+    }
+  }
+  return '';
+}
+
+function metaCoordinate(row, minimum, maximum, ...fields) {
+  return parseCoordinate(rowValue(row, ...fields), minimum, maximum);
 }
 
 function metaAvailability(row) {
@@ -859,6 +881,7 @@ async function metaImages(row) {
 
 async function generateMetaCatalog(rows) {
   await mkdir(metaImagesDir, { recursive: true });
+  const publicRows = publicRowsSorted(rows);
 
   const headers = [
     'home_listing_id',
@@ -893,7 +916,7 @@ async function generateMetaCatalog(rows) {
     skippedWithoutLocation: 0
   };
 
-  for (const row of publicRowsSorted(rows)) {
+  for (const row of publicRows) {
     const price = priceInfo(row);
     if (!price.amount || !price.currency) {
       report.skippedWithoutPrice += 1;
@@ -946,6 +969,13 @@ async function generateMetaCatalog(rows) {
 
     lines.push(values.map(csvCell).join(','));
     report.items += 1;
+  }
+
+  if (publicRows.length && report.items === 0) {
+    throw new Error(
+      'El catálogo de Meta quedaría vacío. Se conservó el archivo anterior. ' +
+      'Revisá el resumen de precio, imágenes y ubicación aproximada.'
+    );
   }
 
   for (const file of await readdir(metaImagesDir)) {
@@ -1179,20 +1209,91 @@ function topbarMarkup() {
     '</div></div>';
 }
 
-function businessSchema() {
+function businessSchema(seo) {
+  const canonical = absoluteUrl(seo.path);
+  const image = absoluteUrl(seo.image);
+  const isCatalog = seo.path === '/propiedades/';
+  const graph = [
+    {
+      '@type': 'RealEstateAgent',
+      '@id': SITE_URL + '/#business',
+      name: SITE_NAME,
+      url: SITE_URL + '/',
+      image,
+      logo: {
+        '@type': 'ImageObject',
+        url: absoluteUrl('/favicon.png')
+      },
+      description: 'Servicios inmobiliarios en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.',
+      telephone: CONTACT_PHONE,
+      email: CONTACT_EMAIL,
+      sameAs: SOCIAL_PROFILES,
+      areaServed: SEO_AREAS.map(name => ({ '@type': 'Place', name }))
+    },
+    {
+      '@type': 'WebSite',
+      '@id': SITE_URL + '/#website',
+      url: SITE_URL + '/',
+      name: SITE_NAME,
+      inLanguage: 'es-AR',
+      publisher: { '@id': SITE_URL + '/#business' }
+    },
+    {
+      '@type': isCatalog ? 'CollectionPage' : 'WebPage',
+      '@id': canonical + '#webpage',
+      url: canonical,
+      name: seo.title,
+      description: seo.description,
+      inLanguage: 'es-AR',
+      isPartOf: { '@id': SITE_URL + '/#website' },
+      about: { '@id': SITE_URL + '/#business' },
+      primaryImageOfPage: {
+        '@type': 'ImageObject',
+        '@id': canonical + '#primaryimage',
+        url: image,
+        contentUrl: image,
+        caption: seo.title
+      },
+      ...(isCatalog ? { breadcrumb: { '@id': canonical + '#breadcrumb' } } : {})
+    }
+  ];
+  if (isCatalog) {
+    graph.push({
+      '@type': 'BreadcrumbList',
+      '@id': canonical + '#breadcrumb',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL + '/' },
+        { '@type': 'ListItem', position: 2, name: 'Propiedades', item: canonical }
+      ]
+    });
+  }
   return JSON.stringify({
     '@context': 'https://schema.org',
-    '@type': 'RealEstateAgent',
-    '@id': SITE_URL + '/#business',
-    name: SITE_NAME,
-    url: SITE_URL + '/',
-    image: absoluteUrl('/favicon.png'),
-    description: 'Servicios inmobiliarios en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.',
-    telephone: CONTACT_PHONE,
-    email: CONTACT_EMAIL,
-    sameAs: SOCIAL_PROFILES,
-    areaServed: SEO_AREAS.map(name => ({ '@type': 'Place', name }))
+    '@graph': graph
   }).replace(/</g, '\\u003c');
+}
+
+function upsertRobotsMeta(html, content) {
+  const tag = '<meta name="robots" content="' + escapeAttribute(content) + '">';
+  const withoutPrevious = html.replace(
+    /\s*<meta\s+name=["']robots["'][^>]*>/gi,
+    ''
+  );
+  if (/<meta\s+name=["']description["'][^>]*>/i.test(withoutPrevious)) {
+    return withoutPrevious.replace(
+      /(<meta\s+name=["']description["'][^>]*>)/i,
+      '$1\n' + tag
+    );
+  }
+  return withoutPrevious.replace(/<\/head>/i, tag + '\n</head>');
+}
+
+function useCanonicalInternalLinks(html) {
+  return html
+    .replace(/\bhref=(["'])(?:\.\/)?\/?propiedades\/index\.html(#[^"']*)?\1/gi,
+      (_, quote, fragment = '') => 'href=' + quote + '/propiedades/' + fragment + quote)
+    .replace(/\bhref=(["'])(?:\.\/)?\/?index\.html(#[^"']*)?\1/gi,
+      (_, quote, fragment = '') => 'href=' + quote + '/' + fragment + quote);
 }
 
 function updateStaticSeo(html, seo) {
@@ -1201,7 +1302,7 @@ function updateStaticSeo(html, seo) {
   const canonical = absoluteUrl(seo.path);
   const socialImage = absoluteUrl(seo.image);
 
-  return html
+  const updated = html
     .replace(/<title>[\s\S]*?<\/title>/i, '<title>' + title + '</title>')
     .replace(/<meta\s+name=["']description["'][^>]*>/i,
       '<meta name="description" content="' + description + '">')
@@ -1222,7 +1323,8 @@ function updateStaticSeo(html, seo) {
     .replace(/<meta\s+name=["']twitter:image["'][^>]*>/i,
       '<meta name="twitter:image" content="' + escapeAttribute(socialImage) + '">')
     .replace(/<script\s+type=["']application\/ld\+json["']>[\s\S]*?<\/script>/i,
-      '<script type="application/ld+json">' + businessSchema() + '</script>');
+      '<script type="application/ld+json">' + businessSchema(seo) + '</script>');
+  return upsertRobotsMeta(useCanonicalInternalLinks(updated), PUBLIC_ROBOTS);
 }
 
 function metaPixelHeadMarkup() {
@@ -1317,7 +1419,6 @@ async function updateCatalogPages(rows) {
     '<span class="count-number">' + publicRows.length + '</span>'
   );
   catalogHtml = catalogHtml
-    .replace(/<meta name=["']robots["'][^>]*>/gi, '')
     .replace(/https:\/\/sabrinagigena\.com\/propiedades\.html/g, SITE_URL + '/propiedades/')
     .replace(
       /href=["']\/?propiedades\.html["']/g,
@@ -1416,27 +1517,27 @@ function featureMarkup(row) {
 
 function siteHeader() {
   return topbarMarkup() + '<header class="site-header"><div class="container header-inner">' +
-    '<a class="brand" href="' + sitePath('/index.html') + '" aria-label="' + SITE_NAME + '">' +
+    '<a class="brand" href="' + sitePath('/') + '" aria-label="' + SITE_NAME + '">' +
     '<span class="brand-mark"><img src="' + sitePath('/favicon.png') + '" alt=""></span><span class="brand-copy">' +
     '<strong>Sabrina Gigena</strong><small>Servicios Inmobiliarios</small></span></a>' +
     '<button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav">' +
     '<span></span><span></span><span></span></button><nav class="nav" id="site-nav" aria-label="Navegación principal">' +
-    '<a href="' + sitePath('/index.html') + '">Inicio</a><a class="active" href="' +
+    '<a href="' + sitePath('/') + '">Inicio</a><a class="active" href="' +
     sitePath('/propiedades/') + '" aria-current="page">Propiedades</a>' +
-    '<a href="' + sitePath('/index.html#servicios') + '">Servicios</a><a class="header-cta" href="https://wa.me/' +
+    '<a href="' + sitePath('/#servicios') + '">Servicios</a><a class="header-cta" href="https://wa.me/' +
     CONTACT_WHATSAPP + '?text=Hola%20Sabrina%2C%20quiero%20hacer%20una%20consulta%20inmobiliaria" ' +
     'target="_blank" rel="noopener noreferrer">Consultar</a></nav></div></header>';
 }
 
 function siteFooter() {
   return '<footer class="footer"><div class="container"><div class="footer-grid"><div>' +
-    '<a class="brand footer-brand" href="' + sitePath('/index.html') + '"><span class="brand-mark"><img src="' +
+    '<a class="brand footer-brand" href="' + sitePath('/') + '"><span class="brand-mark"><img src="' +
     sitePath('/favicon.png') + '" alt=""></span>' +
     '<span class="brand-copy"><strong>Sabrina Gigena</strong><small>Servicios Inmobiliarios</small></span></a>' +
     '<p>Servicios inmobiliarios en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.</p>' +
-    '</div><div><h4>Navegación</h4><div class="footer-links"><a href="' + sitePath('/index.html') + '">Inicio</a>' +
+    '</div><div><h4>Navegación</h4><div class="footer-links"><a href="' + sitePath('/') + '">Inicio</a>' +
     '<a href="' + sitePath('/propiedades/') + '">Propiedades</a><a href="' +
-    sitePath('/index.html#servicios') + '">Servicios</a></div></div>' +
+    sitePath('/#servicios') + '">Servicios</a></div></div>' +
     '<div><h4>Contacto</h4><div class="footer-links"><a href="tel:+5492304567715">' + CONTACT_PHONE + '</a>' +
     '<a href="mailto:' + CONTACT_EMAIL + '">' + CONTACT_EMAIL + '</a>' +
     '<a href="https://wa.me/' + CONTACT_WHATSAPP + '" target="_blank" rel="noopener noreferrer">WhatsApp</a>' +
@@ -1446,7 +1547,65 @@ function siteFooter() {
     SITE_VERSION + '</div></div></footer>';
 }
 
+function truncateSeoText(value, maxLength = 158) {
+  const compact = clean(value).replace(/\s+/g, ' ');
+  if (compact.length <= maxLength) return compact;
+  const sliced = compact.slice(0, maxLength - 1);
+  const boundary = sliced.lastIndexOf(' ');
+  return (boundary > 90 ? sliced.slice(0, boundary) : sliced) + '…';
+}
+
+function propertySeoTitle(row) {
+  const title = propertyTitle(row);
+  const area = formatArea(rowValue(row, 'Superficie total (m²)', 'Superficie total (m2)'));
+  const qualifier = area || rowValue(row, 'Localidad');
+  return qualifier ? title + ' · ' + qualifier : title;
+}
+
+function propertyMetaDescription(row) {
+  const typeOperation = [
+    rowValue(row, 'Tipo de propiedad'),
+    rowValue(row, 'Operación', 'Operacion')
+  ].filter(Boolean).join(' en ');
+  const location = propertyLocation(row);
+  const area = formatArea(rowValue(row, 'Superficie total (m²)', 'Superficie total (m2)'));
+  const introduction = [typeOperation, location].filter(Boolean).join(' en ');
+  const commercial = rowValue(row, 'Descripción comercial', 'Descripcion comercial');
+  return truncateSeoText([
+    introduction ? introduction + '.' : '',
+    area ? 'Superficie total: ' + area + '.' : '',
+    commercial
+  ].filter(Boolean).join(' '));
+}
+
 function propertySchema(row, canonical, images) {
+  const firstImage = images[0] ? absoluteUrl(images[0]) : '';
+  const latitude = metaCoordinate(row, -90, 90, 'Latitud aproximada');
+  const longitude = metaCoordinate(row, -180, 180, 'Longitud aproximada');
+  const postalCode = rowValue(row, 'Código postal', 'Codigo postal');
+  const propertyEntity = {
+    '@type': 'Place',
+    '@id': canonical + '#property',
+    name: propertyTitle(row),
+    description: propertyMetaDescription(row),
+    image: images.map(absoluteUrl),
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: rowValue(row, 'Localidad'),
+      addressRegion: 'Buenos Aires',
+      postalCode,
+      addressCountry: 'AR'
+    },
+    ...(latitude && longitude
+      ? {
+          geo: {
+            '@type': 'GeoCoordinates',
+            latitude,
+            longitude
+          }
+        }
+      : {})
+  };
   const graph = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -1454,8 +1613,12 @@ function propertySchema(row, canonical, images) {
         '@type': 'RealEstateAgent',
         '@id': SITE_URL + '/#business',
         name: SITE_NAME,
-        url: SITE_URL,
+        url: SITE_URL + '/',
         image: absoluteUrl('/favicon.png'),
+        logo: {
+          '@type': 'ImageObject',
+          url: absoluteUrl('/favicon.png')
+        },
         description: 'Servicios inmobiliarios en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.',
         telephone: CONTACT_PHONE,
         email: CONTACT_EMAIL,
@@ -1466,26 +1629,42 @@ function propertySchema(row, canonical, images) {
         '@type': 'WebPage',
         '@id': canonical + '#webpage',
         url: canonical,
-        name: propertyTitle(row) + ' | ' + SITE_NAME,
-        description: summaryText(row, 300),
-        about: {
-          '@type': 'Place',
-          name: propertyTitle(row),
-          image: images.map(absoluteUrl),
-          address: {
-            '@type': 'PostalAddress',
-            addressLocality: rowValue(row, 'Localidad'),
-            addressRegion: 'Buenos Aires',
-            addressCountry: 'AR'
-          }
-        },
+        name: propertySeoTitle(row) + ' | ' + SITE_NAME,
+        description: propertyMetaDescription(row),
+        inLanguage: 'es-AR',
+        about: { '@id': canonical + '#property' },
+        mainEntity: { '@id': canonical + '#property' },
+        breadcrumb: { '@id': canonical + '#breadcrumb' },
+        ...(firstImage
+          ? {
+              primaryImageOfPage: {
+                '@type': 'ImageObject',
+                '@id': canonical + '#primaryimage',
+                url: firstImage,
+                contentUrl: firstImage,
+                caption: propertyTitle(row)
+              }
+            }
+          : {}),
         isPartOf: { '@id': SITE_URL + '/#website' }
+      },
+      propertyEntity,
+      {
+        '@type': 'BreadcrumbList',
+        '@id': canonical + '#breadcrumb',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL + '/' },
+          { '@type': 'ListItem', position: 2, name: 'Propiedades', item: SITE_URL + '/propiedades/' },
+          { '@type': 'ListItem', position: 3, name: propertyTitle(row), item: canonical }
+        ]
       },
       {
         '@type': 'WebSite',
         '@id': SITE_URL + '/#website',
-        url: SITE_URL,
-        name: SITE_NAME
+        url: SITE_URL + '/',
+        name: SITE_NAME,
+        inLanguage: 'es-AR',
+        publisher: { '@id': SITE_URL + '/#business' }
       }
     ]
   };
@@ -1635,23 +1814,24 @@ function propertyPageHtml(row, activeRows = []) {
   const archived = !isPublicProperty(row);
   const archiveStatus = archivedLabel(row);
   const canonical = SITE_URL + propertyRoute(row);
-  const baseDescription = summaryText(row, 155) ||
+  const seoTitle = propertySeoTitle(row);
+  const baseDescription = propertyMetaDescription(row) ||
     'Información y consulta sobre esta propiedad con Sabrina Gigena Servicios Inmobiliarios.';
   const leadText = summaryText(row, 320) || 'Consultá por más información sobre esta propiedad.';
-  const metaDescription = archived
+  const metaDescription = truncateSeoText(archived
     ? archiveStatus + ': ' + baseDescription
-    : baseDescription;
+    : baseDescription);
   const ogImage = images.length
     ? absoluteUrl(images[0])
-    : SITE_URL + '/assets/images/favicon.png';
+    : SITE_URL + '/favicon.png';
   const specs = specificationItems(row)
     .map(item => '<div class="spec"><strong>' + escapeHtml(item.value) +
       '</strong><span>' + escapeHtml(item.label) + '</span></div>')
     .join('');
   const price = priceInfo(row);
   const pageTitle = archived
-    ? archiveStatus + ' · ' + title
-    : title;
+    ? archiveStatus + ' · ' + seoTitle
+    : seoTitle;
   const locationType = [
     propertyLocation(row),
     rowValue(row, 'Tipo de propiedad')
@@ -1661,7 +1841,7 @@ function propertyPageHtml(row, activeRows = []) {
     '<!doctype html><html lang="es-AR"><head>',
     '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">',
     '<meta name="theme-color" content="#071b26"><meta name="color-scheme" content="dark">',
-    archived ? '<meta name="robots" content="noindex,nofollow,noarchive">' : '',
+    '<meta name="robots" content="' + (archived ? ARCHIVED_ROBOTS : PUBLIC_ROBOTS) + '">',
     '<link rel="icon" href="' + sitePath('/favicon.png') + '" type="image/png"><link rel="stylesheet" href="' +
       sitePath('/assets/css/site.css') + '">',
     '<title>' + escapeHtml(pageTitle) + ' | Sabrina Gigena Inmobiliaria</title>',
@@ -1684,7 +1864,7 @@ function propertyPageHtml(row, activeRows = []) {
     '<main><section class="detail-hero"><div class="container">',
     '<div class="property-nav-row"><button class="back-button" type="button" data-back-button>' +
       '<span aria-hidden="true">←</span> Volver</button><nav class="breadcrumbs" aria-label="Migas de pan">' +
-      '<a href="' + sitePath('/index.html') + '">Inicio</a><span>/</span><a href="' +
+      '<a href="' + sitePath('/') + '">Inicio</a><span>/</span><a href="' +
       sitePath('/propiedades/') + '">Propiedades</a>' +
       '<span>/</span><span aria-current="page">' + escapeHtml(title) + '</span></nav></div>',
     heroGallery(title, images),

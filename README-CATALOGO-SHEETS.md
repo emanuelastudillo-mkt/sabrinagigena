@@ -132,7 +132,23 @@ Para que una propiedad pueda ingresar al feed se deben agregar y completar estas
 
 La versión V22.13 reconoce directamente los encabezados actuales de la hoja: `Código Postal`, `Latitud aproximada` y `Longitud aproximada`. No es necesario moverlos a una letra específica.
 
+La versión V22.14 también normaliza automáticamente coordenadas que Google Sheets exporta con separadores regionales. Por ejemplo, `-34.316.898` se publica correctamente como `-34.316898`. Si hay propiedades públicas pero ninguna puede incorporarse, el workflow falla antes de reemplazar el feed por un CSV vacío.
+
 Las coordenadas deben señalar el centro aproximado del barrio o localidad, nunca la puerta de la propiedad. El feed no utiliza `Dirección` ni `Link Google Maps`. Las instrucciones de conexión se encuentran en `META-CATALOGO.md`.
+
+## Indexación en Google
+
+La versión V22.14 refuerza las señales técnicas para Google Search:
+
+- todas las páginas públicas declaran `index,follow` y permiten vistas previas grandes de imágenes;
+- las propiedades vendidas o retiradas declaran `noindex,follow` y permanecen fuera del sitemap;
+- portada, catálogo y fichas usan canonical absolutos del dominio `https://sabrinagigena.com`;
+- los enlaces internos usan `/` y `/propiedades/`, sin enlazar copias con `/index.html`;
+- las fichas con nombres repetidos reciben títulos SEO diferenciados por superficie;
+- el JSON-LD incorpora `RealEstateAgent`, `WebSite`, `WebPage`, ubicación aproximada, imagen principal y migas de pan;
+- el sitemap sólo contiene URLs públicas y conserva las imágenes sincronizadas.
+
+Después de publicar el ajuste hay que enviar `https://sabrinagigena.com/sitemap.xml` una sola vez en Google Search Console. Google puede tardar en volver a rastrear las URLs; una cobertura previa no desaparece de inmediato.
 
 Cada archivo de Google Drive debe estar compartido como **Cualquier persona con el enlace**. Una URL de carpeta por sí sola no permite una descarga estable en GitHub Actions; por eso el proceso avisa cuando encuentra únicamente **Carpeta Google Drive**.
 
