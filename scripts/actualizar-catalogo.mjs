@@ -21,7 +21,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.14';
+const SITE_VERSION = 'V22.15';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -1290,9 +1290,9 @@ function upsertRobotsMeta(html, content) {
 
 function useCanonicalInternalLinks(html) {
   return html
-    .replace(/\bhref=(["'])(?:\.\/)?\/?propiedades\/index\.html(#[^"']*)?\1/gi,
+    .replace(/\bhref=(["'])(?:\.\/)?(?:\/sabrinagigena)?\/?propiedades\/index\.html(#[^"']*)?\1/gi,
       (_, quote, fragment = '') => 'href=' + quote + '/propiedades/' + fragment + quote)
-    .replace(/\bhref=(["'])(?:\.\/)?\/?index\.html(#[^"']*)?\1/gi,
+    .replace(/\bhref=(["'])(?:\.\/)?(?:\/sabrinagigena)?\/?index\.html(#[^"']*)?\1/gi,
       (_, quote, fragment = '') => 'href=' + quote + '/' + fragment + quote);
 }
 
@@ -1347,11 +1347,11 @@ function metaPixelNoScriptMarkup() {
 function updateMetaPixel(html) {
   const withoutPreviousPixel = html
     .replace(/\s*<!-- Meta Pixel Code -->[\s\S]*?<!-- End Meta Pixel Code -->\s*/gi, '\n')
-    .replace(/\s*<!-- Meta Pixel NoScript -->[\s\S]*?<!-- End Meta Pixel NoScript -->\s*/gi, '\n');
+    .replace(/\s*<!-- Meta Pixel NoScript -->[\s\S]*?<!-- End Meta Pixel NoScript -->\s*/gi, '');
 
   return withoutPreviousPixel
     .replace(/<\/head>/i, metaPixelHeadMarkup() + '\n</head>')
-    .replace(/(<body\b[^>]*>)/i, '$1\n' + metaPixelNoScriptMarkup());
+    .replace(/(<body\b[^>]*>)/i, '$1\n' + metaPixelNoScriptMarkup() + '\n');
 }
 
 function updateSharedSeoCopy(html) {
@@ -1364,12 +1364,19 @@ function updateSharedSeoCopy(html) {
 
 function updateHomeSeoCopy(html) {
   return updateSharedSeoCopy(html)
+    .replace(/(<div class="home-hero-copy">[\s\S]*?<h1>)[\s\S]*?(<\/h1>)/i,
+      '$1Encontrá tu lugar<br>en Exaltación<br>de la Cruz.$2')
     .replace(/(<div class="home-hero-note"><p>)[\s\S]*?(<\/p><\/div>)/i,
-      '$1Asesoramiento inmobiliario en Capilla del Señor, Parque Sakura y Exaltación de la Cruz, con transparencia, calidez y seguridad jurídica.$2')
-    .replace(/(<section id="servicios"[\s\S]*?<div class="section-head">[\s\S]*?<h2>)[\s\S]*?(<\/h2>)/i,
-      '$1Inmobiliaria en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.$2')
-    .replace(/(<article class="service"><strong>Conocimiento local<\/strong><span>)[\s\S]*?(<\/span><\/article>)/i,
-      '$1Experiencia en Capilla del Señor, Parque Sakura y todo Exaltación de la Cruz.$2');
+      '$1Casas, lotes y terrenos seleccionados para distintas formas de vivir e invertir.$2')
+    .replace(
+      /(<section class="section home-catalog"[\s\S]*?<div class="section-head"><div><span class="eyebrow">[^<]*<\/span>)<h2>[\s\S]*?<\/h2>/i,
+      '$1'
+    )
+    .replace(/\s*<section id="servicios" class="section services-band">[\s\S]*?<\/section>/i, '\n')
+    .replace(
+      /<section(?: id="servicios")? class="section"><div class="container about-strip">/i,
+      '<section id="servicios" class="section"><div class="container about-strip">'
+    );
 }
 
 function updateCatalogSeoCopy(html) {

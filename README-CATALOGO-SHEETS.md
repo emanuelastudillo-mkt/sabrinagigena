@@ -80,6 +80,15 @@ La versión V22.10 concentra el posicionamiento local en **Capilla del Señor**,
 - Los datos estructurados `RealEstateAgent` declaran las tres zonas mediante `areaServed`, tanto en las páginas generales como en cada ficha.
 - El generador vuelve a aplicar estos ajustes en cada sincronización para evitar que un workflow posterior restaure el contenido anterior.
 
+## Contenido simplificado de la home
+
+La versión V22.15 evita repetir la misma propuesta en varias secciones:
+
+- el hero utiliza un título y una frase breve propios;
+- el listado conserva la etiqueta `Disponibles` pero no muestra el título `Propiedades destacadas`;
+- se elimina el bloque redundante de acompañamiento y servicios;
+- el enlace del menú a `#servicios` continúa funcionando y apunta al bloque informativo de Sabrina.
+
 ## Meta Pixel
 
 La versión V22.11 instala el píxel de Meta con el identificador `1421470373195307`:
