@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-04T05:00:40.086Z",
+  "generatedAt": "2026-09-04T13:35:33.387Z",
   "source": "https://docs.google.com/spreadsheets/d/1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI/export?format=csv&gid=779453685",
   "spreadsheetId": "1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI",
   "sheetGid": "779453685",
   "rowCount": 8,
-  "contentHash": "37ce5c8fd3a153038c68597334173dbdc700b329f1c727051d2a1976978676fe",
+  "contentHash": "52afa6ff3dd092c4bf73fc942660e6259ebb8169fcaa71ce0c231fa2b73db454",
   "rows": [
     {
       "ID": "S001",
@@ -226,7 +226,7 @@
       "Tipo de propiedad": "Casa",
       "Nombre": "Casa Casco Urbano",
       "Precio USD": "95.000",
-      "Precio ARS": "146.500.000",
+      "Precio ARS": "146.400.000",
       "Mostrar precio": "Sí",
       "Moneda principal": "USD",
       "Apta para Crédito Hipotecario": "No",
@@ -347,7 +347,7 @@
       "Destacada en web": "",
       "Orden de publicación": "3",
       "Superficie total (m²)": "1500",
-      "Superficie semicubierta(m²)": "",
+      "Superficie semicubierta(m²)": "0",
       "Superficie cubierta (m²)": "0",
       "Superficie libre (m²)": "1500",
       "Ambientes": "0",
