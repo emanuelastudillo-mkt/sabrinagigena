@@ -21,14 +21,17 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.17';
+const SITE_VERSION = 'V22.18';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
 const META_PIXEL_ID = '1421470373195307';
+const MERCADOLIBRE_URL = 'https://inmuebles.mercadolibre.com.ar/_CustId_3248344187';
+const APPOINTMENT_URL = 'https://calendar.app.google/SefkdpjA8xZqpVYc9';
 const SOCIAL_PROFILES = [
   'https://www.instagram.com/sabrina_gigena_inmobiliaria/',
-  'https://www.facebook.com/profile.php?id=61579988094625'
+  'https://www.facebook.com/profile.php?id=61579988094625',
+  MERCADOLIBRE_URL
 ];
 const SEO_AREAS = ['Capilla del Señor', 'Parque Sakura', 'Exaltación de la Cruz'];
 const HOME_SEO = {
@@ -1243,6 +1246,63 @@ function topbarMarkup() {
     '</div></div>';
 }
 
+function headerExternalLinksMarkup() {
+  return '<a data-mercadolibre-link href="' + escapeAttribute(MERCADOLIBRE_URL) +
+    '" target="_blank" rel="noopener noreferrer">Mercado Libre</a>' +
+    '<a class="header-cta" data-appointment-link href="' + escapeAttribute(APPOINTMENT_URL) +
+    '" target="_blank" rel="noopener noreferrer">Agendar reunión</a>';
+}
+
+function footerExternalLinksMarkup() {
+  return '<a data-mercadolibre-link href="' + escapeAttribute(MERCADOLIBRE_URL) +
+    '" target="_blank" rel="noopener noreferrer">Publicaciones en Mercado Libre</a>' +
+    '<a data-appointment-link href="' + escapeAttribute(APPOINTMENT_URL) +
+    '" target="_blank" rel="noopener noreferrer">Agendar una reunión</a>';
+}
+
+function aboutActionsMarkup(whatsappUrl) {
+  return '<div class="about-actions">' +
+    '<a class="btn" href="' + escapeAttribute(whatsappUrl) +
+    '" target="_blank" rel="noopener noreferrer">Contanos qué estás buscando</a>' +
+    '<a class="btn btn-secondary" data-appointment-link href="' + escapeAttribute(APPOINTMENT_URL) +
+    '" target="_blank" rel="noopener noreferrer">Agendar una reunión</a></div>';
+}
+
+function updateExternalNavigation(html) {
+  const withHeaderLinks = html.replace(
+    /<nav class="nav" id="site-nav"[\s\S]*?<\/nav>/i,
+    nav => {
+      const cleanNav = nav
+        .replace(/\s*<a\b[^>]*\bdata-mercadolibre-link\b[^>]*>[\s\S]*?<\/a>/gi, '')
+        .replace(/\s*<a\b[^>]*\bdata-appointment-link\b[^>]*>[\s\S]*?<\/a>/gi, '');
+      const headerCta = /<a\b[^>]*class=["'][^"']*\bheader-cta\b[^"']*["'][^>]*>[\s\S]*?<\/a>/i;
+      if (headerCta.test(cleanNav)) {
+        return cleanNav.replace(headerCta, headerExternalLinksMarkup());
+      }
+      return cleanNav.replace(/<\/nav>$/i, headerExternalLinksMarkup() + '</nav>');
+    }
+  );
+
+  return withHeaderLinks.replace(
+    /(<div><h4>Contacto<\/h4><div class="footer-links">)([\s\S]*?)(<\/div><\/div>)/gi,
+    (_, opening, links, closing) => {
+      let cleanLinks = links
+        .replace(/\s*<a\b[^>]*\bdata-mercadolibre-link\b[^>]*>[\s\S]*?<\/a>/gi, '')
+        .replace(/\s*<a\b[^>]*\bdata-appointment-link\b[^>]*>[\s\S]*?<\/a>/gi, '');
+      const whatsappLink = /<a\b[^>]*href=["']https:\/\/wa\.me\/[^"']+["'][^>]*>WhatsApp<\/a>/i;
+      if (whatsappLink.test(cleanLinks)) {
+        cleanLinks = cleanLinks.replace(
+          whatsappLink,
+          match => match + footerExternalLinksMarkup()
+        );
+      } else {
+        cleanLinks += footerExternalLinksMarkup();
+      }
+      return opening + cleanLinks + closing;
+    }
+  );
+}
+
 function businessSchema(seo) {
   const canonical = absoluteUrl(seo.path);
   const image = absoluteUrl(seo.image);
@@ -1389,13 +1449,15 @@ function updateMetaPixel(html) {
 }
 
 function updateSharedSeoCopy(html) {
-  return html
+  const updated = html
     .replace(/<div class="topbar"\s+aria-hidden="true"><div class="topbar-track">[\s\S]*?<\/div><\/div>/i,
       topbarMarkup())
     .replace(/(<span class="brand-mark"><img\b[^>]*\balt=)["'][^"']*["']/gi,
       '$1"' + escapeAttribute(SITE_NAME) + '"')
     .replace(/Servicios inmobiliarios con foco en [^<]+\./gi,
       'Servicios inmobiliarios en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.');
+
+  return updateExternalNavigation(updated);
 }
 
 function updateHomeSeoCopy(html) {
@@ -1425,9 +1487,8 @@ function updateHomeSeoCopy(html) {
       '$1Te acompañamos de forma integral en cada etapa, con seguimiento personalizado, respuestas claras y la calidez necesaria para que tomes decisiones con seguridad. Brindamos atención inmobiliaria en Capilla del Señor, Parque Sakura y distintas zonas de Exaltación de la Cruz.$2'
     )
     .replace(
-      /<a class="btn" href="https:\/\/wa\.me\/5492304567715\?text=[^"]*" target="_blank" rel="noopener noreferrer">(?:Contar|Contanos)[^<]*<\/a>/i,
-      '<a class="btn" href="' + escapeAttribute(aboutWhatsappUrl) +
-        '" target="_blank" rel="noopener noreferrer">Contanos qué estás buscando</a>'
+      /<div class="about-actions">[\s\S]*?<\/div>|<a class="btn" href="https:\/\/wa\.me\/5492304567715\?text=[^"]*" target="_blank" rel="noopener noreferrer">(?:Contar|Contanos)[^<]*<\/a>/i,
+      aboutActionsMarkup(aboutWhatsappUrl)
     );
 }
 
@@ -1584,9 +1645,8 @@ function siteHeader() {
     '<span></span><span></span><span></span></button><nav class="nav" id="site-nav" aria-label="Navegación principal">' +
     '<a href="' + sitePath('/') + '">Inicio</a><a class="active" href="' +
     sitePath('/propiedades/') + '" aria-current="page">Propiedades</a>' +
-    '<a href="' + sitePath('/#servicios') + '">Servicios</a><a class="header-cta" href="https://wa.me/' +
-    CONTACT_WHATSAPP + '?text=Hola%20Sabrina%2C%20quiero%20hacer%20una%20consulta%20inmobiliaria" ' +
-    'target="_blank" rel="noopener noreferrer">Consultar</a></nav></div></header>';
+    '<a href="' + sitePath('/#servicios') + '">Servicios</a>' +
+    headerExternalLinksMarkup() + '</nav></div></header>';
 }
 
 function siteFooter() {
@@ -1601,6 +1661,7 @@ function siteFooter() {
     '<div><h4>Contacto</h4><div class="footer-links"><a href="tel:+5492304567715">' + CONTACT_PHONE + '</a>' +
     '<a href="mailto:' + CONTACT_EMAIL + '">' + CONTACT_EMAIL + '</a>' +
     '<a href="https://wa.me/' + CONTACT_WHATSAPP + '" target="_blank" rel="noopener noreferrer">WhatsApp</a>' +
+    footerExternalLinksMarkup() +
     '<a href="https://www.instagram.com/sabrina_gigena_inmobiliaria/" target="_blank" rel="noopener noreferrer">Instagram</a>' +
     '<a href="https://www.facebook.com/profile.php?id=61579988094625" target="_blank" rel="noopener noreferrer">Facebook</a>' +
     '</div></div></div><div class="copyright">© 2026 ' + SITE_NAME + '. · Versión ' +
@@ -1858,7 +1919,10 @@ function contactCard(row, archived = false) {
     '<span class="eyebrow">Consulta directa</span><h3>' + escapeHtml(heading) + '</h3>' +
     '<p>' + escapeHtml(description) + '</p>' +
     '<a class="btn" href="' + escapeAttribute(whatsapp) + '" target="_blank" rel="noopener noreferrer">' +
-    escapeHtml(buttonLabel) + '</a><div class="contact-mini"><a href="tel:+5492304567715">' + CONTACT_PHONE + '</a>' +
+    escapeHtml(buttonLabel) + '</a>' +
+    '<a class="btn btn-secondary appointment-link" data-appointment-link href="' +
+    escapeAttribute(APPOINTMENT_URL) + '" target="_blank" rel="noopener noreferrer">Agendar una reunión</a>' +
+    '<div class="contact-mini"><a href="tel:+5492304567715">' + CONTACT_PHONE + '</a>' +
     '<a href="mailto:' + CONTACT_EMAIL + '">' + CONTACT_EMAIL + '</a></div></aside>';
 }
 

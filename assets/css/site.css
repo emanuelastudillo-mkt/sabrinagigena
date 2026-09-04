@@ -176,3 +176,13 @@
  .property-page .detail-gallery-empty{min-height:125px}
  .property-page .map-unavailable{min-height:260px}
 }
+
+/* V22.18 · accesos a Mercado Libre y agenda */
+.about-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.btn.btn-secondary{background:transparent!important;border-color:rgba(212,182,108,.58)!important;color:var(--gold-soft)!important}
+.btn.btn-secondary:hover{background:rgba(212,182,108,.1)!important;color:#fff!important}
+.contact-card .appointment-link{margin-top:10px}
+@media(max-width:720px){
+ .about-actions{align-items:stretch}
+ .about-actions .btn{width:100%}
+}

@@ -218,3 +218,12 @@ En PowerShell:
     node scripts/actualizar-catalogo.mjs
 
 Si Google Sheets deja de estar disponible públicamente o cambia su estructura, el script termina con error antes de reemplazar el catálogo existente.
+
+## Mercado Libre y agenda de reuniones
+
+Desde la versión V22.18 se integran dos accesos externos permanentes:
+
+- **Mercado Libre:** aparece en el menú principal y en el pie de página. El perfil también se incorpora al dato estructurado `sameAs` del negocio.
+- **Agendar una reunión:** aparece como acción destacada del encabezado, en el bloque institucional de la portada, en cada ficha de propiedad y en el pie de página.
+
+Los dos enlaces se abren en una pestaña nueva con `noopener noreferrer`. WhatsApp continúa disponible en la portada, las fichas, el botón flotante y el pie de página.
