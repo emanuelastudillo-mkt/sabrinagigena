@@ -92,6 +92,19 @@ La versión V22.15 evita repetir la misma propuesta en varias secciones:
 
 La versión V22.16 mantiene un único `H1` en la portada y cambia al azar solamente el nombre visible de la zona entre **Exaltación de la Cruz**, **Parque Sakura** y **Capilla del Señor**. El `<title>`, la descripción, el canonical y los datos estructurados permanecen estables e incluyen las tres zonas para conservar señales SEO consistentes. El bloque final usa imágenes institucionales independientes del catálogo y comunica atención integral, seguimiento personalizado y calidez.
 
+## Ajustes posteriores a la auditoría SEO
+
+La versión V22.17 corrige los hallazgos verificables de la auditoría del 4 de septiembre de 2026:
+
+- acorta los títulos de la portada y el catálogo, manteniendo el contexto geográfico completo en las descripciones, encabezados y datos estructurados;
+- asigna un texto alternativo descriptivo a los logos del encabezado y el pie;
+- genera descripciones SEO específicas con ubicación, precio y características reales de cada fila;
+- cuando falta `Descripción comercial`, construye un texto visible útil únicamente con datos existentes en la hoja;
+- identifica cada ficha mediante `RealEstateListing`, la propiedad mediante `House`, `Apartment` o `Place`, y su disponibilidad/precio mediante `Offer`;
+- amplía el texto institucional de la portada con las zonas atendidas sin reponer bloques redundantes.
+
+La auditoría no pudo leer el HTML fuente y por eso informó falsos positivos. El sitio ya tenía JSON-LD, `robots.txt`, `sitemap.xml`, carga diferida de imágenes y `rel="noopener noreferrer"`; V22.17 los conserva sin duplicarlos.
+
 ## Meta Pixel
 
 La versión V22.11 instala el píxel de Meta con el identificador `1421470373195307`:

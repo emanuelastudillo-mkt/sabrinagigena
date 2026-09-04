@@ -21,7 +21,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.16';
+const SITE_VERSION = 'V22.17';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -32,13 +32,13 @@ const SOCIAL_PROFILES = [
 ];
 const SEO_AREAS = ['Capilla del Señor', 'Parque Sakura', 'Exaltación de la Cruz'];
 const HOME_SEO = {
-  title: 'Inmobiliaria en Capilla del Señor, Parque Sakura y Exaltación de la Cruz',
+  title: 'Inmobiliaria en Capilla del Señor y Exaltación de la Cruz',
   description: 'Casas, lotes y terrenos en Capilla del Señor, Parque Sakura y Exaltación de la Cruz. Catálogo actualizado y asesoramiento de Sabrina Gigena.',
   path: '/',
   image: '/assets/images/floracion-duraznos-hero.webp'
 };
 const CATALOG_SEO = {
-  title: 'Propiedades en Capilla del Señor, Parque Sakura y Exaltación de la Cruz',
+  title: 'Propiedades en Capilla del Señor y Exaltación de la Cruz',
   description: 'Explorá propiedades disponibles en Capilla del Señor, Parque Sakura y Exaltación de la Cruz: casas, lotes y terrenos con información clara.',
   path: '/propiedades/',
   image: '/assets/images/floracion-duraznos-hero.webp'
@@ -995,15 +995,32 @@ function propertyLocation(row) {
   ].filter(Boolean).join(', ');
 }
 
+function formatInlineList(items) {
+  return new Intl.ListFormat('es-AR', { style: 'long', type: 'conjunction' })
+    .format(items.filter(Boolean));
+}
+
+function propertyFallbackDescription(row) {
+  const typeOperation = [
+    rowValue(row, 'Tipo de propiedad'),
+    rowValue(row, 'Operación', 'Operacion')
+  ].filter(Boolean).join(' en ');
+  const introduction = [typeOperation || propertyTitle(row), propertyLocation(row)]
+    .filter(Boolean)
+    .join(' en ');
+  const facts = propertyFacts(row).slice(0, 6);
+
+  return [
+    introduction ? introduction + '.' : '',
+    facts.length ? 'Entre sus datos publicados se destacan ' + formatInlineList(facts) + '.' : '',
+    'La ficha reúne fotografías, características y ubicación aproximada para que puedas evaluar la propuesta con información clara.',
+    'Consultá disponibilidad y coordiná una visita con Sabrina Gigena.'
+  ].filter(Boolean).join(' ');
+}
+
 function summaryText(row, maxLength = 220) {
-  const source = rowValue(row, 'Descripción comercial', 'Descripcion comercial');
-  if (!source) {
-    return [
-      rowValue(row, 'Tipo de propiedad'),
-      rowValue(row, 'Operación', 'Operacion'),
-      propertyLocation(row)
-    ].filter(Boolean).join(' en ');
-  }
+  const source = rowValue(row, 'Descripción comercial', 'Descripcion comercial') ||
+    propertyFallbackDescription(row);
 
   const compact = clean(source).replace(/\s+/g, ' ');
   if (compact.length <= maxLength) return compact;
@@ -1375,6 +1392,8 @@ function updateSharedSeoCopy(html) {
   return html
     .replace(/<div class="topbar"\s+aria-hidden="true"><div class="topbar-track">[\s\S]*?<\/div><\/div>/i,
       topbarMarkup())
+    .replace(/(<span class="brand-mark"><img\b[^>]*\balt=)["'][^"']*["']/gi,
+      '$1"' + escapeAttribute(SITE_NAME) + '"')
     .replace(/Servicios inmobiliarios con foco en [^<]+\./gi,
       'Servicios inmobiliarios en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.');
 }
@@ -1403,7 +1422,7 @@ function updateHomeSeoCopy(html) {
     )
     .replace(
       /(<div class="container about-strip">[\s\S]*?<h2>[\s\S]*?<\/h2><p>)[\s\S]*?(<\/p>)/i,
-      '$1Te acompañamos de forma integral en cada etapa, con seguimiento personalizado, respuestas claras y la calidez necesaria para que tomes decisiones con seguridad.$2'
+      '$1Te acompañamos de forma integral en cada etapa, con seguimiento personalizado, respuestas claras y la calidez necesaria para que tomes decisiones con seguridad. Brindamos atención inmobiliaria en Capilla del Señor, Parque Sakura y distintas zonas de Exaltación de la Cruz.$2'
     )
     .replace(
       /<a class="btn" href="https:\/\/wa\.me\/5492304567715\?text=[^"]*" target="_blank" rel="noopener noreferrer">(?:Contar|Contanos)[^<]*<\/a>/i,
@@ -1559,7 +1578,7 @@ function featureMarkup(row) {
 function siteHeader() {
   return topbarMarkup() + '<header class="site-header"><div class="container header-inner">' +
     '<a class="brand" href="' + sitePath('/') + '" aria-label="' + SITE_NAME + '">' +
-    '<span class="brand-mark"><img src="' + sitePath('/favicon.png') + '" alt=""></span><span class="brand-copy">' +
+    '<span class="brand-mark"><img src="' + sitePath('/favicon.png') + '" alt="' + SITE_NAME + '"></span><span class="brand-copy">' +
     '<strong>Sabrina Gigena</strong><small>Servicios Inmobiliarios</small></span></a>' +
     '<button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav">' +
     '<span></span><span></span><span></span></button><nav class="nav" id="site-nav" aria-label="Navegación principal">' +
@@ -1573,7 +1592,7 @@ function siteHeader() {
 function siteFooter() {
   return '<footer class="footer"><div class="container"><div class="footer-grid"><div>' +
     '<a class="brand footer-brand" href="' + sitePath('/') + '"><span class="brand-mark"><img src="' +
-    sitePath('/favicon.png') + '" alt=""></span>' +
+    sitePath('/favicon.png') + '" alt="' + SITE_NAME + '"></span>' +
     '<span class="brand-copy"><strong>Sabrina Gigena</strong><small>Servicios Inmobiliarios</small></span></a>' +
     '<p>Servicios inmobiliarios en Capilla del Señor, Parque Sakura y Exaltación de la Cruz.</p>' +
     '</div><div><h4>Navegación</h4><div class="footer-links"><a href="' + sitePath('/') + '">Inicio</a>' +
@@ -1609,13 +1628,14 @@ function propertyMetaDescription(row) {
     rowValue(row, 'Operación', 'Operacion')
   ].filter(Boolean).join(' en ');
   const location = propertyLocation(row);
-  const area = formatArea(rowValue(row, 'Superficie total (m²)', 'Superficie total (m2)'));
   const introduction = [typeOperation, location].filter(Boolean).join(' en ');
-  const commercial = rowValue(row, 'Descripción comercial', 'Descripcion comercial');
+  const facts = propertyFacts(row).slice(0, 4);
+  const price = priceInfo(row);
   return truncateSeoText([
     introduction ? introduction + '.' : '',
-    area ? 'Superficie total: ' + area + '.' : '',
-    commercial
+    price.label !== 'Consultar valor' ? 'Valor: ' + price.label + '.' : '',
+    facts.length ? formatInlineList(facts) + '.' : '',
+    'Consultá disponibilidad y coordiná una visita con Sabrina Gigena.'
   ].filter(Boolean).join(' '));
 }
 
@@ -1624,11 +1644,23 @@ function propertySchema(row, canonical, images) {
   const latitude = metaCoordinate(row, -90, 90, 'Latitud aproximada');
   const longitude = metaCoordinate(row, -180, 180, 'Longitud aproximada');
   const postalCode = rowValue(row, 'Código postal', 'Codigo postal');
+  const normalizedType = normalize(rowValue(row, 'Tipo de propiedad'));
+  const propertyType = normalizedType.includes('CASA')
+    ? 'House'
+    : (normalizedType.includes('DEPARTAMENTO') ? 'Apartment' : 'Place');
+  const price = priceInfo(row);
+  const status = normalize(rowValue(row, 'Estado'));
+  const availability = !isPublicProperty(row)
+    ? 'https://schema.org/OutOfStock'
+    : ((status === 'RESERVADA' || status === 'RESERVADO')
+        ? 'https://schema.org/LimitedAvailability'
+        : 'https://schema.org/InStock');
+  const description = propertyMetaDescription(row);
   const propertyEntity = {
-    '@type': 'Place',
+    '@type': propertyType,
     '@id': canonical + '#property',
     name: propertyTitle(row),
-    description: propertyMetaDescription(row),
+    description,
     image: images.map(absoluteUrl),
     address: {
       '@type': 'PostalAddress',
@@ -1644,6 +1676,20 @@ function propertySchema(row, canonical, images) {
             latitude,
             longitude
           }
+        }
+      : {})
+  };
+  const offerEntity = {
+    '@type': 'Offer',
+    '@id': canonical + '#offer',
+    url: canonical,
+    availability,
+    itemOffered: { '@id': canonical + '#property' },
+    seller: { '@id': SITE_URL + '/#business' },
+    ...(price.amount && price.currency
+      ? {
+          price: price.amount,
+          priceCurrency: price.currency
         }
       : {})
   };
@@ -1667,14 +1713,15 @@ function propertySchema(row, canonical, images) {
         areaServed: SEO_AREAS.map(name => ({ '@type': 'Place', name }))
       },
       {
-        '@type': 'WebPage',
+        '@type': 'RealEstateListing',
         '@id': canonical + '#webpage',
         url: canonical,
         name: propertySeoTitle(row) + ' | ' + SITE_NAME,
-        description: propertyMetaDescription(row),
+        description,
         inLanguage: 'es-AR',
         about: { '@id': canonical + '#property' },
         mainEntity: { '@id': canonical + '#property' },
+        offers: { '@id': canonical + '#offer' },
         breadcrumb: { '@id': canonical + '#breadcrumb' },
         ...(firstImage
           ? {
@@ -1690,6 +1737,7 @@ function propertySchema(row, canonical, images) {
         isPartOf: { '@id': SITE_URL + '/#website' }
       },
       propertyEntity,
+      offerEntity,
       {
         '@type': 'BreadcrumbList',
         '@id': canonical + '#breadcrumb',
@@ -1749,7 +1797,8 @@ function detailGallery(title, images) {
 }
 
 function contentSections(row) {
-  const description = rowValue(row, 'Descripción comercial', 'Descripcion comercial');
+  const description = rowValue(row, 'Descripción comercial', 'Descripcion comercial') ||
+    propertyFallbackDescription(row);
   const paragraphs = description
       .split(/\n+/)
       .map(clean)
@@ -1779,7 +1828,7 @@ function contentSections(row) {
   }
 
   return '<section class="content-block description-block"><h2>Descripción</h2>' +
-    (paragraphs || '<p class="pending-copy">Consultá por más información sobre esta propiedad.</p>') +
+    paragraphs +
     '</section><section class="content-block features-block"><h2>Características y servicios</h2>' +
     featureMarkup(row) + '</section><section class="content-block location-block">' +
     '<h2>Ubicación aproximada</h2>' + locationHtml + '</section>';
