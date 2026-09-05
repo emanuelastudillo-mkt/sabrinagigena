@@ -227,3 +227,7 @@ Desde la versión V22.18 se integran dos accesos externos permanentes:
 - **Agendar una reunión:** aparece como acción destacada del encabezado, en el bloque institucional de la portada, en cada ficha de propiedad y en el pie de página.
 
 Los dos enlaces se abren en una pestaña nueva con `noopener noreferrer`. WhatsApp continúa disponible en la portada, las fichas, el botón flotante y el pie de página.
+
+## Redirección de URL antigua
+
+Desde la versión V22.19, la ruta antigua `/sabrinagigena-inmobiliaria-propiedades/` conserva un `index.html` mínimo que redirige inmediatamente a la portada. La página incluye `noindex,follow` y una URL canónica hacia `https://sabrinagigena.com/`, por lo que no compite con la home en los resultados de búsqueda.
