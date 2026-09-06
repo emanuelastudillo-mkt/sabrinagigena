@@ -71,6 +71,21 @@
           "file": "S002-foto-04.webp",
           "source": "drive:17j9ms2oh0kaowWyGEMW4AzJ5evGwF8Bk|column:FOTO 3|pipeline:watermark-v1-primary-first",
           "logicalOrder": 4
+        },
+        {
+          "file": "S002-foto-05.webp",
+          "source": "drive:1bKhKb3haCxnq-NPCqSlb4fW7HSpKFnBf|column:FOTO 4|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 5
+        },
+        {
+          "file": "S002-foto-06.webp",
+          "source": "drive:1ZbuJuN8mcT-yKgnNsEAlSQEG1FqS9rH2|column:FOTO 5|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 6
+        },
+        {
+          "file": "S002-foto-07.webp",
+          "source": "drive:13CQCZG58xUfTUodLyQqk73Y-H7Vwyk5-|column:FOTO 6|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 7
         }
       ]
     },
@@ -95,6 +110,21 @@
           "file": "S003-foto-04.webp",
           "source": "drive:14DEVZFWYPZ5C7dSobwrohruDS8Jp0w_B|column:FOTO 3|pipeline:watermark-v1-primary-first",
           "logicalOrder": 4
+        },
+        {
+          "file": "S003-foto-05.webp",
+          "source": "drive:1bKhKb3haCxnq-NPCqSlb4fW7HSpKFnBf|column:FOTO 4|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 5
+        },
+        {
+          "file": "S003-foto-06.webp",
+          "source": "drive:1ZbuJuN8mcT-yKgnNsEAlSQEG1FqS9rH2|column:FOTO 5|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 6
+        },
+        {
+          "file": "S003-foto-07.webp",
+          "source": "drive:13CQCZG58xUfTUodLyQqk73Y-H7Vwyk5-|column:FOTO 6|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 7
         }
       ]
     },
