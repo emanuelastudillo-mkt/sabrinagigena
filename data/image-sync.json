@@ -281,6 +281,21 @@
           "file": "S007-foto-05.webp",
           "source": "drive:1Q_1K4n7W1rNpzD5mbcVsB33f9Wa8rwlq|column:FOTO 4|pipeline:watermark-v1-primary-first",
           "logicalOrder": 5
+        },
+        {
+          "file": "S007-foto-06.webp",
+          "source": "drive:1aToogt6CHuN8sK06RxixE15zZEoSoMjw|column:FOTO 5|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 6
+        },
+        {
+          "file": "S007-foto-07.webp",
+          "source": "drive:1TcJ2I-H5ADLZT9CRnUnf5abssyqMKtNV|column:FOTO 6|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 7
+        },
+        {
+          "file": "S007-foto-08.webp",
+          "source": "drive:1cOzcymCo48kPPK2FOegHh7IBiyTYIdtc|column:FOTO 7|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 8
         }
       ]
     },
