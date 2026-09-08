@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T21:11:54.824Z",
+  "generatedAt": "2026-09-08T21:17:38.738Z",
   "source": "https://docs.google.com/spreadsheets/d/1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI/export?format=csv&gid=779453685",
   "spreadsheetId": "1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI",
   "sheetGid": "779453685",
   "rowCount": 8,
-  "contentHash": "058661a420820e42725ee822bb351ac9621043502ab7c31702d0f7ef1d776302",
+  "contentHash": "75bdcb413a71ca724b83f06ae0ff22f2a5f564ff7e18bebb8d98cb9c13fcf92a",
   "rows": [
     {
       "ID": "S001",
@@ -241,7 +241,7 @@
       "Carrousel": "No",
       "Stories": "Sí",
       "Precio USD": "95.000",
-      "Precio ARS": "146.900.000",
+      "Precio ARS": "146.800.000",
       "Mostrar precio": "Sí",
       "Moneda principal": "USD",
       "Apta para Crédito Hipotecario": "No",
@@ -345,7 +345,7 @@
     },
     {
       "ID": "S007",
-      "Estado": "Último disponible!",
+      "Estado": "Disponible",
       "Operación": "Venta",
       "Tipo de propiedad": "Terreno",
       "Nombre": "Terreno El Lazo",

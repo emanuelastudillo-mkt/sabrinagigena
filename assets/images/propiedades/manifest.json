@@ -1,15 +1,5 @@
 {
   "_version": "2534ef24205f",
-  "S007": [
-    "S007-foto-01.webp",
-    "S007-foto-02.webp",
-    "S007-foto-03.webp",
-    "S007-foto-04.webp",
-    "S007-foto-05.webp",
-    "S007-foto-06.webp",
-    "S007-foto-07.webp",
-    "S007-foto-08.webp"
-  ],
   "S001": [
     "S001-foto-01.webp",
     "S001-foto-02.webp",
@@ -69,6 +59,16 @@
     "S006-foto-08.webp",
     "S006-foto-09.webp",
     "S006-foto-10.webp"
+  ],
+  "S007": [
+    "S007-foto-01.webp",
+    "S007-foto-02.webp",
+    "S007-foto-03.webp",
+    "S007-foto-04.webp",
+    "S007-foto-05.webp",
+    "S007-foto-06.webp",
+    "S007-foto-07.webp",
+    "S007-foto-08.webp"
   ],
   "S008": [
     "S008-foto-01.webp",
