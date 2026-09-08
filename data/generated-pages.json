@@ -1,6 +1,7 @@
 {
   "schemaVersion": 2,
   "files": [
+    "propiedades-no-index/terreno-el-lazo-s007/index.html",
     "propiedades/casa-alpina-lagomarsino-s008/index.html",
     "propiedades/casa-casco-urbano-s005/index.html",
     "propiedades/casa-en-parada-robles-s006/index.html",
@@ -11,7 +12,6 @@
     "propiedades/terreno-lomadas-de-capilla-s004/index.html"
   ],
   "activeRoutes": [
-    "/propiedades/terreno-el-lazo-s007/",
     "/propiedades/casa-en-parada-robles-s006/",
     "/propiedades/casa-alpina-lagomarsino-s008/",
     "/propiedades/casa-santa-brigida-s001/",
@@ -20,5 +20,7 @@
     "/propiedades/terreno-lomadas-de-capilla-s004/",
     "/propiedades/casa-casco-urbano-s005/"
   ],
-  "archivedRoutes": []
+  "archivedRoutes": [
+    "/propiedades-no-index/terreno-el-lazo-s007/"
+  ]
 }

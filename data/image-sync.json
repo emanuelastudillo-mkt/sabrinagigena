@@ -1,6 +1,50 @@
 {
   "schemaVersion": 1,
   "properties": {
+    "S007": {
+      "items": [
+        {
+          "file": "S007-foto-01.webp",
+          "source": "drive:1CCOB4tH3yB1m_0UB_BGc-xZrz76YjyOI|column:IMAGEN PRINCIPAL|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 1
+        },
+        {
+          "file": "S007-foto-02.webp",
+          "source": "drive:1V7z3XAgemTMHv0iH2znig4idH3Oz0m7W|column:FOTO 1|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 2
+        },
+        {
+          "file": "S007-foto-03.webp",
+          "source": "drive:1oKDmc2H_wM6m5dOL14fF2W2X3Ibf7e8K|column:FOTO 2|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 3
+        },
+        {
+          "file": "S007-foto-04.webp",
+          "source": "drive:11rZlrrXel4e3GSeJleXosRwPCOpItbIK|column:FOTO 3|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 4
+        },
+        {
+          "file": "S007-foto-05.webp",
+          "source": "drive:1Q_1K4n7W1rNpzD5mbcVsB33f9Wa8rwlq|column:FOTO 4|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 5
+        },
+        {
+          "file": "S007-foto-06.webp",
+          "source": "drive:1aToogt6CHuN8sK06RxixE15zZEoSoMjw|column:FOTO 5|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 6
+        },
+        {
+          "file": "S007-foto-07.webp",
+          "source": "drive:1TcJ2I-H5ADLZT9CRnUnf5abssyqMKtNV|column:FOTO 6|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 7
+        },
+        {
+          "file": "S007-foto-08.webp",
+          "source": "drive:1cOzcymCo48kPPK2FOegHh7IBiyTYIdtc|column:FOTO 7|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 8
+        }
+      ]
+    },
     "S001": {
       "items": [
         {
@@ -86,6 +130,11 @@
           "file": "S002-foto-07.webp",
           "source": "drive:13CQCZG58xUfTUodLyQqk73Y-H7Vwyk5-|column:FOTO 6|pipeline:watermark-v1-primary-first",
           "logicalOrder": 7
+        },
+        {
+          "file": "S002-foto-08.webp",
+          "source": "drive:1YNpC9OFsCJAqX8U3wwiQjJR7buaOQ6kY|column:FOTO 7|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 8
         }
       ]
     },
@@ -125,6 +174,11 @@
           "file": "S003-foto-07.webp",
           "source": "drive:13CQCZG58xUfTUodLyQqk73Y-H7Vwyk5-|column:FOTO 6|pipeline:watermark-v1-primary-first",
           "logicalOrder": 7
+        },
+        {
+          "file": "S003-foto-08.webp",
+          "source": "drive:1YNpC9OFsCJAqX8U3wwiQjJR7buaOQ6kY|column:FOTO 7|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 8
         }
       ]
     },
@@ -252,50 +306,6 @@
           "file": "S006-foto-10.webp",
           "source": "drive:1H0P9vLS7Akwu8MjvYai1RH2yaqMeuSTz|column:FOTO 9|pipeline:watermark-v1-primary-first",
           "logicalOrder": 10
-        }
-      ]
-    },
-    "S007": {
-      "items": [
-        {
-          "file": "S007-foto-01.webp",
-          "source": "drive:1CCOB4tH3yB1m_0UB_BGc-xZrz76YjyOI|column:IMAGEN PRINCIPAL|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 1
-        },
-        {
-          "file": "S007-foto-02.webp",
-          "source": "drive:1V7z3XAgemTMHv0iH2znig4idH3Oz0m7W|column:FOTO 1|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 2
-        },
-        {
-          "file": "S007-foto-03.webp",
-          "source": "drive:1oKDmc2H_wM6m5dOL14fF2W2X3Ibf7e8K|column:FOTO 2|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 3
-        },
-        {
-          "file": "S007-foto-04.webp",
-          "source": "drive:11rZlrrXel4e3GSeJleXosRwPCOpItbIK|column:FOTO 3|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 4
-        },
-        {
-          "file": "S007-foto-05.webp",
-          "source": "drive:1Q_1K4n7W1rNpzD5mbcVsB33f9Wa8rwlq|column:FOTO 4|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 5
-        },
-        {
-          "file": "S007-foto-06.webp",
-          "source": "drive:1aToogt6CHuN8sK06RxixE15zZEoSoMjw|column:FOTO 5|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 6
-        },
-        {
-          "file": "S007-foto-07.webp",
-          "source": "drive:1TcJ2I-H5ADLZT9CRnUnf5abssyqMKtNV|column:FOTO 6|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 7
-        },
-        {
-          "file": "S007-foto-08.webp",
-          "source": "drive:1cOzcymCo48kPPK2FOegHh7IBiyTYIdtc|column:FOTO 7|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 8
         }
       ]
     },
