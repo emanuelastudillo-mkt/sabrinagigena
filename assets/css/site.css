@@ -525,3 +525,25 @@ button{cursor:pointer}
  *,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
  .property-card:hover,.property-card:hover .card-media img,.gallery-frame:hover img,.about-photo:hover img,.header-cta:hover,.btn:hover,.wa-float:hover{transform:none}
 }
+
+/* Estados públicos de propiedad · V22.22 */
+.card-media .status{display:inline-flex;align-items:center;gap:7px;max-width:calc(100% - 24px);padding:10px 14px;border-width:1px;box-shadow:0 8px 24px rgba(0,0,0,.28);font-size:12px;font-weight:850;line-height:1.1;white-space:nowrap}
+.card-media .status:before{content:"";width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px rgba(255,255,255,.08);margin-right:0}
+.card-media .tag{top:auto;bottom:12px;max-width:calc(100% - 24px)}
+.card-media .status-disponible{border-color:rgba(160,209,173,.52);background:rgba(20,77,55,.90);color:#d7f3df}
+.card-media .status-ultimo-disponible{border-color:#f1d68a;background:linear-gradient(135deg,#e7c66e,#b58a32);color:#172731;box-shadow:0 8px 26px rgba(70,49,9,.38)}
+.property-status{display:inline-flex;align-items:center;gap:10px;width:max-content;max-width:100%;margin:0 0 16px;padding:7px 12px 7px 8px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);box-shadow:0 8px 22px rgba(0,0,0,.14)}
+.property-status:before{content:"";width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:currentColor}
+.property-status span{padding:4px 7px;border-radius:999px;background:rgba(0,0,0,.18);color:inherit;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.property-status strong{color:inherit;font-size:12px;font-weight:850;letter-spacing:.055em;text-transform:uppercase}
+.property-status-disponible{border-color:rgba(160,209,173,.42);background:rgba(20,77,55,.35);color:#ccebd5}
+.card-media .status-reservada,.property-status-reservada{background:#f2c36f;color:#3b230d;border-color:#ffe6b9}
+.property-status-ultimo-disponible{border-color:rgba(241,214,138,.78);background:linear-gradient(135deg,rgba(231,198,110,.22),rgba(181,138,50,.13));color:#ffe5a0;box-shadow:0 10px 26px rgba(70,49,9,.20)}
+.property-page .detail-title .lead{white-space:pre-line;overflow-wrap:anywhere;max-height:none;-webkit-line-clamp:unset}
+@media(max-width:720px){
+ .card-media .status{top:10px;right:10px;max-width:calc(100% - 20px);padding:9px 12px;font-size:11px;letter-spacing:.025em}
+ .card-media .status:before{width:6px;height:6px;flex-basis:6px}
+ .card-media .status-ultimo-disponible{white-space:normal;text-align:center}
+ .property-status{margin-bottom:13px;padding:6px 10px 6px 7px;gap:8px}
+ .property-status span{font-size:8px}.property-status strong{font-size:12px}
+}
