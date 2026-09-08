@@ -8,7 +8,7 @@ import {
 } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import sharp from 'sharp';
 
 const CSV_URL =
@@ -21,7 +21,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.19';
+const SITE_VERSION = 'V22.22';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -295,22 +295,27 @@ function validateRows(rows) {
   return usable;
 }
 
+function propertyStatus(row) {
+  return normalizedHeader(rowValue(row, 'Estado'));
+}
+
 function isPublicProperty(row) {
-  const status = normalize(rowValue(row, 'Estado'));
-  return status === 'DISPONIBLE' || status === 'RESERVADA' || status === 'RESERVADO';
+  return !['VENDIDA', 'VENDIDO', 'PAUSADA', 'PAUSADO'].includes(propertyStatus(row));
 }
 
 function isSoldProperty(row) {
-  const status = normalize(rowValue(row, 'Estado'));
+  const status = propertyStatus(row);
   return status === 'VENDIDA' || status === 'VENDIDO';
 }
 
 function statusLabel(row) {
-  const status = normalize(rowValue(row, 'Estado'));
+  const status = propertyStatus(row);
   const labels = {
     DISPONIBLE: 'Disponible',
     RESERVADA: 'Reservada',
     RESERVADO: 'Reservada',
+    'ULTIMO DISPONIBLE': 'Último disponible',
+    'ULTIMA DISPONIBLE': 'Último disponible',
     VENDIDA: 'Vendida',
     VENDIDO: 'Vendida',
     PAUSADA: 'Pausada',
@@ -811,7 +816,7 @@ function metaCoordinate(row, minimum, maximum, ...fields) {
 }
 
 function metaAvailability(row) {
-  const status = normalize(rowValue(row, 'Estado'));
+  const status = propertyStatus(row);
   if (status === 'RESERVADA' || status === 'RESERVADO') return 'SALE_PENDING';
   return normalize(rowValue(row, 'Operación', 'Operacion')).includes('ALQUILER')
     ? 'FOR_RENT'
@@ -1710,10 +1715,10 @@ function propertySchema(row, canonical, images) {
     ? 'House'
     : (normalizedType.includes('DEPARTAMENTO') ? 'Apartment' : 'Place');
   const price = priceInfo(row);
-  const status = normalize(rowValue(row, 'Estado'));
+  const status = propertyStatus(row);
   const availability = !isPublicProperty(row)
     ? 'https://schema.org/OutOfStock'
-    : ((status === 'RESERVADA' || status === 'RESERVADO')
+    : ((status === 'RESERVADA' || status === 'RESERVADO' || status === 'ULTIMO DISPONIBLE' || status === 'ULTIMA DISPONIBLE')
         ? 'https://schema.org/LimitedAvailability'
         : 'https://schema.org/InStock');
   const description = propertyMetaDescription(row);
@@ -1971,7 +1976,7 @@ function propertyPageHtml(row, activeRows = []) {
   const seoTitle = propertySeoTitle(row);
   const baseDescription = propertyMetaDescription(row) ||
     'Información y consulta sobre esta propiedad con Sabrina Gigena Servicios Inmobiliarios.';
-  const leadText = summaryText(row, 320) || 'Consultá por más información sobre esta propiedad.';
+  const leadText = rowValue(row, 'Descripción comercial', 'Descripcion comercial') || propertyFallbackDescription(row);
   const metaDescription = truncateSeoText(archived
     ? archiveStatus + ': ' + baseDescription
     : baseDescription);
@@ -2027,7 +2032,7 @@ function propertyPageHtml(row, activeRows = []) {
       (archived
         ? '<div class="sold-alert" role="status"><strong>' + escapeHtml(archiveStatus) +
           '</strong><span>Esta propiedad ya no forma parte del catálogo disponible.</span></div>'
-        : '') +
+        : '<div class="property-status property-status-' + slugify(statusLabel(row)) + '"><span>Estado</span><strong>' + escapeHtml(statusLabel(row)) + '</strong></div>') +
       '<div class="location">' + escapeHtml(locationType) + '</div><h1>' +
       escapeHtml(title) + '</h1><p class="lead">' + escapeHtml(leadText) +
       '</p><div class="detail-price">' + escapeHtml(archived ? archiveStatus : price.label) + '</div>' +
@@ -2333,7 +2338,11 @@ async function main() {
   console.log('Hash del catálogo: ' + contentHash.slice(0, 12));
 }
 
-main().catch(error => {
-  console.error('ERROR: ' + error.message);
-  process.exitCode = 1;
-});
+export { isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml };
+
+if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
+  main().catch(error => {
+    console.error('ERROR: ' + error.message);
+    process.exitCode = 1;
+  });
+}
