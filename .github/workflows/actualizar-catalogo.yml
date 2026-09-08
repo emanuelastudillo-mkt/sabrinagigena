@@ -2,12 +2,21 @@ name: Actualizar catálogo e imágenes
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - "assets/css/**"
+      - "assets/js/**"
+      - ".github/workflows/actualizar-catalogo.yml"
   schedule:
-    # 09:20 UTC = 06:20 en Argentina (UTC-3)
+    # 09:20 UTC = 06:20 en Argentina
     - cron: "20 9 * * *"
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 env:
   SITE_URL: "https://sabrinagigena.com"
@@ -19,52 +28,52 @@ concurrency:
 jobs:
   actualizar:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 30
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
       - name: Preparar Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-
       - name: Instalar procesador de imágenes
         run: npm install --no-save --no-package-lock sharp@0.34.3
-
+      - name: Verificar estados y descripciones
+        run: node --test scripts/catalogo.test.mjs
       - name: Sincronizar Google Sheets, imágenes y páginas
         run: node scripts/actualizar-catalogo.mjs
-
       - name: Guardar cambios publicados
         shell: bash
         run: |
-          git add -A -- \
-            data/ \
-            assets/images/propiedades/ \
-            propiedades/ \
-            meta-catalog.csv \
-            sitemap.xml \
-            robots.txt \
-            CNAME \
-            ':(glob)*.html'
-
+          git add -A -- data/ assets/images/propiedades/ propiedades/ meta-catalog.csv sitemap.xml robots.txt CNAME ":(glob)*.html"
           if [ -d propiedades-no-index ]; then
             git add -A -- propiedades-no-index/
           fi
-
           if [ -d assets/images/meta ]; then
             git add -A -- assets/images/meta/
           fi
-
           if git diff --cached --quiet; then
             echo "No hubo cambios para publicar."
             exit 0
           fi
-
           git config user.name "sabrina-catalogo-bot"
           git config user.email "actions@users.noreply.github.com"
-
           git commit -m "chore: actualizar catálogo e imágenes"
           git push
+      # El push del bot no dispara otro workflow: publicar en esta ejecución.
+      - name: Preparar archivos públicos
+        run: |
+          mkdir -p "$RUNNER_TEMP/sabrina-pages"
+          rsync -a --exclude=".git/" --exclude=".github/" --exclude="node_modules/" --exclude="scripts/" --exclude="*.md" --exclude="package*.json" ./ "$RUNNER_TEMP/sabrina-pages/"
+      - name: Subir sitio actualizado
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ runner.temp }}/sabrina-pages
+      - name: Publicar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
