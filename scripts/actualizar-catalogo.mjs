@@ -21,7 +21,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.22';
+const SITE_VERSION = 'V22.23';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -1128,8 +1128,9 @@ function propertyCard(row) {
   const price = priceInfo(row);
   const summary = summaryText(row, 150);
 
-  return '<article class="property-card" data-search="' +
-    escapeAttribute(propertySearchText(row)) +
+  return '<article class="property-card" data-property-id="' +
+    escapeAttribute(propertyId(row)) +
+    '" data-search="' + escapeAttribute(propertySearchText(row)) +
     '" data-tags="' + escapeAttribute(propertyTags(row)) +
     '"><a href="' + escapeAttribute(sitePath(propertyRoute(row))) +
     '"><div class="card-media">' + imageMarkup +
@@ -1426,15 +1427,94 @@ function updateStaticSeo(html, seo) {
   return upsertRobotsMeta(useCanonicalInternalLinks(updated), PUBLIC_ROBOTS);
 }
 
-function metaPixelHeadMarkup() {
-  return '<!-- Meta Pixel Code -->\n<script>\n' +
+function safeInlineJson(value) {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
+}
+
+function metaCatalogEventData(row) {
+  const price = priceInfo(row);
+  const data = {
+    content_type: 'home_listing',
+    content_ids: [propertyId(row)],
+    content_name: propertyTitle(row)
+  };
+
+  if (price.amount && price.currency) {
+    data.value = price.amount;
+    data.currency = price.currency;
+  }
+
+  return data;
+}
+
+function metaCatalogSearchTrackingMarkup() {
+  return [
+    '(function(){',
+    '  var searchTimer = 0;',
+    '  var lastSearchKey = \'\';',
+    '  document.addEventListener(\'DOMContentLoaded\', function(){',
+    '    var input = document.querySelector(\'[data-property-search]\');',
+    '    if (!input) return;',
+    '    input.addEventListener(\'input\', function(){',
+    '      window.clearTimeout(searchTimer);',
+    '      var query = input.value.trim();',
+    '      if (query.length < 2) return;',
+    '      searchTimer = window.setTimeout(function(){',
+    '        var ids = Array.prototype.map.call(',
+    '          document.querySelectorAll(\'.property-card[data-property-id]:not([hidden])\'),',
+    '          function(card){ return card.getAttribute(\'data-property-id\'); }',
+    '        ).filter(Boolean).slice(0, 10);',
+    '        if (!ids.length) return;',
+    '        var searchKey = query + \'|\' + ids.join(\',\');',
+    '        if (searchKey === lastSearchKey) return;',
+    '        lastSearchKey = searchKey;',
+    '        fbq(\'track\', \'Search\', {',
+    '          content_type: \'home_listing\',',
+    '          content_ids: ids,',
+    '          search_string: query',
+    '        });',
+    '      }, 800);',
+    '    });',
+    '  });',
+    '})();'
+  ].join('\n');
+}
+
+function metaLeadTrackingMarkup(eventData) {
+  return [
+    '(function(){',
+    '  document.addEventListener(\'click\', function(event){',
+    '    var target = event.target;',
+    '    if (!target || typeof target.closest !== \'function\') return;',
+    '    if (!target.closest(\'a[href*="wa.me/"]\')) return;',
+    '    fbq(\'track\', \'Lead\', ' + safeInlineJson(eventData) + ');',
+    '  });',
+    '})();'
+  ].join('\n');
+}
+
+function metaPixelHeadMarkup(options = {}) {
+  const scripts = [
     '!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?' +
-    'n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;' +
-    'n.push=n;n.loaded=!0;n.version=\'2.0\';n.queue=[];t=b.createElement(e);t.async=!0;' +
-    't.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}' +
-    '(window,document,\'script\',\'https://connect.facebook.net/en_US/fbevents.js\');\n' +
-    'fbq(\'init\', \'' + META_PIXEL_ID + '\');\nfbq(\'track\', \'PageView\');\n' +
-    '</script>\n<!-- End Meta Pixel Code -->';
+      'n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;' +
+      'n.push=n;n.loaded=!0;n.version=\'2.0\';n.queue=[];t=b.createElement(e);t.async=!0;' +
+      't.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}' +
+      '(window,document,\'script\',\'https://connect.facebook.net/en_US/fbevents.js\');',
+    'fbq(\'init\', \'' + META_PIXEL_ID + '\');',
+    'fbq(\'track\', \'PageView\');'
+  ];
+
+  if (options.viewContent) {
+    scripts.push('fbq(\'track\', \'ViewContent\', ' + safeInlineJson(options.viewContent) + ');');
+  }
+  if (options.catalogSearch) scripts.push(metaCatalogSearchTrackingMarkup());
+  if (options.lead) scripts.push(metaLeadTrackingMarkup(options.lead));
+
+  return '<!-- Meta Pixel Code -->\n<script>\n' + scripts.join('\n') +
+    '\n</script>\n<!-- End Meta Pixel Code -->';
 }
 
 function metaPixelNoScriptMarkup() {
@@ -1443,13 +1523,13 @@ function metaPixelNoScriptMarkup() {
     '&amp;ev=PageView&amp;noscript=1" alt=""></noscript>\n<!-- End Meta Pixel NoScript -->';
 }
 
-function updateMetaPixel(html) {
+function updateMetaPixel(html, options = {}) {
   const withoutPreviousPixel = html
     .replace(/\s*<!-- Meta Pixel Code -->[\s\S]*?<!-- End Meta Pixel Code -->\s*/gi, '\n')
     .replace(/\s*<!-- Meta Pixel NoScript -->[\s\S]*?<!-- End Meta Pixel NoScript -->\s*/gi, '');
 
   return withoutPreviousPixel
-    .replace(/<\/head>/i, metaPixelHeadMarkup() + '\n</head>')
+    .replace(/<\/head>/i, metaPixelHeadMarkup(options) + '\n</head>')
     .replace(/(<body\b[^>]*>)/i, '$1\n' + metaPixelNoScriptMarkup() + '\n');
 }
 
@@ -1538,7 +1618,7 @@ async function updateCatalogPages(rows) {
   };
   catalogHtml = updateStaticSeo(catalogHtml, catalogSeo);
   catalogHtml = updateCatalogSeoCopy(catalogHtml);
-  catalogHtml = updateMetaPixel(catalogHtml);
+  catalogHtml = updateMetaPixel(catalogHtml, { catalogSearch: true });
   catalogHtml = injectCatalogIntoGrid(catalogHtml, 'SHEET_CATALOG', catalogCards);
   catalogHtml = catalogHtml.replace(
     /<span class="count-number">\d+<\/span>/,
@@ -2064,7 +2144,11 @@ function propertyPageHtml(row, activeRows = []) {
     '<script src="' + sitePath('/assets/js/main.js') + '" defer></script></body></html>'
   ].join('\n');
 
-  return updateMetaPixel(html) + '\n';
+  const catalogEvent = archived ? null : metaCatalogEventData(row);
+  return updateMetaPixel(html, {
+    viewContent: catalogEvent,
+    lead: catalogEvent
+  }) + '\n';
 }
 
 function normalizedGeneratedPath(file) {
@@ -2338,7 +2422,7 @@ async function main() {
   console.log('Hash del catálogo: ' + contentHash.slice(0, 12));
 }
 
-export { isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml };
+export { isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup };
 
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
   main().catch(error => {
