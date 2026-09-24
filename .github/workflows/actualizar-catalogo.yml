@@ -8,6 +8,8 @@ on:
       - "scripts/**"
       - "assets/css/**"
       - "assets/js/**"
+      - "apps-script/**"
+      - "privacidad/**"
       - ".github/workflows/actualizar-catalogo.yml"
   schedule:
     # 09:20 UTC = 06:20 en Argentina
@@ -46,7 +48,14 @@ jobs:
       - name: Verificar estados y descripciones
         run: node --test scripts/catalogo.test.mjs
       - name: Sincronizar Google Sheets, imágenes y páginas
-        run: node scripts/actualizar-catalogo.mjs
+        env:
+          PROPERTIES_CSV_URL: ${{ secrets.PROPERTIES_CSV_URL }}
+        run: |
+          if [ -z "$PROPERTIES_CSV_URL" ]; then
+            echo "Falta configurar el secreto PROPERTIES_CSV_URL."
+            exit 1
+          fi
+          node scripts/actualizar-catalogo.mjs
       - name: Guardar cambios publicados
         shell: bash
         run: |
@@ -69,7 +78,7 @@ jobs:
       - name: Preparar archivos públicos
         run: |
           mkdir -p "$RUNNER_TEMP/sabrina-pages"
-          rsync -a --exclude=".git/" --exclude=".github/" --exclude="node_modules/" --exclude="scripts/" --exclude="*.md" --exclude="package*.json" ./ "$RUNNER_TEMP/sabrina-pages/"
+          rsync -a --exclude=".git/" --exclude=".github/" --exclude="apps-script/" --exclude="node_modules/" --exclude="scripts/" --exclude="*.md" --exclude="package*.json" ./ "$RUNNER_TEMP/sabrina-pages/"
       - name: Subir sitio actualizado
         uses: actions/upload-pages-artifact@v4
         with:
