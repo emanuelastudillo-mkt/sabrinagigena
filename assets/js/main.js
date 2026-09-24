@@ -239,6 +239,133 @@
       },{threshold:0.15}).observe(contact);
     }
   }
+
+  // Formulario general de consultas. El endpoint se publica como Web App de Apps Script.
+  const LEADS_API='https://script.google.com/macros/s/AKfycbzHgQ_D21HkQq1iKyH70aiEvbRKUDSVJwc4UquSSxc2I81eVU1_odyM66YzL2xyOQlrMQ/exec';
+  const META_PIXEL_ID='1421470373195307';
+  const consultationDialog=create('div','consult-dialog');
+  consultationDialog.id='consultDialog';consultationDialog.setAttribute('aria-hidden','true');
+  consultationDialog.innerHTML=`
+    <section class="consult-panel" role="dialog" aria-modal="true" aria-labelledby="consultTitle">
+      <button class="consult-close" type="button" aria-label="Cerrar formulario">×</button>
+      <span class="eyebrow">Consulta directa</span>
+      <h2 id="consultTitle">Contanos qué estás buscando</h2>
+      <p class="consult-intro">Dejanos tus datos y Sabrina se pondrá en contacto con vos.</p>
+      <form class="consult-form" novalidate>
+        <label class="consult-field"><span>Nombre y apellido</span><input name="name" type="text" autocomplete="name" maxlength="80" required placeholder="Ej.: María López"></label>
+        <label class="consult-field"><span>Teléfono / WhatsApp</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" required placeholder="Ej.: 11 2345-6789"></label>
+        <label class="consult-field"><span>Mensaje</span><textarea name="message" rows="3" maxlength="1000" required placeholder="Contanos qué propiedad o zona te interesa"></textarea></label>
+        <label class="consult-consent"><input name="consent" type="checkbox" required><span>Acepto que Sabrina Gigena use estos datos para responder mi consulta, según la <a href="/privacidad/" target="_blank" rel="noopener">Política de Privacidad</a>.</span></label>
+        <label class="consult-consent"><input name="meta_consent" type="checkbox"><span>Opcional: autorizo usar mi nombre y teléfono para coincidencias, medición y mejora de anuncios en Meta.</span></label>
+        <label class="consult-honeypot" aria-hidden="true">Empresa<input name="company" type="text" tabindex="-1" autocomplete="off"></label>
+        <div class="consult-status" role="status" aria-live="polite"></div>
+        <button class="btn consult-submit" type="submit">Enviar consulta</button>
+      </form>
+    </section>`;
+  document.body.append(consultationDialog);
+  const consultationForm=$('.consult-form',consultationDialog);
+  const consultationStatus=$('.consult-status',consultationDialog);
+  const consultationSubmit=$('.consult-submit',consultationDialog);
+  let consultationOpenedAt=0,consultationReturnFocus=null,restoreConsultBackground=()=>{},pendingLeadId=null;
+  const openConsultation=trigger=>{
+    closeMenu();consultationOpenedAt=Date.now();consultationReturnFocus=trigger||document.activeElement;
+    consultationStatus.textContent='';consultationSubmit.disabled=false;consultationSubmit.textContent='Enviar consulta';
+    consultationDialog.classList.add('open');consultationDialog.setAttribute('aria-hidden','false');
+    document.body.classList.add('no-scroll','consult-open');
+    restoreConsultBackground=suspendBackground([...document.body.children].filter(element=>element!==consultationDialog&&!['SCRIPT','STYLE','LINK'].includes(element.tagName)));
+    requestAnimationFrame(()=>$('[name="name"]',consultationDialog)?.focus());
+  };
+  const closeConsultation=reset=>{
+    consultationDialog.classList.remove('open');consultationDialog.setAttribute('aria-hidden','true');
+    document.body.classList.remove('no-scroll','consult-open');restoreConsultBackground();restoreConsultBackground=()=>{};
+    if(reset){consultationForm.reset();pendingLeadId=null}
+    if(consultationReturnFocus?.isConnected)consultationReturnFocus.focus({preventScroll:true});
+    consultationReturnFocus=null;
+  };
+  const leadEventId=()=>{
+    try{if(crypto.randomUUID)return crypto.randomUUID().replace(/-/g,'')}catch(_){}
+    return 'sg'+Date.now().toString(36)+Math.random().toString(36).slice(2,12);
+  };
+  const normalizePhone=value=>{
+    let digits=String(value||'').replace(/\D/g,'');
+    if(digits.startsWith('00'))digits=digits.slice(2);
+    if(digits.startsWith('0'))digits=digits.slice(1);
+    if(!digits.startsWith('54'))digits='54'+digits;
+    return digits.slice(0,15);
+  };
+  const sendLead=payload=>{
+    if(!/^https:\/\/script\.google\.com\/macros\/s\//.test(LEADS_API))throw new Error('El formulario todavía no está conectado.');
+    const body=JSON.stringify({action:'lead',...payload});
+    return fetch(LEADS_API,{method:'POST',mode:'no-cors',cache:'no-store',credentials:'omit',keepalive:true,headers:{'Content-Type':'text/plain;charset=UTF-8'},body});
+  };
+  const checkLeadStatus=eventId=>new Promise((resolve,reject)=>{
+    const callback='sgLeadStatus'+eventId;
+    const script=create('script');
+    let finished=false;
+    const finish=(error,saved)=>{
+      if(finished)return;finished=true;clearTimeout(timer);script.remove();delete window[callback];
+      error?reject(error):resolve(saved);
+    };
+    const timer=setTimeout(()=>finish(new Error('No se pudo confirmar la recepción. Reintentá en unos segundos.')),12000);
+    window[callback]=payload=>finish(null,payload?.ok===true&&payload?.saved===true);
+    script.onerror=()=>finish(new Error('No se pudo verificar la consulta. Reintentá.'));
+    script.src=LEADS_API+'?action=lead_status&event_id='+encodeURIComponent(eventId)+'&callback='+encodeURIComponent(callback)+'&_='+Date.now();
+    document.head.append(script);
+  });
+  const waitForLead=async eventId=>{
+    for(let attempt=0;attempt<5;attempt++){
+      if(await checkLeadStatus(eventId))return true;
+      await new Promise(resolve=>setTimeout(resolve,1000));
+    }
+    throw new Error('No pudimos confirmar el registro. Reintentá en unos segundos.');
+  };
+  document.addEventListener('click',event=>{
+    const trigger=event.target.closest('[data-consult-open]');
+    if(!trigger)return;event.preventDefault();openConsultation(trigger);
+  });
+  $('.consult-close',consultationDialog).addEventListener('click',()=>closeConsultation(false));
+  consultationDialog.addEventListener('click',event=>{if(event.target===consultationDialog)closeConsultation(false)});
+  document.addEventListener('keydown',event=>{
+    if(!consultationDialog.classList.contains('open'))return;
+    if(event.key==='Escape'){event.preventDefault();closeConsultation(false);return}
+    trapFocus(event,consultationDialog);
+  });
+  consultationForm.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const data=new FormData(consultationForm);
+    if(data.get('company')){consultationStatus.textContent='No se pudo procesar la consulta.';return}
+    if(Date.now()-consultationOpenedAt<800){consultationStatus.textContent='Esperá un instante y volvé a intentar.';return}
+    if(!consultationForm.checkValidity()){consultationForm.reportValidity();consultationStatus.textContent='Completá los campos requeridos.';return}
+    const name=String(data.get('name')||'').trim().replace(/\s+/g,' ');
+    const phone=normalizePhone(data.get('phone'));
+    const message=String(data.get('message')||'').trim().replace(/\s+/g,' ');
+    if(name.length<2){consultationStatus.textContent='Ingresá tu nombre.';return}
+    if(phone.length<12){consultationStatus.textContent='Ingresá un teléfono válido con código de área.';return}
+    if(message.length<3){consultationStatus.textContent='Escribí un mensaje breve.';return}
+    const params=new URLSearchParams(location.search);const eventId=pendingLeadId||leadEventId();pendingLeadId=eventId;
+    const metaConsent=data.get('meta_consent')==='on';
+    consultationSubmit.disabled=true;consultationSubmit.textContent='Enviando…';consultationStatus.textContent='';
+    try{
+      await sendLead({
+        event_id:eventId,name,phone,message,source:'formulario_web',page_url:location.href,
+        property:$('.detail-title h1')?.textContent.trim()||'',utm_source:params.get('utm_source')||'',
+        utm_medium:params.get('utm_medium')||'',utm_campaign:params.get('utm_campaign')||'',
+        consent:true,meta_consent:metaConsent,company:'',form_elapsed_ms:Date.now()-consultationOpenedAt,
+        submitted_at:new Date().toISOString()
+      });
+      await waitForLead(eventId);
+      if(metaConsent&&typeof window.fbq==='function'){
+        try{window.fbq('init',META_PIXEL_ID,{fn:name,ph:phone});window.fbq('track','Lead',{content_name:'Formulario web',lead_channel:'web'},{eventID:eventId})}catch(_){}
+      }
+      consultationStatus.textContent='¡Gracias! Recibimos tu consulta. Te contactaremos pronto.';
+      consultationSubmit.textContent='Consulta enviada';
+      setTimeout(()=>closeConsultation(true),1800);
+    }catch(error){
+      consultationStatus.textContent=error?.message||'No pudimos enviar la consulta. Intentá nuevamente.';
+      consultationSubmit.disabled=false;consultationSubmit.textContent='Reintentar';
+    }
+  });
+
   const topButton=create('button','back-to-top','↑');
   topButton.type='button';topButton.setAttribute('aria-label','Volver al inicio de la página');topButton.hidden=true;
   document.body.append(topButton);

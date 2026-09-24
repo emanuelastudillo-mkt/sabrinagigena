@@ -11,9 +11,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import sharp from 'sharp';
 
-const CSV_URL =
-  process.env.PROPERTIES_CSV_URL ||
-  'https://docs.google.com/spreadsheets/d/1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI/export?format=csv&gid=779453685';
+const CSV_URL = process.env.PROPERTIES_CSV_URL || '';
 
 const SITE_URL = (process.env.SITE_URL || 'https://sabrinagigena.com').replace(/\/+$/, '');
 const SITE_ORIGIN = new URL(SITE_URL).origin;
@@ -21,7 +19,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.23';
+const SITE_VERSION = 'V22.24';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -1256,14 +1254,17 @@ function headerExternalLinksMarkup() {
   return '<a data-mercadolibre-link href="' + escapeAttribute(MERCADOLIBRE_URL) +
     '" target="_blank" rel="noopener noreferrer">Mercado Libre</a>' +
     '<a class="header-cta" data-appointment-link href="' + escapeAttribute(APPOINTMENT_URL) +
-    '" target="_blank" rel="noopener noreferrer">Agendar reunión</a>';
+    '" target="_blank" rel="noopener noreferrer">Agendar reunión</a>' +
+    '<button class="header-consult" data-consult-open type="button">Enviar consulta</button>';
 }
 
 function footerExternalLinksMarkup() {
   return '<a data-mercadolibre-link href="' + escapeAttribute(MERCADOLIBRE_URL) +
     '" target="_blank" rel="noopener noreferrer">Publicaciones en Mercado Libre</a>' +
     '<a data-appointment-link href="' + escapeAttribute(APPOINTMENT_URL) +
-    '" target="_blank" rel="noopener noreferrer">Agendar una reunión</a>';
+    '" target="_blank" rel="noopener noreferrer">Agendar una reunión</a>' +
+    '<button class="footer-consult" data-consult-open type="button">Enviar consulta</button>' +
+    '<a data-privacy-link href="' + sitePath('/privacidad/') + '">Privacidad</a>';
 }
 
 function aboutActionsMarkup(whatsappUrl) {
@@ -1280,7 +1281,8 @@ function updateExternalNavigation(html) {
     nav => {
       const cleanNav = nav
         .replace(/\s*<a\b[^>]*\bdata-mercadolibre-link\b[^>]*>[\s\S]*?<\/a>/gi, '')
-        .replace(/\s*<a\b[^>]*\bdata-appointment-link\b[^>]*>[\s\S]*?<\/a>/gi, '');
+        .replace(/\s*<a\b[^>]*\bdata-appointment-link\b[^>]*>[\s\S]*?<\/a>/gi, '')
+        .replace(/\s*<button\b[^>]*\bdata-consult-open\b[^>]*>[\s\S]*?<\/button>/gi, '');
       const headerCta = /<a\b[^>]*class=["'][^"']*\bheader-cta\b[^"']*["'][^>]*>[\s\S]*?<\/a>/i;
       if (headerCta.test(cleanNav)) {
         return cleanNav.replace(headerCta, headerExternalLinksMarkup());
@@ -1294,7 +1296,9 @@ function updateExternalNavigation(html) {
     (_, opening, links, closing) => {
       let cleanLinks = links
         .replace(/\s*<a\b[^>]*\bdata-mercadolibre-link\b[^>]*>[\s\S]*?<\/a>/gi, '')
-        .replace(/\s*<a\b[^>]*\bdata-appointment-link\b[^>]*>[\s\S]*?<\/a>/gi, '');
+        .replace(/\s*<a\b[^>]*\bdata-appointment-link\b[^>]*>[\s\S]*?<\/a>/gi, '')
+        .replace(/\s*<button\b[^>]*\bdata-consult-open\b[^>]*>[\s\S]*?<\/button>/gi, '')
+        .replace(/\s*<a\b[^>]*\bdata-privacy-link\b[^>]*>[\s\S]*?<\/a>/gi, '');
       const whatsappLink = /<a\b[^>]*href=["']https:\/\/wa\.me\/[^"']+["'][^>]*>WhatsApp<\/a>/i;
       if (whatsappLink.test(cleanLinks)) {
         cleanLinks = cleanLinks.replace(
@@ -2207,7 +2211,8 @@ function sitemapXml(rows, generatedAt) {
     : new Date().toISOString().slice(0, 10);
   const staticUrls = [
     { loc: SITE_URL + '/', priority: '1.0', changefreq: 'daily' },
-    { loc: SITE_URL + '/propiedades/', priority: '0.9', changefreq: 'daily' }
+    { loc: SITE_URL + '/propiedades/', priority: '0.9', changefreq: 'daily' },
+    { loc: SITE_URL + '/privacidad/', priority: '0.3', changefreq: 'yearly' }
   ];
   const propertyUrls = rows.map(row => ({
     loc: SITE_URL + propertyRoute(row),
@@ -2252,6 +2257,9 @@ async function writeRobots() {
 async function loadCsvText() {
   const fixture = process.env.PROPERTIES_CSV_FILE;
   if (fixture) return readFile(path.resolve(fixture), 'utf8');
+  if (!CSV_URL) {
+    throw new Error('Falta PROPERTIES_CSV_URL con el enlace privado del catálogo.');
+  }
 
   const separator = CSV_URL.includes('?') ? '&' : '?';
   const url = CSV_URL + separator + '_=' + Date.now();
@@ -2271,7 +2279,7 @@ async function loadCsvText() {
   const text = await response.text();
   const compact = text.slice(0, 5000);
   if (!text || !compact.includes('ID') || !compact.includes('Estado')) {
-    throw new Error('La respuesta no parece ser el CSV esperado. Verificá que el Sheet siga publicado para lectura.');
+    throw new Error('La respuesta no parece ser el CSV esperado. Verificá el acceso privado al catálogo.');
   }
   return text;
 }
@@ -2369,7 +2377,7 @@ async function main() {
     await writeJsonIfChanged(stockPath, {
       schemaVersion: 1,
       generatedAt,
-      source: CSV_URL,
+      source: 'Google Sheets / Propiedades (acceso privado mediante Apps Script)',
       spreadsheetId: '1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI',
       sheetGid: '779453685',
       rowCount: rows.length,
