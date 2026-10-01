@@ -1,10 +1,22 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup } from './actualizar-catalogo.mjs';
+import { isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertyCardsMarkup, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup } from './actualizar-catalogo.mjs';
 const row = { ID: 'TEST01', Nombre: 'Lote de prueba', Estado: 'Disponible', 'Tipo de propiedad': 'Lote', Localidad: 'Capilla del Señor', Operación: 'Venta', 'Precio USD': '30000', 'Mostrar precio': 'Sí' };
 test('Solo vendida o pausada se retiran', () => {
   for (const Estado of ['Disponible', 'Reservada', 'RESERVADO!', 'Último disponible!', ' último   disponible ', 'ULTIMA DISPONIBLE', 'Nuevo estado']) assert.equal(isPublicProperty({ ...row, Estado }), true, Estado);
   for (const Estado of ['Vendida', 'VENDIDO!', ' Pausada ', 'PAUSADO']) assert.equal(isPublicProperty({ ...row, Estado }), false, Estado);
+});
+test('Los filtros de la home reciben todas las propiedades públicas, no solo las primeras seis', () => {
+  const rows = Array.from({ length: 8 }, (_, index) => ({
+    ...row,
+    ID: 'TEST' + String(index + 1).padStart(2, '0'),
+    Nombre: 'Lote de prueba ' + (index + 1)
+  }));
+  rows.push({ ...row, ID: 'VENDIDA', Estado: 'Vendida' });
+  const cards = propertyCardsMarkup(rows);
+  assert.equal((cards.match(/class="property-card"/g) || []).length, 8);
+  assert.match(cards, /data-property-id="TEST08"/);
+  assert.doesNotMatch(cards, /data-property-id="VENDIDA"/);
 });
 test('Ultimo se recupera del archivo y aparece en tarjeta ficha sitemap y Meta', () => {
   const active = { ...row, Estado: 'Último disponible!' };

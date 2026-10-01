@@ -19,7 +19,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.24';
+const SITE_VERSION = 'V22.25';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -1163,6 +1163,10 @@ function publicRowsSorted(rows) {
     });
 }
 
+function propertyCardsMarkup(rows) {
+  return publicRowsSorted(rows).map(propertyCard).join('\n');
+}
+
 function replaceMarkedContent(html, markerName, content) {
   const startMarker = '<!-- ' + markerName + '_START -->';
   const endMarker = '<!-- ' + markerName + '_END -->';
@@ -1591,12 +1595,7 @@ function updateCatalogSeoCopy(html) {
 
 async function updateCatalogPages(rows) {
   const publicRows = publicRowsSorted(rows);
-  const catalogCards = publicRows.length
-    ? publicRows.map(propertyCard).join('\n')
-    : '';
-  const featuredCards = publicRows.length
-    ? publicRows.slice(0, 6).map(propertyCard).join('\n')
-    : '';
+  const catalogCards = propertyCardsMarkup(publicRows);
   const rotatorImages = activeCatalogRotatorImages(publicRows);
   const aboutImages = await staticAboutRotatorImages();
 
@@ -1604,7 +1603,7 @@ async function updateCatalogPages(rows) {
   indexHtml = updateStaticSeo(indexHtml, HOME_SEO);
   indexHtml = updateHomeSeoCopy(indexHtml);
   indexHtml = updateMetaPixel(indexHtml);
-  indexHtml = injectCatalogIntoGrid(indexHtml, 'SHEET_FEATURED', featuredCards);
+  indexHtml = injectCatalogIntoGrid(indexHtml, 'SHEET_FEATURED', catalogCards);
   indexHtml = injectAboutRotatorData(indexHtml, aboutImages);
   indexHtml = updateAboutRotatorElement(indexHtml, aboutImages);
   indexHtml = indexHtml.replace(
@@ -2430,7 +2429,7 @@ async function main() {
   console.log('Hash del catálogo: ' + contentHash.slice(0, 12));
 }
 
-export { isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup };
+export { isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertyCardsMarkup, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup };
 
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
   main().catch(error => {
