@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-01T16:31:42.961Z",
+  "generatedAt": "2026-10-02T15:52:43.319Z",
   "source": "Google Sheets / Propiedades (acceso privado mediante Apps Script)",
   "spreadsheetId": "1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI",
   "sheetGid": "779453685",
   "rowCount": 8,
-  "contentHash": "e008a62d47f001ad576f374faef8702b16d9d9982bc12b3404fb63ebb96b4d5a",
+  "contentHash": "d5fdc111ecc8931c49247c25473c450aa27466cd5ea31cedbdaf1db8ab1e5481",
   "rows": [
     {
       "ID": "S001",
@@ -417,7 +417,7 @@
       "Stories": "Sí",
       "Meli": "Sí",
       "Precio USD": "125.000",
-      "Precio ARS": "194.900.000",
+      "Precio ARS": "194.800.000",
       "Mostrar precio": "Sí",
       "Moneda principal": "USD",
       "Apta para Crédito Hipotecario": "No",
