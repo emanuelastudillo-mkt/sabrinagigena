@@ -2,6 +2,8 @@
 
 <html lang="es-AR">
 <head>
+<meta http-equiv="Content-Security-Policy" content="base-uri 'self'; object-src 'none'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
@@ -275,14 +277,14 @@
 <main class="wrap">
 
 <div class="exampleAccess" aria-label="Accesos secundarios">
-  <a href="../propiedades.html">
+  <a href="/propiedades/">
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
     Páginas de propiedades
   </a>
 </div>
 
 <section class="hero">
-<img alt="Sabrina Gigena Inmobiliaria" class="brandCover" src="../assets/images/portada-dashboard.png"/>
+<img alt="Sabrina Gigena Inmobiliaria" class="brandCover" src="../assets/images/portada-dashboard.png" width="2048" height="601">
 <div class="heroText">
 <div>
 <h1>Informe de Marketing Digital</h1>
@@ -401,12 +403,16 @@
   const SHEET_NAMES = [""];
 
   const $ = (id) => document.getElementById(id);
+  const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   let rawRows = [];
   let charts = [];
   let lastDebug = [];
 
   function setStatus(message, ok = false) {
-    $("status").innerHTML = ok ? `<strong>${message}</strong>` : message;
+    $("status").textContent = '';
+    const text = document.createElement(ok ? 'strong' : 'span');
+    text.textContent = message;
+    $("status").append(text);
   }
 
   function setDebug(lines) {
@@ -885,7 +891,7 @@
   function setupMonthFilter() {
     const select = $("monthFilter");
     const current = select.value;
-    select.innerHTML = '<option value="all">Todos los meses</option>' + rawRows.map(r => `<option value="${r.mes}">${monthOptionLabel(r)}</option>`).join("");
+    select.replaceChildren(new Option('Todos los meses', 'all'), ...rawRows.map(r => new Option(monthOptionLabel(r), r.mes)));
     if ([...select.options].some(o => o.value === current)) select.value = current;
     else if (rawRows.length) select.value = rawRows[rawRows.length - 1].mes;
     else select.value = "all";
@@ -971,7 +977,7 @@
   function renderTable(rows) {
     $("tbody").innerHTML = rows.map(r => `
       <tr>
-        <td>${r.mes}</td>
+        <td>${escapeHtml(r.mes)}</td>
         <td>${formatMoney(r.inversion)}</td>
         <td>${formatNum(r.consultas)}</td>
         <td>${formatMoney(r.cpc)}</td>

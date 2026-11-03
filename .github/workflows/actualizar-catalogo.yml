@@ -36,11 +36,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Descargar repositorio
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
       - name: Preparar Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
       - name: Instalar procesador de imágenes
@@ -56,10 +56,16 @@ jobs:
             exit 1
           fi
           node scripts/actualizar-catalogo.mjs
+      - name: Optimizar imágenes y proteger páginas públicas
+        run: node scripts/optimizar-web.mjs
       - name: Guardar cambios publicados
         shell: bash
         run: |
           git add -A -- data/ assets/images/propiedades/ propiedades/ meta-catalog.csv sitemap.xml robots.txt CNAME ":(glob)*.html"
+          git add -A -- privacidad/ metricas/ visor/ sabrinagigena-inmobiliaria-propiedades/
+          if [ -d assets/images/miniaturas ]; then
+            git add -A -- assets/images/miniaturas/
+          fi
           if [ -d propiedades-no-index ]; then
             git add -A -- propiedades-no-index/
           fi
@@ -78,11 +84,11 @@ jobs:
       - name: Preparar archivos públicos
         run: |
           mkdir -p "$RUNNER_TEMP/sabrina-pages"
-          rsync -a --exclude=".git/" --exclude=".github/" --exclude="apps-script/" --exclude="node_modules/" --exclude="scripts/" --exclude="*.md" --exclude="package*.json" ./ "$RUNNER_TEMP/sabrina-pages/"
+          rsync -a --exclude=".git/" --exclude=".github/" --exclude="apps-script/" --exclude="node_modules/" --exclude="scripts/" --exclude="*.md" --exclude="package*.json" --exclude=".env*" --exclude="*.zip" --exclude="README*" --exclude="/data/image-sync.json" --exclude="/data/imagenes-manuales.json" --exclude="/data/generated-pages.json" ./ "$RUNNER_TEMP/sabrina-pages/"
       - name: Subir sitio actualizado
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
           path: ${{ runner.temp }}/sabrina-pages
       - name: Publicar en GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

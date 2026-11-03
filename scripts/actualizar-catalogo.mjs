@@ -19,7 +19,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.25';
+const SITE_VERSION = 'V22.26';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -234,17 +234,21 @@ function rowValue(row, ...names) {
 }
 
 function publicDataRow(row) {
-  const privateHeaders = new Set([
-    'PROPIEDAD PROPIA COLEGA',
-    'DIRECCION',
-    'LINK GOOGLE MAPS',
-    'CARPETA GOOGLE DRIVE'
-  ]);
-
+  // Solo campos destinados al catálogo. Una columna nueva no se publica por defecto.
+  const publicHeaders = new Set([
+    'ID','Estado','Operación','Tipo de propiedad','Nombre','Título','Precio USD','Precio ARS',
+    'Mostrar precio','Moneda principal','Apta para Crédito Hipotecario','Localidad','Barrio / Zona',
+    'Código postal','Latitud aproximada','Longitud aproximada','Descripción comercial',
+    'Superficie total (m²)','Superficie total (m2)','Superficie cubierta (m²)','Superficie cubierta (m2)',
+    'Superficie libre (m²)','Superficie libre (m2)','Superficie semicubierta(m²)',
+    'Superficie semicubierta (m²)','Superficie semicubierta(m2)','Superficie semicubierta (m2)',
+    'Superficie semicubierta','Ambientes','Dormitorios','Baños','Cocheras','Plantas','Antigüedad (años)',
+    'Año de construcción','Estado general','Expensas','Cocina','Living / comedor','Jardín / parque',
+    'Pileta','Quincho / parrilla','Servicios disponibles','Destacada en web','Orden de publicación',
+    'Imagen principal',...Array.from({length:12},(_,i)=>'Foto '+(i+1))
+  ].map(normalizedHeader));
   return Object.fromEntries(Object.entries(row || {}).filter(([header]) => {
-    const normalized = normalizedHeader(header);
-    const hasPrivatePrefix = /^(?:PRIVADO|INTERNO|NO PUBLICAR)(?: |$)/.test(normalized);
-    return !privateHeaders.has(normalized) && !hasPrivatePrefix;
+    return publicHeaders.has(normalizedHeader(header));
   }));
 }
 
@@ -2429,7 +2433,7 @@ async function main() {
   console.log('Hash del catálogo: ' + contentHash.slice(0, 12));
 }
 
-export { isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertyCardsMarkup, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup };
+export { publicDataRow, isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertyCardsMarkup, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup };
 
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
   main().catch(error => {

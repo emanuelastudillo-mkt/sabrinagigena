@@ -1,7 +1,32 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertyCardsMarkup, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup } from './actualizar-catalogo.mjs';
+import { publicDataRow, isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertyCardsMarkup, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup } from './actualizar-catalogo.mjs';
+import { optimizeHtml } from './optimizar-web.mjs';
 const row = { ID: 'TEST01', Nombre: 'Lote de prueba', Estado: 'Disponible', 'Tipo de propiedad': 'Lote', Localidad: 'Capilla del Señor', Operación: 'Venta', 'Precio USD': '30000', 'Mostrar precio': 'Sí' };
+test('Una columna nueva o privada no se copia al registro público', () => {
+  const output = publicDataRow({ ...row, 'Teléfono dueño': 'dato privado', 'Propiedad propia/colega': 'Propia',
+    'Nueva columna': 'no publicar por defecto', 'Dirección': 'exacta', 'Foto 12': 'https://example.com/foto.jpg',
+    'Superficie semicubierta (m²)': '20', 'Descripción comercial': 'Texto público' });
+  assert.equal(output['Teléfono dueño'], undefined);
+  assert.equal(output['Propiedad propia/colega'], undefined);
+  assert.equal(output['Nueva columna'], undefined);
+  assert.equal(output['Dirección'], undefined);
+  assert.equal(output['Foto 12'], 'https://example.com/foto.jpg');
+  assert.equal(output['Superficie semicubierta (m²)'], '20');
+  assert.equal(output['Descripción comercial'], 'Texto público');
+});
+test('Texto de Sheets no puede cerrar scripts ni inyectar HTML en la ficha', () => {
+  const html = propertyPageHtml({ ...row, Nombre: '</script><img src=x onerror=alert(1)>',
+    'Descripción comercial': '<script>alert(1)</script>' });
+  assert.doesNotMatch(html, /<img src=x|<script>alert\(1\)/);
+  assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+});
+test('Las protecciones de las páginas no se duplican al volver a generar', async () => {
+  const html = await optimizeHtml('<html><head></head><body><script src="/assets/js/main.js"></script></body></html>');
+  assert.match(html, /base-uri 'self'; object-src 'none'; form-action 'self'/);
+  assert.match(html, /strict-origin-when-cross-origin/);
+  assert.equal(await optimizeHtml(html), html);
+});
 test('Solo vendida o pausada se retiran', () => {
   for (const Estado of ['Disponible', 'Reservada', 'RESERVADO!', 'Último disponible!', ' último   disponible ', 'ULTIMA DISPONIBLE', 'Nuevo estado']) assert.equal(isPublicProperty({ ...row, Estado }), true, Estado);
   for (const Estado of ['Vendida', 'VENDIDO!', ' Pausada ', 'PAUSADO']) assert.equal(isPublicProperty({ ...row, Estado }), false, Estado);

@@ -12,7 +12,7 @@
     if(text)element.textContent=text;
     return element;
   };
-  const focusable=element=>$$('a[href],button:not([disabled]),input:not([disabled]),[tabindex="0"]',element)
+  const focusable=element=>$$('a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex="0"]',element)
     .filter(item=>!item.hidden&&item.getClientRects().length&&!item.closest('[inert]'));
   const trapFocus=(event,element)=>{
     if(event.key!=='Tab')return;
@@ -267,18 +267,20 @@
   const consultationStatus=$('.consult-status',consultationDialog);
   const consultationSubmit=$('.consult-submit',consultationDialog);
   let consultationOpenedAt=0,consultationReturnFocus=null,restoreConsultBackground=()=>{},pendingLeadId=null;
+  let consultationSending=false,consultationSent=false,consultationCloseTimer=0,pendingLeadSignature='';
   const openConsultation=trigger=>{
+    if(consultationDialog.classList.contains('open'))return;
     closeMenu();consultationOpenedAt=Date.now();consultationReturnFocus=trigger||document.activeElement;
-    consultationStatus.textContent='';consultationSubmit.disabled=false;consultationSubmit.textContent='Enviar consulta';
+    if(!consultationSending&&!consultationSent){consultationStatus.textContent='';consultationSubmit.disabled=false;consultationSubmit.textContent='Enviar consulta'}
     consultationDialog.classList.add('open');consultationDialog.setAttribute('aria-hidden','false');
     document.body.classList.add('no-scroll','consult-open');
     restoreConsultBackground=suspendBackground([...document.body.children].filter(element=>element!==consultationDialog&&!['SCRIPT','STYLE','LINK'].includes(element.tagName)));
-    requestAnimationFrame(()=>$('[name="name"]',consultationDialog)?.focus());
+    requestAnimationFrame(()=>(consultationSending?$('.consult-close',consultationDialog):$('[name="name"]',consultationDialog))?.focus());
   };
   const closeConsultation=reset=>{
     consultationDialog.classList.remove('open');consultationDialog.setAttribute('aria-hidden','true');
     document.body.classList.remove('no-scroll','consult-open');restoreConsultBackground();restoreConsultBackground=()=>{};
-    if(reset){consultationForm.reset();pendingLeadId=null}
+    if(reset||consultationSent){clearTimeout(consultationCloseTimer);consultationForm.reset();pendingLeadId=null;pendingLeadSignature='';consultationSent=false}
     if(consultationReturnFocus?.isConnected)consultationReturnFocus.focus({preventScroll:true});
     consultationReturnFocus=null;
   };
@@ -296,7 +298,10 @@
   const sendLead=payload=>{
     if(!/^https:\/\/script\.google\.com\/macros\/s\//.test(LEADS_API))throw new Error('El formulario todavía no está conectado.');
     const body=JSON.stringify({action:'lead',...payload});
-    return fetch(LEADS_API,{method:'POST',mode:'no-cors',cache:'no-store',credentials:'omit',keepalive:true,headers:{'Content-Type':'text/plain;charset=UTF-8'},body});
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),20000);
+    return fetch(LEADS_API,{method:'POST',mode:'no-cors',cache:'no-store',credentials:'omit',signal:controller.signal,headers:{'Content-Type':'text/plain;charset=UTF-8'},body})
+      .finally(()=>clearTimeout(timer));
   };
   const checkLeadStatus=eventId=>new Promise((resolve,reject)=>{
     const callback='sgLeadStatus'+eventId;
@@ -332,6 +337,7 @@
   });
   consultationForm.addEventListener('submit',async event=>{
     event.preventDefault();
+    if(consultationSending||consultationSent)return;
     const data=new FormData(consultationForm);
     if(data.get('company')){consultationStatus.textContent='No se pudo procesar la consulta.';return}
     if(Date.now()-consultationOpenedAt<800){consultationStatus.textContent='Esperá un instante y volvé a intentar.';return}
@@ -342,12 +348,17 @@
     if(name.length<2){consultationStatus.textContent='Ingresá tu nombre.';return}
     if(phone.length<12){consultationStatus.textContent='Ingresá un teléfono válido con código de área.';return}
     if(message.length<3){consultationStatus.textContent='Escribí un mensaje breve.';return}
-    const params=new URLSearchParams(location.search);const eventId=pendingLeadId||leadEventId();pendingLeadId=eventId;
+    const params=new URLSearchParams(location.search);
     const metaConsent=data.get('meta_consent')==='on';
+    const signature=JSON.stringify([name,phone,message,metaConsent,location.pathname]);
+    if(signature!==pendingLeadSignature){pendingLeadId=leadEventId();pendingLeadSignature=signature}
+    const eventId=pendingLeadId;
+    consultationSending=true;
+    $$('input,textarea',consultationForm).forEach(field=>{field.disabled=true});
     consultationSubmit.disabled=true;consultationSubmit.textContent='Enviando…';consultationStatus.textContent='';
     try{
       await sendLead({
-        event_id:eventId,name,phone,message,source:'formulario_web',page_url:location.href,
+        event_id:eventId,name,phone,message,source:'formulario_web',page_url:location.origin+location.pathname,
         property:$('.detail-title h1')?.textContent.trim()||'',utm_source:params.get('utm_source')||'',
         utm_medium:params.get('utm_medium')||'',utm_campaign:params.get('utm_campaign')||'',
         consent:true,meta_consent:metaConsent,company:'',form_elapsed_ms:Date.now()-consultationOpenedAt,
@@ -358,11 +369,15 @@
         try{window.fbq('init',META_PIXEL_ID,{fn:name,ph:phone});window.fbq('track','Lead',{content_name:'Formulario web',lead_channel:'web'},{eventID:eventId})}catch(_){}
       }
       consultationStatus.textContent='¡Gracias! Recibimos tu consulta. Te contactaremos pronto.';
+      consultationSent=true;
       consultationSubmit.textContent='Consulta enviada';
-      setTimeout(()=>closeConsultation(true),1800);
+      consultationCloseTimer=setTimeout(()=>closeConsultation(true),1800);
     }catch(error){
-      consultationStatus.textContent=error?.message||'No pudimos enviar la consulta. Intentá nuevamente.';
+      consultationStatus.textContent=error?.name==='AbortError'?'El envío demoró más de lo esperado. Reintentá en unos segundos.':(error?.message||'No pudimos enviar la consulta. Intentá nuevamente.');
       consultationSubmit.disabled=false;consultationSubmit.textContent='Reintentar';
+    }finally{
+      consultationSending=false;
+      $$('input,textarea',consultationForm).forEach(field=>{field.disabled=false});
     }
   });
 
