@@ -8,7 +8,8 @@
     "propiedades/loteo-la-loma-etapa-iii-s002/index.html",
     "propiedades/loteo-la-loma-etapa-iii-s003/index.html",
     "propiedades/terreno-el-lazo-s007/index.html",
-    "propiedades/terreno-lomadas-de-capilla-s004/index.html"
+    "propiedades/terreno-lomadas-de-capilla-s004/index.html",
+    "propiedades/terreno-pavon-s009/index.html"
   ],
   "activeRoutes": [
     "/propiedades/terreno-el-lazo-s007/",
@@ -18,7 +19,8 @@
     "/propiedades/terreno-lomadas-de-capilla-s004/",
     "/propiedades/casa-casco-urbano-s005/",
     "/propiedades/casa-en-parada-robles-s006/",
-    "/propiedades/casa-alpina-lagomarsino-s008/"
+    "/propiedades/casa-alpina-lagomarsino-s008/",
+    "/propiedades/terreno-pavon-s009/"
   ],
   "archivedRoutes": []
 }
