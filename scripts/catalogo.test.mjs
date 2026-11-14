@@ -3,6 +3,25 @@ import { test } from 'node:test';
 import { publicDataRow, isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertyCardsMarkup, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup } from './actualizar-catalogo.mjs';
 import { optimizeHtml } from './optimizar-web.mjs';
 const row = { ID: 'TEST01', Nombre: 'Lote de prueba', Estado: 'Disponible', 'Tipo de propiedad': 'Lote', Localidad: 'Capilla del Señor', Operación: 'Venta', 'Precio USD': '30000', 'Mostrar precio': 'Sí' };
+test('Frente y largo llegan al registro público y a fichas activas o archivadas', () => {
+  const measured = { ...row, 'Frente (mts)': '31,15', 'Largo (mts)': '48.65', 'Foto 12': 'https://example.com/12.webp' };
+  const published = publicDataRow(measured);
+  assert.equal(published['Frente (mts)'], '31,15');
+  assert.equal(published['Largo (mts)'], '48.65');
+  assert.equal(published['Foto 12'], measured['Foto 12']);
+  for (const Estado of ['Disponible', 'Vendida']) {
+    const html = propertyPageHtml({ ...published, Estado });
+    assert.match(html, /<strong>31,15 m<\/strong><span>Frente<\/span>/);
+    assert.match(html, /<strong>48,65 m<\/strong><span>Largo<\/span>/);
+  }
+});
+test('Las medidas ausentes o inválidas se muestran a consultar sin inventar valores', () => {
+  for (const value of ['', '0', '-10', 'sin confirmar', '<img src=x onerror=alert(1)>']) {
+    const html = propertyPageHtml({ ...row, 'Frente (mts)': value, 'Largo (mts)': value });
+    assert.match(html, /<strong>A consultar<\/strong><span>Frente<\/span>/);
+    assert.match(html, /<strong>A consultar<\/strong><span>Largo<\/span>/);
+  }
+});
 test('Una columna nueva o privada no se copia al registro público', () => {
   const output = publicDataRow({ ...row, 'Teléfono dueño': 'dato privado', 'Propiedad propia/colega': 'Propia',
     'Nueva columna': 'no publicar por defecto', 'Dirección': 'exacta', 'Foto 12': 'https://example.com/foto.jpg',

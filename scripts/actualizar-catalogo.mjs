@@ -19,7 +19,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.26';
+const SITE_VERSION = 'V22.27';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -238,7 +238,7 @@ function publicDataRow(row) {
   const publicHeaders = new Set([
     'ID','Estado','Operación','Tipo de propiedad','Nombre','Título','Precio USD','Precio ARS',
     'Mostrar precio','Moneda principal','Apta para Crédito Hipotecario','Localidad','Barrio / Zona',
-    'Código postal','Latitud aproximada','Longitud aproximada','Descripción comercial',
+    'Código postal','Latitud aproximada','Longitud aproximada','Descripción comercial','Frente (mts)','Largo (mts)',
     'Superficie total (m²)','Superficie total (m2)','Superficie cubierta (m²)','Superficie cubierta (m2)',
     'Superficie libre (m²)','Superficie libre (m2)','Superficie semicubierta(m²)',
     'Superficie semicubierta (m²)','Superficie semicubierta(m2)','Superficie semicubierta (m2)',
@@ -1645,6 +1645,14 @@ async function updateCatalogPages(rows) {
 
 function specificationItems(row) {
   const pending = 'A consultar';
+  const length = field => {
+    const raw = clean(rowValue(row, field));
+    if (!/^\d+(?:[.,]\d+)?$/.test(raw)) return pending;
+    const value = Number(raw.replace(',', '.'));
+    return Number.isFinite(value) && value > 0
+      ? new Intl.NumberFormat('es-AR', { maximumFractionDigits: 3 }).format(value) + ' m'
+      : pending;
+  };
   const area = (...fields) => {
     const raw = rowValue(row, ...fields);
     if (!clean(raw)) return pending;
@@ -1664,6 +1672,8 @@ function specificationItems(row) {
   // La cantidad y el orden son fijos: ninguna ficha cambia de geometría
   // cuando un dato todavía no fue cargado en Google Sheets.
   return [
+    { label: 'Frente', value: length('Frente (mts)') },
+    { label: 'Largo', value: length('Largo (mts)') },
     { label: 'Superficie total', value: area('Superficie total (m²)', 'Superficie total (m2)') },
     { label: 'Superficie cubierta', value: area('Superficie cubierta (m²)', 'Superficie cubierta (m2)') },
     {
