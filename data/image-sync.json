@@ -389,7 +389,28 @@
       ]
     },
     "S009": {
-      "items": []
+      "items": [
+        {
+          "file": "S009-foto-01.webp",
+          "source": "drive:1v8RwRWg2DZkElrEB2h3qo6EyMjnshBY6|column:IMAGEN PRINCIPAL|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 1
+        },
+        {
+          "file": "S009-foto-02.webp",
+          "source": "drive:1qwJvlW0LAPKiYYJxBsjWL4GnwGsRvjJ5|column:FOTO 1|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 2
+        },
+        {
+          "file": "S009-foto-03.webp",
+          "source": "drive:1BK3ye2x7tj37ZEWSXJzvo7kvoMnuzEGw|column:FOTO 2|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 3
+        },
+        {
+          "file": "S009-foto-04.webp",
+          "source": "drive:1v8RwRWg2DZkElrEB2h3qo6EyMjnshBY6|column:FOTO 3|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 4
+        }
+      ]
     }
   }
 }

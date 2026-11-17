@@ -1,5 +1,5 @@
 {
-  "_version": "62b064acca93",
+  "_version": "3dde9c453bbd",
   "S001": [
     "S001-foto-01.webp",
     "S001-foto-02.webp",
@@ -86,5 +86,11 @@
     "S008-foto-09.webp",
     "S008-foto-10.webp",
     "S008-foto-11.webp"
+  ],
+  "S009": [
+    "S009-foto-01.webp",
+    "S009-foto-02.webp",
+    "S009-foto-03.webp",
+    "S009-foto-04.webp"
   ]
 }
