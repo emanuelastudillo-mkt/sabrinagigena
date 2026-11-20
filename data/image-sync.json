@@ -409,6 +409,11 @@
           "file": "S009-foto-04.webp",
           "source": "drive:1v8RwRWg2DZkElrEB2h3qo6EyMjnshBY6|column:FOTO 3|pipeline:watermark-v1-primary-first",
           "logicalOrder": 4
+        },
+        {
+          "file": "S009-foto-05.webp",
+          "source": "drive:1smP0rC9jAKXKA_iRG1taQ7qNpWCN9VtJ|column:FOTO 4|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 5
         }
       ]
     }
