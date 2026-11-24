@@ -9,7 +9,7 @@ La sincronización se ejecuta automáticamente una vez por día y también puede
 ## Qué actualiza
 
 - data/propiedades.json: copia normalizada y pública del catálogo, sin campos clasificados ni ubicación exacta.
-- data/propiedades-no-index.json: historial de propiedades vendidas, pausadas o retiradas.
+- data/propiedades-no-index.json: historial de propiedades vendidas, pausadas, ocultas o retiradas.
 - index.html: propiedades destacadas de la portada.
 - propiedades/index.html: catálogo completo, buscador y filtros en /propiedades/.
 - propiedades/NOMBRE-ID/index.html: URL pública estable de cada propiedad.
@@ -22,7 +22,9 @@ La sincronización se ejecuta automáticamente una vez por día y también puede
 
 ## Estados que se publican
 
-Se publican las filas con estado **Disponible** o **Reservada**. Las filas **Vendida** o **Pausada** dejan de aparecer en portada, catálogo y sitemap, pero no se eliminan.
+Se publican las filas con estado **Disponible**, **Reservada**, **Último disponible** y otros estados no excluidos. Las filas **Vendida**, **Pausada** u **Oculta** dejan de aparecer en portada, catálogo, recomendaciones, sitemap y catálogo de Meta, pero no se eliminan. Se aceptan mayúsculas, minúsculas y espacios alrededor del estado.
+
+Para deslistar una propiedad sin borrar su ficha, escribí **OCULTA** en la columna **Estado**. En la siguiente sincronización, su URL original seguirá accesible, con `noindex`, el aviso **Fuera de publicación** y alternativas disponibles. No se marcará como vendida. Al volver a **Disponible**, reaparecerá en el catálogo. Deslistar no convierte la ficha en privada: quien tenga su enlace podrá seguir abriéndola.
 
 Cuando una propiedad se vende:
 

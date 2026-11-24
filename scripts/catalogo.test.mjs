@@ -46,9 +46,38 @@ test('Las protecciones de las páginas no se duplican al volver a generar', asyn
   assert.match(html, /strict-origin-when-cross-origin/);
   assert.equal(await optimizeHtml(html), html);
 });
-test('Solo vendida o pausada se retiran', () => {
+test('Vendida, pausada y oculta se retiran; reservada y último disponible siguen públicas', () => {
   for (const Estado of ['Disponible', 'Reservada', 'RESERVADO!', 'Último disponible!', ' último   disponible ', 'ULTIMA DISPONIBLE', 'Nuevo estado']) assert.equal(isPublicProperty({ ...row, Estado }), true, Estado);
-  for (const Estado of ['Vendida', 'VENDIDO!', ' Pausada ', 'PAUSADO']) assert.equal(isPublicProperty({ ...row, Estado }), false, Estado);
+  for (const Estado of ['Vendida', 'VENDIDO!', ' Pausada ', 'PAUSADO', 'OCULTA', ' oculta ', 'Oculta!', 'Oculto']) assert.equal(isPublicProperty({ ...row, Estado }), false, Estado);
+});
+
+test('Oculta sale de los listados y conserva su ficha noindex con alternativas', () => {
+  const hidden = { ...row, ID: 'HIDDEN01', Estado: 'OCULTA', 'Descripción comercial': 'Descripción conservada.' };
+  const publicRows = publicRowsSorted([hidden, row]);
+  assert.deepEqual(publicRows, [row]);
+  assert.equal(statusLabel(hidden), 'Oculta');
+  assert.doesNotMatch(propertyCardsMarkup([hidden, row]), /HIDDEN01/);
+  assert.doesNotMatch(sitemapXml(publicRows, '2026-11-24'), /hidden01/i);
+
+  const archive = buildArchiveState([hidden, row], [{ ...hidden, Estado: 'Disponible' }, row], { rows: [] });
+  assert.equal(archive.rowCount, 1);
+  assert.equal(archive.rows[0].ID, hidden.ID);
+  assert.equal(archive.rows[0]._archiveReason, 'Oculta');
+  const html = propertyPageHtml(archive.rows[0], publicRows);
+  assert.match(html, /<link rel="canonical" href="https:\/\/sabrinagigena.com\/propiedades\/lote-de-prueba-hidden01\/">/);
+  assert.match(html, /noindex,follow/);
+  assert.match(html, /Fuera de publicación/);
+  assert.match(html, /Descripción conservada\./);
+  assert.match(html, /data-property-id="TEST01"/);
+  assert.doesNotMatch(html, /<strong>Vendida<\/strong>|fbq\('track', '(?:ViewContent|Lead)'/);
+});
+
+test('Una oculta puede volver al catálogo al cambiar a disponible', () => {
+  const hidden = { ...row, Estado: 'Oculta' };
+  const archive = buildArchiveState([hidden], [row], { rows: [] });
+  assert.equal(buildArchiveState([row], [hidden], archive).rowCount, 0);
+  assert.match(propertyCardsMarkup([row]), /data-property-id="TEST01"/);
+  assert.doesNotMatch(propertyPageHtml(row), /noindex,follow|Fuera de publicación/);
 });
 test('Los filtros de la home reciben todas las propiedades públicas, no solo las primeras seis', () => {
   const rows = Array.from({ length: 8 }, (_, index) => ({

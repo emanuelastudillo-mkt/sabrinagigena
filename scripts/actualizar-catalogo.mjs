@@ -19,7 +19,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.27';
+const SITE_VERSION = 'V22.28';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -302,7 +302,7 @@ function propertyStatus(row) {
 }
 
 function isPublicProperty(row) {
-  return !['VENDIDA', 'VENDIDO', 'PAUSADA', 'PAUSADO'].includes(propertyStatus(row));
+  return !['VENDIDA', 'VENDIDO', 'PAUSADA', 'PAUSADO', 'OCULTA', 'OCULTO'].includes(propertyStatus(row));
 }
 
 function isSoldProperty(row) {
@@ -321,7 +321,9 @@ function statusLabel(row) {
     VENDIDA: 'Vendida',
     VENDIDO: 'Vendida',
     PAUSADA: 'Pausada',
-    PAUSADO: 'Pausada'
+    PAUSADO: 'Pausada',
+    OCULTA: 'Oculta',
+    OCULTO: 'Oculta'
   };
   return labels[status] || rowValue(row, 'Estado');
 }
