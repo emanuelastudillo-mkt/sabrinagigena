@@ -6,46 +6,55 @@
         {
           "file": "S011-foto-01.webp",
           "source": "drive:19IWfDbRJty4JjpVSmQddmBeOjy68fAHu|column:IMAGEN PRINCIPAL|pipeline:watermark-v1-primary-first",
+          "inputHash": "38c1d28de44b25ef778a4b5469b85aaf3fbb57453392d8bc9a3188b1acac9594",
           "logicalOrder": 1
         },
         {
           "file": "S011-foto-02.webp",
           "source": "drive:1hXS09NQlfJcElCTDqoDGgszv9Z6Dsfgq|column:FOTO 1|pipeline:watermark-v1-primary-first",
+          "inputHash": "e1f69f0a4a95346a310220ef6c0358b606189b0757199377e94a0d2ff9401667",
           "logicalOrder": 2
         },
         {
           "file": "S011-foto-03.webp",
           "source": "drive:1hfncZU7b4TQ4KzM9sCjZUOA7Za7ieMo2|column:FOTO 2|pipeline:watermark-v1-primary-first",
+          "inputHash": "4d4656f1fe89673054c076679414caffb46a3ae3c811aa9f21df891fd1fbc1db",
           "logicalOrder": 3
         },
         {
           "file": "S011-foto-04.webp",
           "source": "drive:11fvxWQQhc6Ak1rNbgcDto_mMAg5T_4KX|column:FOTO 3|pipeline:watermark-v1-primary-first",
+          "inputHash": "c571d751643906c48d7e56c77cabe190f7f34834f93ef8b66c4b1d6680fcd638",
           "logicalOrder": 4
         },
         {
           "file": "S011-foto-05.webp",
           "source": "drive:1tVPUw8BzkXr3Zn_Vm26pF5jKk7aHPGe_|column:FOTO 4|pipeline:watermark-v1-primary-first",
+          "inputHash": "a86c003eb1955a08eb074cc79a7bb7a9eaf765a21ddfbf503bcf0d3bfb92b4de",
           "logicalOrder": 5
         },
         {
           "file": "S011-foto-06.webp",
           "source": "drive:1lsvzOmk4zTsJaWIstdHx3L1izkKTWAdf|column:FOTO 5|pipeline:watermark-v1-primary-first",
+          "inputHash": "7f345558c44868956714c1dd92e6955b586e678a88300c05bcd05092762c9b1e",
           "logicalOrder": 6
         },
         {
           "file": "S011-foto-07.webp",
           "source": "drive:1DlC-xbm9pZsSfRE8VjhDgy5xVUAX89H7|column:FOTO 6|pipeline:watermark-v1-primary-first",
+          "inputHash": "3df605e3ef9b1ca8c61de7608da2ec5fa94eb2d81bc2619e388c54126fc197d5",
           "logicalOrder": 7
         },
         {
           "file": "S011-foto-08.webp",
           "source": "drive:10_H7yx86VFcXiKTGuV7k9yuE_LePAA_9|column:FOTO 7|pipeline:watermark-v1-primary-first",
+          "inputHash": "0e98866597fa44bbdfe1ce70dde71028859e07a5eb2c49de59fee155eb29e813",
           "logicalOrder": 8
         },
         {
           "file": "S011-foto-09.webp",
           "source": "drive:1Da-iOfTnGZY9OAdDkJldpJWQVYZaXszN|column:FOTO 8|pipeline:watermark-v1-primary-first",
+          "inputHash": "de7cdb8e75aa031810e76f770d2903c9ce8e956624a6f6676fb812843c60d639",
           "logicalOrder": 9
         }
       ]
@@ -123,26 +132,31 @@
         {
           "file": "S002-foto-03.webp",
           "source": "drive:1YNpC9OFsCJAqX8U3wwiQjJR7buaOQ6kY|column:FOTO 2|pipeline:watermark-v1-primary-first",
+          "inputHash": "88bc88230adc7831cd443456e19d34a55b0e18d3f89901fc4ed5cb74b362ea2e",
           "logicalOrder": 3
         },
         {
           "file": "S002-foto-04.webp",
           "source": "drive:13eshAoNoGBcVFTwnwQK-acXhsZtEpexQ|column:FOTO 3|pipeline:watermark-v1-primary-first",
+          "inputHash": "e988fe088895e4a0dfbf240ea5b44681bd948e0cbcad809021265423efbb7e3f",
           "logicalOrder": 4
         },
         {
           "file": "S002-foto-05.webp",
           "source": "drive:1bKhKb3haCxnq-NPCqSlb4fW7HSpKFnBf|column:FOTO 4|pipeline:watermark-v1-primary-first",
+          "inputHash": "b0e0a99ac0df672be37a915562ccf8a9441901eeb52cee483c413dea67764eb1",
           "logicalOrder": 5
         },
         {
           "file": "S002-foto-06.webp",
           "source": "drive:1ZbuJuN8mcT-yKgnNsEAlSQEG1FqS9rH2|column:FOTO 5|pipeline:watermark-v1-primary-first",
+          "inputHash": "f42e5b7371007e31755ce7d9155a7ce59fce9591d0954423045d6146fd0ac700",
           "logicalOrder": 6
         },
         {
           "file": "S002-foto-07.webp",
           "source": "drive:13CQCZG58xUfTUodLyQqk73Y-H7Vwyk5-|column:FOTO 6|pipeline:watermark-v1-primary-first",
+          "inputHash": "a553cd75a8e7efeefa3413deacfdd45480a6190708532e0999b71fd5c3344a6f",
           "logicalOrder": 7
         },
         {
@@ -153,6 +167,7 @@
         {
           "file": "S002-foto-09.webp",
           "source": "drive:1dueedka3rLlvdS_OsphsOjV3kHPDY5Cd|column:FOTO 8|pipeline:watermark-v1-primary-first",
+          "inputHash": "4fb10d5e7daccde98e84d2c55958a6f15f6f3025f94cffcb80d88f228124fa27",
           "logicalOrder": 9
         },
         {
@@ -177,26 +192,31 @@
         {
           "file": "S003-foto-03.webp",
           "source": "drive:1YNpC9OFsCJAqX8U3wwiQjJR7buaOQ6kY|column:FOTO 2|pipeline:watermark-v1-primary-first",
+          "inputHash": "88bc88230adc7831cd443456e19d34a55b0e18d3f89901fc4ed5cb74b362ea2e",
           "logicalOrder": 3
         },
         {
           "file": "S003-foto-04.webp",
           "source": "drive:13eshAoNoGBcVFTwnwQK-acXhsZtEpexQ|column:FOTO 3|pipeline:watermark-v1-primary-first",
+          "inputHash": "e988fe088895e4a0dfbf240ea5b44681bd948e0cbcad809021265423efbb7e3f",
           "logicalOrder": 4
         },
         {
           "file": "S003-foto-05.webp",
           "source": "drive:1bKhKb3haCxnq-NPCqSlb4fW7HSpKFnBf|column:FOTO 4|pipeline:watermark-v1-primary-first",
+          "inputHash": "b0e0a99ac0df672be37a915562ccf8a9441901eeb52cee483c413dea67764eb1",
           "logicalOrder": 5
         },
         {
           "file": "S003-foto-06.webp",
           "source": "drive:1ZbuJuN8mcT-yKgnNsEAlSQEG1FqS9rH2|column:FOTO 5|pipeline:watermark-v1-primary-first",
+          "inputHash": "f42e5b7371007e31755ce7d9155a7ce59fce9591d0954423045d6146fd0ac700",
           "logicalOrder": 6
         },
         {
           "file": "S003-foto-07.webp",
           "source": "drive:13CQCZG58xUfTUodLyQqk73Y-H7Vwyk5-|column:FOTO 6|pipeline:watermark-v1-primary-first",
+          "inputHash": "a553cd75a8e7efeefa3413deacfdd45480a6190708532e0999b71fd5c3344a6f",
           "logicalOrder": 7
         },
         {
@@ -207,6 +227,7 @@
         {
           "file": "S003-foto-09.webp",
           "source": "drive:1dueedka3rLlvdS_OsphsOjV3kHPDY5Cd|column:FOTO 8|pipeline:watermark-v1-primary-first",
+          "inputHash": "4fb10d5e7daccde98e84d2c55958a6f15f6f3025f94cffcb80d88f228124fa27",
           "logicalOrder": 9
         },
         {
@@ -373,16 +394,19 @@
         {
           "file": "S007-foto-06.webp",
           "source": "drive:1aToogt6CHuN8sK06RxixE15zZEoSoMjw|column:FOTO 5|pipeline:watermark-v1-primary-first",
+          "inputHash": "50bb9f31247bafc43c82957ca7a85b32bc9ef7909477264ad10fc60fbb481912",
           "logicalOrder": 6
         },
         {
           "file": "S007-foto-07.webp",
           "source": "drive:1TcJ2I-H5ADLZT9CRnUnf5abssyqMKtNV|column:FOTO 6|pipeline:watermark-v1-primary-first",
+          "inputHash": "7c2dad1b6da89f9972993facd41730c91f7c9a30384cf7e6388562ee4ac354c2",
           "logicalOrder": 7
         },
         {
           "file": "S007-foto-08.webp",
           "source": "drive:1cOzcymCo48kPPK2FOegHh7IBiyTYIdtc|column:FOTO 7|pipeline:watermark-v1-primary-first",
+          "inputHash": "99f092690e962b1b025e2ab0ab7e5df767ea3aba9f565cc8b80cea5497c31c69",
           "logicalOrder": 8
         }
       ]
@@ -451,26 +475,31 @@
         {
           "file": "S009-foto-01.webp",
           "source": "drive:1v8RwRWg2DZkElrEB2h3qo6EyMjnshBY6|column:IMAGEN PRINCIPAL|pipeline:watermark-v1-primary-first",
+          "inputHash": "ecb1263dda792ebee40b881b1562dc4b67e02ffde0e54dc09113c81732fb2c8a",
           "logicalOrder": 1
         },
         {
           "file": "S009-foto-02.webp",
           "source": "drive:1qwJvlW0LAPKiYYJxBsjWL4GnwGsRvjJ5|column:FOTO 1|pipeline:watermark-v1-primary-first",
+          "inputHash": "6043ab44579042e0b3e78f3ef8fd91cf38998e00b22daace9b21b04fcdfaaf35",
           "logicalOrder": 2
         },
         {
           "file": "S009-foto-03.webp",
           "source": "drive:1BK3ye2x7tj37ZEWSXJzvo7kvoMnuzEGw|column:FOTO 2|pipeline:watermark-v1-primary-first",
+          "inputHash": "cf126ba78c01f3254ef70b26843afebb036b8c2f51479c98dca0f214c1bb20c6",
           "logicalOrder": 3
         },
         {
           "file": "S009-foto-04.webp",
           "source": "drive:1v8RwRWg2DZkElrEB2h3qo6EyMjnshBY6|column:FOTO 3|pipeline:watermark-v1-primary-first",
+          "inputHash": "ecb1263dda792ebee40b881b1562dc4b67e02ffde0e54dc09113c81732fb2c8a",
           "logicalOrder": 4
         },
         {
           "file": "S009-foto-05.webp",
           "source": "drive:1smP0rC9jAKXKA_iRG1taQ7qNpWCN9VtJ|column:FOTO 4|pipeline:watermark-v1-primary-first",
+          "inputHash": "defa49c2e011923d8881a020e4d465ab0549ead20a1c57a5fd55ccca58ec98fe",
           "logicalOrder": 5
         }
       ]
@@ -480,36 +509,43 @@
         {
           "file": "S010-foto-01.webp",
           "source": "drive:1g3nNd2UHWhveQMMTI1jiXwB2VLwLp-Ic|column:IMAGEN PRINCIPAL|pipeline:watermark-v1-primary-first",
+          "inputHash": "51ec7a1cc25e4c830df1258f1473e5be4ef20ddbd315b5165fee6e99a5fa07a1",
           "logicalOrder": 1
         },
         {
           "file": "S010-foto-02.webp",
           "source": "drive:1Q1Oj3aTVqN-LbEA6JSnGkV0Rp8v0wu1G|column:FOTO 1|pipeline:watermark-v1-primary-first",
+          "inputHash": "a36400c937e789ce2f8a1814caf972aa866796141c294f12d79021598af34c22",
           "logicalOrder": 2
         },
         {
           "file": "S010-foto-03.webp",
           "source": "drive:1y_XzA_SfpgoscN_s6pI6CyBdVjdNwL4U|column:FOTO 2|pipeline:watermark-v1-primary-first",
+          "inputHash": "285672aedbad80d578b62ffe45992657aa41938fb0a57ed36d9fcd16f1356a42",
           "logicalOrder": 3
         },
         {
           "file": "S010-foto-04.webp",
           "source": "drive:1umVEwdxh6PDfC8Sn5Vsn6RslpsPpFER_|column:FOTO 3|pipeline:watermark-v1-primary-first",
+          "inputHash": "200aa4bb6af6ecc1402bf8bff2a0abb2ca09c7a48d84f15fe4818a60dd8730d1",
           "logicalOrder": 4
         },
         {
           "file": "S010-foto-05.webp",
           "source": "drive:1x7V8sltZeCMziiLP62RUR3IrU3QslN-D|column:FOTO 4|pipeline:watermark-v1-primary-first",
+          "inputHash": "acddab6d701ea67716955028e8fcb6bf0611f5c2f314605c367196f53ad0d5d7",
           "logicalOrder": 5
         },
         {
           "file": "S010-foto-06.webp",
           "source": "drive:1yUvj3M7ruNuMTC_EPVrwPWTapZxuy5y1|column:FOTO 5|pipeline:watermark-v1-primary-first",
+          "inputHash": "962e2340dbc3fa27f767b4320ff30597eea0be9dc6226bf3d1e6b54a62b00069",
           "logicalOrder": 6
         },
         {
           "file": "S010-foto-07.webp",
           "source": "drive:1YClHX3vZEn4b8rFxW8vHOq2mGUYIdf84|column:FOTO 6|pipeline:watermark-v1-primary-first",
+          "inputHash": "0c70a0e7b02ba38ca9a15e757d646fe48963c5a7ac684aba19074831a22eaeae",
           "logicalOrder": 7
         }
       ]
