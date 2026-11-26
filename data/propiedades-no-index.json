@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-26T22:18:50.328Z",
+  "updatedAt": "2026-11-26T22:28:29.505Z",
   "rowCount": 4,
-  "contentHash": "5cfed1adade872be3674cd8a48dbaaf0f744aeeeea16e1394d00ab688008c3f6",
+  "contentHash": "26f3421be45143a74d1b8ab0c2dded49e3d934169d98096306581a4776e5791d",
   "rows": [
     {
       "ID": "S011",
@@ -56,7 +56,7 @@
       "Foto 10": "",
       "Foto 11": "",
       "Foto 12": "",
-      "_archivedAt": "2026-11-26T22:18:50.328Z",
+      "_archivedAt": "2026-11-26T22:28:29.505Z",
       "_archiveReason": "Oculta"
     },
     {
@@ -111,7 +111,7 @@
       "Foto 10": "",
       "Foto 11": "",
       "Foto 12": "",
-      "_archivedAt": "2026-11-26T22:18:50.328Z",
+      "_archivedAt": "2026-11-26T22:28:29.505Z",
       "_archiveReason": "Oculta"
     },
     {
@@ -166,7 +166,7 @@
       "Foto 10": "",
       "Foto 11": "",
       "Foto 12": "",
-      "_archivedAt": "2026-11-26T22:18:50.328Z",
+      "_archivedAt": "2026-11-26T22:28:29.505Z",
       "_archiveReason": "Oculta"
     },
     {
