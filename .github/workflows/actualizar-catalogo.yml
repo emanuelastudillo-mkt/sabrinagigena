@@ -46,8 +46,8 @@ jobs:
           node-version: "24"
       - name: Instalar procesador de imágenes
         run: npm install --no-save --no-package-lock sharp@0.34.3
-      - name: Verificar estados y descripciones
-        run: node --test scripts/catalogo.test.mjs scripts/verificar-artefacto-pages.test.mjs
+      - name: Verificar estados, descripciones e imágenes
+        run: node --test scripts/catalogo.test.mjs scripts/imagenes.test.mjs scripts/verificar-artefacto-pages.test.mjs
       - name: Sincronizar Google Sheets, imágenes y páginas
         env:
           PROPERTIES_CSV_URL: ${{ secrets.PROPERTIES_CSV_URL }}

@@ -63,7 +63,9 @@ El catálogo usa primero **Imagen principal** y después las columnas **Foto 1**
 - Cada enlace se descarga y se convierte a WebP conservando la proporción vertical 1080 × 1350.
 - Durante esa conversión se incrusta la marca de agua **Sabrina Gigena Inmobiliaria** en la parte inferior de cada WebP.
 - La fotografía original de Google Drive no se modifica: la marca solo queda incorporada en la copia optimizada que se publica en GitHub.
-- Si cambia el enlace de una columna, se reemplaza su WebP estable.
+- En cada workflow se vuelve a descargar la fuente y se compara su contenido (SHA-256). Si reemplazás la foto en Drive conservando el mismo enlace, también se actualiza su WebP estable. Si no cambió, no se vuelve a procesar ni escribir.
+- Se prioriza la descarga original de Drive antes que sus miniaturas. Si falla la descarga, se conserva la foto anterior y se informa la advertencia para reintentar en la próxima ejecución.
+- Las miniaturas, las fotos para Meta y las versiones de caché se actualizan a partir del nuevo WebP. No hace falta cambiar enlaces en la planilla para forzar esta actualización.
 - Si el enlace se vacía, el WebP anterior se elimina del repositorio en la siguiente sincronización.
 - Si se vacía **Imagen principal** o cualquiera de las columnas **Foto**, su WebP anterior se elimina en la siguiente sincronización.
 

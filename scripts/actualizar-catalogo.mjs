@@ -19,7 +19,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.28';
+const SITE_VERSION = 'V22.29';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -492,10 +492,10 @@ function imageDownloadCandidates(url) {
   if (!id) return [input];
 
   return [
-    'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w2400',
-    'https://lh3.googleusercontent.com/d/' + id + '=w2400',
     'https://drive.google.com/uc?export=download&id=' + encodeURIComponent(id),
-    'https://drive.usercontent.google.com/download?id=' + encodeURIComponent(id) + '&export=download&confirm=t'
+    'https://drive.usercontent.google.com/download?id=' + encodeURIComponent(id) + '&export=download&confirm=t',
+    'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w2400',
+    'https://lh3.googleusercontent.com/d/' + id + '=w2400'
   ];
 }
 
@@ -508,6 +508,7 @@ async function downloadImageBuffer(url) {
         signal: AbortSignal.timeout(30000),
         headers: {
           'user-agent': 'SabrinaGigenaCatalogSync/1.0',
+          'cache-control': 'no-cache',
           accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
         }
       });
@@ -626,18 +627,19 @@ async function writeJsonIfChanged(filePath, value) {
   return writeTextIfChanged(filePath, stableJson(value));
 }
 
-async function syncPropertyImages(row, previousState, report) {
+async function syncPropertyImages(row, previousState, report, outputDir = imagesDir) {
   const id = propertyId(row);
   const previousItems = Array.isArray(previousState?.items) ? previousState.items : [];
   const previousByFile = new Map(previousItems.map(item => [clean(item.file), item]));
   const sources = photoSources(row);
   const nextItems = [];
+  const downloadedBySource = new Map();
   const optimizedBySource = new Map();
 
   for (let index = 0; index < sources.length; index += 1) {
     const source = sources[index];
     const file = id + '-foto-' + String(source.order).padStart(2, '0') + '.webp';
-    const filePath = path.join(imagesDir, file);
+    const filePath = path.join(outputDir, file);
     // La versión del procesamiento forma parte de la identidad para que un
     // cambio de marca de agua regenere incluso fotos cuyo enlace no cambió.
     const contentKey = sourceKey(source.url);
@@ -645,17 +647,25 @@ async function syncPropertyImages(row, previousState, report) {
       '|pipeline:' + IMAGE_PIPELINE_VERSION;
     const previous = previousByFile.get(file);
 
-    if (previous && previous.source === key && existsSync(filePath)) {
-      nextItems.push(previous);
-      report.unchanged += 1;
-      continue;
-    }
-
     try {
+      // El ID de Drive no cambia al reemplazar una foto. Comprobamos el
+      // contenido en cada ejecución y solo reprocesamos si cambió.
+      let downloaded = downloadedBySource.get(contentKey);
+      if (!downloaded) {
+        const input = await downloadImageBuffer(source.url);
+        downloaded = { input, hash: createHash('sha256').update(input).digest('hex') };
+        downloadedBySource.set(contentKey, downloaded);
+      }
+      if (previous && previous.source === key &&
+          previous.inputHash === downloaded.hash && existsSync(filePath)) {
+        nextItems.push(previous);
+        report.unchanged += 1;
+        continue;
+      }
+
       let output = optimizedBySource.get(contentKey);
       if (!output) {
-        const input = await downloadImageBuffer(source.url);
-        output = await toOptimizedWebp(input);
+        output = await toOptimizedWebp(downloaded.input);
         optimizedBySource.set(contentKey, output);
       }
       let written = true;
@@ -666,7 +676,7 @@ async function syncPropertyImages(row, previousState, report) {
       }
 
       if (written) await writeFile(filePath, output);
-      nextItems.push({ file, source: key, logicalOrder: source.order });
+      nextItems.push({ file, source: key, inputHash: downloaded.hash, logicalOrder: source.order });
       if (written) report.downloaded += 1;
       else report.unchanged += 1;
     } catch (error) {
@@ -679,7 +689,7 @@ async function syncPropertyImages(row, previousState, report) {
   for (const previous of previousItems) {
     const file = clean(previous.file);
     if (!file || nextFiles.has(file)) continue;
-    const filePath = path.join(imagesDir, file);
+    const filePath = path.join(outputDir, file);
     if (existsSync(filePath)) {
       await unlink(filePath);
       report.deleted += 1;
@@ -2445,7 +2455,7 @@ async function main() {
   console.log('Hash del catálogo: ' + contentHash.slice(0, 12));
 }
 
-export { publicDataRow, isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertyCardsMarkup, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup };
+export { publicDataRow, isPublicProperty, statusLabel, propertyPageHtml, propertyCard, propertyCardsMarkup, propertySchema, metaAvailability, buildArchiveState, publicRowsSorted, sitemapXml, metaCatalogEventData, metaPixelHeadMarkup, syncPropertyImages };
 
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
   main().catch(error => {
