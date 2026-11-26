@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-26T21:21:59.394Z",
+  "generatedAt": "2026-11-26T21:26:31.055Z",
   "source": "Google Sheets / Propiedades (acceso privado mediante Apps Script)",
   "spreadsheetId": "1Q58K5bHQQWj4rjAZlN9cNZ9LgbY7oj_If36COOmDnsI",
   "sheetGid": "779453685",
   "rowCount": 14,
-  "contentHash": "e88e22b4ceb309e9996eea51a2f271e9016a7e29306bb2e623b2e256050e2ca6",
+  "contentHash": "16f77af24b02972b88ebefcacc4f4ef26ac70d4fb1848327bf9ffc881e6c970b",
   "rows": [
     {
       "ID": "S001",
@@ -592,7 +592,7 @@
     },
     {
       "ID": "S012",
-      "Estado": "Disponible",
+      "Estado": "Oculta",
       "Operación": "Venta",
       "Tipo de propiedad": "Terreno",
       "Nombre": "Terreno Del Viso",
@@ -645,7 +645,7 @@
     },
     {
       "ID": "S013",
-      "Estado": "Disponible",
+      "Estado": "Oculta",
       "Operación": "Venta",
       "Tipo de propiedad": "Lote",
       "Nombre": "Lote Villa Rosa",
@@ -698,7 +698,7 @@
     },
     {
       "ID": "S014",
-      "Estado": "Disponible",
+      "Estado": "Oculta",
       "Operación": "Venta",
       "Tipo de propiedad": "Terreno",
       "Nombre": "Terreno Pilar del Este",
