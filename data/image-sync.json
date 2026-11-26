@@ -1,6 +1,12 @@
 {
   "schemaVersion": 1,
   "properties": {
+    "S011": {
+      "items": []
+    },
+    "S012": {
+      "items": []
+    },
     "S001": {
       "items": [
         {
