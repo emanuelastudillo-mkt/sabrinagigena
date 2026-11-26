@@ -1,5 +1,16 @@
 {
   "_version": "70ff95d6c413",
+  "S011": [
+    "S011-foto-01.webp",
+    "S011-foto-02.webp",
+    "S011-foto-03.webp",
+    "S011-foto-04.webp",
+    "S011-foto-05.webp",
+    "S011-foto-06.webp",
+    "S011-foto-07.webp",
+    "S011-foto-08.webp",
+    "S011-foto-09.webp"
+  ],
   "S001": [
     "S001-foto-01.webp",
     "S001-foto-02.webp",
@@ -102,16 +113,5 @@
     "S010-foto-05.webp",
     "S010-foto-06.webp",
     "S010-foto-07.webp"
-  ],
-  "S011": [
-    "S011-foto-01.webp",
-    "S011-foto-02.webp",
-    "S011-foto-03.webp",
-    "S011-foto-04.webp",
-    "S011-foto-05.webp",
-    "S011-foto-06.webp",
-    "S011-foto-07.webp",
-    "S011-foto-08.webp",
-    "S011-foto-09.webp"
   ]
 }

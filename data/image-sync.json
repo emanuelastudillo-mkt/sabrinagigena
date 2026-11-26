@@ -1,6 +1,55 @@
 {
   "schemaVersion": 1,
   "properties": {
+    "S011": {
+      "items": [
+        {
+          "file": "S011-foto-01.webp",
+          "source": "drive:19IWfDbRJty4JjpVSmQddmBeOjy68fAHu|column:IMAGEN PRINCIPAL|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 1
+        },
+        {
+          "file": "S011-foto-02.webp",
+          "source": "drive:1hXS09NQlfJcElCTDqoDGgszv9Z6Dsfgq|column:FOTO 1|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 2
+        },
+        {
+          "file": "S011-foto-03.webp",
+          "source": "drive:1hfncZU7b4TQ4KzM9sCjZUOA7Za7ieMo2|column:FOTO 2|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 3
+        },
+        {
+          "file": "S011-foto-04.webp",
+          "source": "drive:11fvxWQQhc6Ak1rNbgcDto_mMAg5T_4KX|column:FOTO 3|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 4
+        },
+        {
+          "file": "S011-foto-05.webp",
+          "source": "drive:1tVPUw8BzkXr3Zn_Vm26pF5jKk7aHPGe_|column:FOTO 4|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 5
+        },
+        {
+          "file": "S011-foto-06.webp",
+          "source": "drive:1lsvzOmk4zTsJaWIstdHx3L1izkKTWAdf|column:FOTO 5|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 6
+        },
+        {
+          "file": "S011-foto-07.webp",
+          "source": "drive:1DlC-xbm9pZsSfRE8VjhDgy5xVUAX89H7|column:FOTO 6|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 7
+        },
+        {
+          "file": "S011-foto-08.webp",
+          "source": "drive:10_H7yx86VFcXiKTGuV7k9yuE_LePAA_9|column:FOTO 7|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 8
+        },
+        {
+          "file": "S011-foto-09.webp",
+          "source": "drive:1Da-iOfTnGZY9OAdDkJldpJWQVYZaXszN|column:FOTO 8|pipeline:watermark-v1-primary-first",
+          "logicalOrder": 9
+        }
+      ]
+    },
     "S012": {
       "items": []
     },
@@ -462,55 +511,6 @@
           "file": "S010-foto-07.webp",
           "source": "drive:1YClHX3vZEn4b8rFxW8vHOq2mGUYIdf84|column:FOTO 6|pipeline:watermark-v1-primary-first",
           "logicalOrder": 7
-        }
-      ]
-    },
-    "S011": {
-      "items": [
-        {
-          "file": "S011-foto-01.webp",
-          "source": "drive:19IWfDbRJty4JjpVSmQddmBeOjy68fAHu|column:IMAGEN PRINCIPAL|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 1
-        },
-        {
-          "file": "S011-foto-02.webp",
-          "source": "drive:1hXS09NQlfJcElCTDqoDGgszv9Z6Dsfgq|column:FOTO 1|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 2
-        },
-        {
-          "file": "S011-foto-03.webp",
-          "source": "drive:1hfncZU7b4TQ4KzM9sCjZUOA7Za7ieMo2|column:FOTO 2|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 3
-        },
-        {
-          "file": "S011-foto-04.webp",
-          "source": "drive:11fvxWQQhc6Ak1rNbgcDto_mMAg5T_4KX|column:FOTO 3|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 4
-        },
-        {
-          "file": "S011-foto-05.webp",
-          "source": "drive:1tVPUw8BzkXr3Zn_Vm26pF5jKk7aHPGe_|column:FOTO 4|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 5
-        },
-        {
-          "file": "S011-foto-06.webp",
-          "source": "drive:1lsvzOmk4zTsJaWIstdHx3L1izkKTWAdf|column:FOTO 5|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 6
-        },
-        {
-          "file": "S011-foto-07.webp",
-          "source": "drive:1DlC-xbm9pZsSfRE8VjhDgy5xVUAX89H7|column:FOTO 6|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 7
-        },
-        {
-          "file": "S011-foto-08.webp",
-          "source": "drive:10_H7yx86VFcXiKTGuV7k9yuE_LePAA_9|column:FOTO 7|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 8
-        },
-        {
-          "file": "S011-foto-09.webp",
-          "source": "drive:1Da-iOfTnGZY9OAdDkJldpJWQVYZaXszN|column:FOTO 8|pipeline:watermark-v1-primary-first",
-          "logicalOrder": 9
         }
       ]
     }
