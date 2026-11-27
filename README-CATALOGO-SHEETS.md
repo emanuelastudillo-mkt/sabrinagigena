@@ -29,7 +29,7 @@ Para deslistar una propiedad sin borrar su ficha, escribí **OCULTA** en la colu
 Cuando una propiedad se vende:
 
 - su URL original en /propiedades/NOMBRE-ID/ sigue existiendo;
-- la página recibe noindex, destaca que fue vendida y muestra alternativas disponibles;
+- la misma ficha muestra **Propiedad vendida** al comienzo y hasta tres alternativas en estado **Disponible** o **Último disponible**, priorizando tipo y ubicación. Si no hay alternativas, ofrece contacto con Sabrina. La descripción y las fotos siguen accesibles en la ficha original, que lleva `noindex,follow`.
 - se conserva otra copia en /propiedades-no-index/NOMBRE-ID/;
 - sus datos e imágenes permanecen disponibles;
 - si una fila desaparece del Sheet sin marcarse como vendida, se archiva automáticamente como retirada del catálogo.

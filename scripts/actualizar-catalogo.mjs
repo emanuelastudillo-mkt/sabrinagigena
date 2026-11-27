@@ -19,7 +19,7 @@ const SITE_BASE_PATH = normalizeSiteBasePath(
   process.env.SITE_BASE_PATH ?? new URL(SITE_URL).pathname
 );
 const SITE_NAME = 'Sabrina Gigena Servicios Inmobiliarios';
-const SITE_VERSION = 'V22.29';
+const SITE_VERSION = 'V22.30';
 const CONTACT_PHONE = '+54 9 2304 56-7715';
 const CONTACT_WHATSAPP = '5492304567715';
 const CONTACT_EMAIL = 'sabrinagigena.inmobiliaria@gmail.com';
@@ -1953,11 +1953,11 @@ function heroGallery(title, images) {
     '</div></div>';
 }
 
-function detailGallery(title, images) {
-  const galleryImages = images.slice(3);
+function detailGallery(title, images, startIndex = 3) {
+  const galleryImages = images.slice(startIndex);
   const items = galleryImages
     .map((image, index) => '<img src="' + escapeAttribute(image) + '" alt="' +
-      escapeAttribute(title + ' · foto ' + (index + 4)) +
+      escapeAttribute(title + ' · foto ' + (startIndex + index + 1)) +
       '" loading="lazy" decoding="async" data-lightbox>')
     .join('');
   const galleryContent = items ||
@@ -2026,7 +2026,8 @@ function contactCard(row, archived = false) {
     : 'Escribime para verificar disponibilidad, recibir información adicional o coordinar una visita.';
   const buttonLabel = archived ? 'Consultar por opciones similares' : 'Consultar por WhatsApp';
 
-  return '<aside class="contact-card"><div class="contact-person"><span class="contact-person-photo">' +
+  return '<aside class="contact-card"' + (archived ? ' id="contacto-alternativas"' : '') +
+    '><div class="contact-person"><span class="contact-person-photo">' +
     '<img src="' + sitePath('/assets/images/sabrina-gigena-persona.webp') +
     '" alt="Sabrina Gigena" loading="lazy"></span>' +
     '<span><strong>Sabrina Gigena</strong><small>Asesoramiento inmobiliario</small></span></div>' +
@@ -2046,11 +2047,12 @@ function similarProperties(row, activeRows, limit = 3) {
   const zone = normalize(rowValue(row, 'Barrio / Zona'));
 
   return activeRows
-    .filter(candidate => propertyId(candidate) !== propertyId(row))
+    .filter(candidate => propertyId(candidate) !== propertyId(row) &&
+      ['Disponible', 'Último disponible'].includes(statusLabel(candidate)))
     .map(candidate => {
       let score = 0;
-      if (normalize(rowValue(candidate, 'Tipo de propiedad')) === type) score += 4;
-      if (normalize(rowValue(candidate, 'Localidad')) === locality) score += 3;
+      if (type && normalize(rowValue(candidate, 'Tipo de propiedad')) === type) score += 4;
+      if (locality && normalize(rowValue(candidate, 'Localidad')) === locality) score += 3;
       if (zone && normalize(rowValue(candidate, 'Barrio / Zona')) === zone) score += 2;
       return { candidate, score };
     })
@@ -2067,11 +2069,11 @@ function similarPropertiesSection(row, activeRows) {
   if (!rows.length) {
     return '<section class="content-block similar-properties"><span class="eyebrow">Alternativas</span>' +
       '<h2>Consultanos por propiedades similares</h2>' +
-      '<p>El catálogo cambia con frecuencia. Sabrina puede ayudarte a encontrar una opción equivalente.</p></section>';
+      '<a class="text-link" href="#contacto-alternativas">Hablar con Sabrina →</a></section>';
   }
 
   return '<section class="content-block similar-properties"><div class="content-head"><div>' +
-    '<span class="eyebrow">Alternativas disponibles</span><h2>Propiedades similares</h2></div>' +
+    '<h2>Otras propiedades disponibles</h2></div>' +
     '<a class="text-link" href="' + sitePath('/propiedades/') + '">Ver catálogo completo →</a></div>' +
     '<div class="property-grid">' + rows.map(propertyCard).join('') + '</div></section>';
 }
@@ -2080,6 +2082,7 @@ function propertyPageHtml(row, activeRows = []) {
   const title = propertyTitle(row);
   const images = propertyImages(row);
   const archived = !isPublicProperty(row);
+  const sold = isSoldProperty(row);
   const archiveStatus = archivedLabel(row);
   const canonical = SITE_URL + propertyRoute(row);
   const seoTitle = propertySeoTitle(row);
@@ -2135,16 +2138,25 @@ function propertyPageHtml(row, activeRows = []) {
       '<a href="' + sitePath('/') + '">Inicio</a><span>/</span><a href="' +
       sitePath('/propiedades/') + '">Propiedades</a>' +
       '<span>/</span><span aria-current="page">' + escapeHtml(title) + '</span></nav></div>',
-    heroGallery(title, images),
+    sold
+      ? '<header class="sold-notice"><div><strong class="sold-badge">Propiedad vendida</strong>' +
+        '<h1>' + escapeHtml(title) + '</h1><p>' + escapeHtml(locationType) + '</p>' +
+        '<a class="text-link" href="#ficha-original">Ver ficha original ↓</a></div>' +
+        (images[0] ? '<img class="sold-cover" src="' + escapeAttribute(images[0]) + '" alt="">' : '') +
+        '</header>' + similarPropertiesSection(row, activeRows)
+      : heroGallery(title, images),
     '</div></section><section class="property-detail"><div class="container detail-layout"><article class="detail-main">',
-    '<header class="detail-title">' +
+    (sold
+      ? '<header class="detail-title" id="ficha-original"><h2>Ficha de la propiedad vendida</h2>'
+      : '<header class="detail-title">' +
       (archived
         ? '<div class="sold-alert" role="status"><strong>' + escapeHtml(archiveStatus) +
           '</strong><span>Esta propiedad ya no forma parte del catálogo disponible.</span></div>'
         : '<div class="property-status property-status-' + slugify(statusLabel(row)) + '"><span>Estado</span><strong>' + escapeHtml(statusLabel(row)) + '</strong></div>') +
       '<div class="location">' + escapeHtml(locationType) + '</div><h1>' +
-      escapeHtml(title) + '</h1><p class="lead">' + escapeHtml(leadText) +
-      '</p><div class="detail-price">' + escapeHtml(archived ? archiveStatus : price.label) + '</div>' +
+      escapeHtml(title) + '</h1>') +
+      '<p class="lead">' + escapeHtml(leadText) + '</p>' +
+      (sold ? '' : '<div class="detail-price">' + escapeHtml(archived ? archiveStatus : price.label) + '</div>') +
       (!archived && price.secondaryLabel
         ? '<p class="detail-price-secondary">' + escapeHtml(price.secondaryLabel) + '</p>'
         : '') +
@@ -2155,8 +2167,8 @@ function propertyPageHtml(row, activeRows = []) {
       '</header>',
     '<div class="spec-grid" aria-label="Datos principales">' + specs + '</div>',
     contentSections(row),
-    detailGallery(title, images),
-    archived ? similarPropertiesSection(row, activeRows) : '',
+    sold && !images.length ? '' : detailGallery(title, images, sold ? 0 : 3),
+    archived && !sold ? similarPropertiesSection(row, activeRows) : '',
     '</article>',
     contactCard(row, archived),
     '</div></section></main>',

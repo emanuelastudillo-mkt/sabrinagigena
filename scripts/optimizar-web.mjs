@@ -7,7 +7,7 @@ import { publicDataRow } from './actualizar-catalogo.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const site = 'https://sabrinagigena.com';
-const version = '22.29';
+const version = '22.30';
 const policy = "base-uri 'self'; object-src 'none'; form-action 'self'; upgrade-insecure-requests";
 const metadata = new Map();
 const thumbnails = new Map();

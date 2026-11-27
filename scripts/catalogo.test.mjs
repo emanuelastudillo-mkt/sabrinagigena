@@ -79,6 +79,42 @@ test('Una oculta puede volver al catálogo al cambiar a disponible', () => {
   assert.match(propertyCardsMarkup([row]), /data-property-id="TEST01"/);
   assert.doesNotMatch(propertyPageHtml(row), /noindex,follow|Fuera de publicación/);
 });
+
+test('Una venta conserva el enlace y prioriza alternativas disponibles sobre la ficha original', () => {
+  const sold = { ...row, Estado: 'VENDIDO!', 'Descripción comercial': 'Descripción histórica completa.' };
+  const candidates = [
+    { ...row, ID: 'A1', Localidad: 'Otra localidad', 'Tipo de propiedad': 'Casa' },
+    { ...row, ID: 'A2', Estado: 'Reservada' },
+    { ...row, ID: 'A3', Estado: 'Último disponible!' },
+    { ...row, ID: 'A4', Estado: 'Oculta' },
+    { ...row, ID: 'A5', Estado: 'Vendida' },
+    { ...row, ID: 'A6', Estado: 'Pausada' },
+    { ...row, ID: 'A7', Localidad: 'Otra localidad' },
+    { ...row, ID: 'A8', Estado: 'Estado sin confirmar' },
+    { ...row, ID: 'A9', 'Tipo de propiedad': 'Casa' }
+  ];
+  const archive = buildArchiveState([sold, ...candidates], [row, ...candidates], { rows: [] });
+  const html = propertyPageHtml(archive.rows.find(item => item.ID === row.ID), [row, ...candidates]);
+  const canonical = propertyPageHtml(row).match(/<link rel="canonical"[^>]+>/)[0];
+  assert.ok(html.includes(canonical));
+  assert.match(html, /noindex,follow/);
+  assert.doesNotMatch(propertyCardsMarkup([sold, ...candidates]), /data-property-id="TEST01"/);
+  assert.doesNotMatch(sitemapXml(publicRowsSorted([sold, ...candidates]), '2026-11-27'), /test01/i);
+  assert.equal((html.match(/<h1>/g) || []).length, 1);
+  assert.match(html, /Propiedad vendida[\s\S]*?<h1>Lote de prueba<\/h1>[\s\S]*?Otras propiedades disponibles[\s\S]*?id="ficha-original"[\s\S]*?Descripción histórica completa\./);
+  assert.deepEqual([...html.matchAll(/class="property-card" data-property-id="([^"]+)"/g)].map(m => m[1]), ['A3', 'A7', 'A9']);
+  assert.match(html, /href="\/propiedades\/lote-de-prueba-a3\/"/);
+  assert.doesNotMatch(html, /fbq\('track', '(?:ViewContent|Lead)'/);
+  assert.doesNotMatch(propertyPageHtml(row), /class="sold-notice"/);
+});
+
+test('Una venta sin alternativas disponibles ofrece contacto desde el aviso', () => {
+  const html = propertyPageHtml({ ...row, Estado: 'Vendida' }, [{ ...row, ID: 'R', Estado: 'Reservada' }]);
+  assert.doesNotMatch(html, /class="property-card"|Otras propiedades disponibles/);
+  assert.match(html, /href="#contacto-alternativas"/);
+  assert.match(html, /<aside class="contact-card" id="contacto-alternativas">[\s\S]*?href="https:\/\/wa\.me\//);
+  assert.match(html, /href="#ficha-original"/);
+});
 test('Los filtros de la home reciben todas las propiedades públicas, no solo las primeras seis', () => {
   const rows = Array.from({ length: 8 }, (_, index) => ({
     ...row,

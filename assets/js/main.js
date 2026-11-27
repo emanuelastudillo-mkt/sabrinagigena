@@ -227,7 +227,7 @@
     if(whatsapp){
       const link=whatsapp.cloneNode(true);link.className='btn dock-whatsapp';
       link.setAttribute('aria-label',whatsapp.textContent.trim());
-      link.textContent=document.body.classList.contains('is-archived')?'Ver alternativas':'Consultar por WhatsApp';dock.append(link);
+      link.textContent=document.body.classList.contains('is-archived')?'Consultar alternativas':'Consultar por WhatsApp';dock.append(link);
     }
     if(appointment){
       const link=appointment.cloneNode(true);link.className='btn btn-secondary';link.textContent='Agendar reunión';dock.append(link);
@@ -359,7 +359,7 @@
     try{
       await sendLead({
         event_id:eventId,name,phone,message,source:'formulario_web',page_url:location.origin+location.pathname,
-        property:$('.detail-title h1')?.textContent.trim()||'',utm_source:params.get('utm_source')||'',
+        property:$('.property-page main h1')?.textContent.trim()||'',utm_source:params.get('utm_source')||'',
         utm_medium:params.get('utm_medium')||'',utm_campaign:params.get('utm_campaign')||'',
         consent:true,meta_consent:metaConsent,company:'',form_elapsed_ms:Date.now()-consultationOpenedAt,
         submitted_at:new Date().toISOString()

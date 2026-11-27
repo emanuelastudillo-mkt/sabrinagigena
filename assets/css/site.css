@@ -109,6 +109,48 @@
 .similar-properties{padding-top:30px}
 .similar-properties .property-grid{margin-top:16px}
 .similar-properties .property-card h3{font-size:22px}
+
+.sold-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(12px, 4vw, 44px);
+  padding: clamp(18px, 3.5vw, 40px);
+  border: 1px solid var(--line);
+  border-inline-start: 4px solid var(--gold);
+  border-radius: 18px;
+  background: #102d3b;
+}
+.sold-notice > div { min-width: 0; }
+.sold-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: #f1d69e;
+  color: #152833;
+  font-size: 14px;
+  font-weight: 800;
+}
+.sold-notice h1, #ficha-original h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+.sold-notice h1 { margin: 12px 0 6px; font-size: clamp(30px, 4vw, 52px); }
+.sold-notice p { margin: 0 0 12px; color: var(--muted); }
+.sold-cover {
+  flex: none;
+  width: clamp(76px, 15vw, 146px);
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.property-page .sold-notice + .similar-properties { margin-top: 14px; border: 0; }
+.sold-notice + .similar-properties .content-head { flex-wrap: wrap; }
+#ficha-original, #contacto-alternativas { scroll-margin-top: calc(var(--header-height, 72px) + 16px); }
+#ficha-original h2 { margin: 0 0 12px; font-size: clamp(26px, 3.5vw, 36px); }
 @media(max-width:720px){
  .sold-alert{align-items:flex-start;flex-direction:column;gap:8px}
  .similar-properties .content-head{align-items:flex-start}
