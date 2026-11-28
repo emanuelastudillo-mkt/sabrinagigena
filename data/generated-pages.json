@@ -2,9 +2,9 @@
   "schemaVersion": 2,
   "files": [
     "propiedades-no-index/lote-villa-rosa-s013/index.html",
-    "propiedades-no-index/terreno-capilla-del-senor-s011/index.html",
     "propiedades-no-index/terreno-del-viso-s012/index.html",
     "propiedades-no-index/terreno-pilar-del-este-s014/index.html",
+    "propiedades-no-index/terreno-zona-urbana-capilla-del-senor-s011/index.html",
     "propiedades/casa-alpina-lagomarsino-s008/index.html",
     "propiedades/casa-casco-urbano-s005/index.html",
     "propiedades/casa-en-parada-robles-s006/index.html",
@@ -12,13 +12,13 @@
     "propiedades/lote-villa-rosa-s013/index.html",
     "propiedades/loteo-la-loma-etapa-iii-s002/index.html",
     "propiedades/loteo-la-loma-etapa-iii-s003/index.html",
-    "propiedades/terreno-capilla-del-senor-s011/index.html",
     "propiedades/terreno-del-viso-s012/index.html",
     "propiedades/terreno-el-lazo-s007/index.html",
     "propiedades/terreno-en-parada-robles-s010/index.html",
     "propiedades/terreno-lomadas-de-capilla-s004/index.html",
     "propiedades/terreno-pavon-s009/index.html",
-    "propiedades/terreno-pilar-del-este-s014/index.html"
+    "propiedades/terreno-pilar-del-este-s014/index.html",
+    "propiedades/terreno-zona-urbana-capilla-del-senor-s011/index.html"
   ],
   "activeRoutes": [
     "/propiedades/casa-casco-urbano-s005/",
@@ -33,7 +33,7 @@
     "/propiedades/terreno-en-parada-robles-s010/"
   ],
   "archivedRoutes": [
-    "/propiedades-no-index/terreno-capilla-del-senor-s011/",
+    "/propiedades-no-index/terreno-zona-urbana-capilla-del-senor-s011/",
     "/propiedades-no-index/terreno-del-viso-s012/",
     "/propiedades-no-index/lote-villa-rosa-s013/",
     "/propiedades-no-index/terreno-pilar-del-este-s014/"
